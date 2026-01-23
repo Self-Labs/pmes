@@ -91,18 +91,39 @@ docker-compose up -d
 ## 📂 Estrutura
 ```text
 pmes/
-├── docker-compose.yml   # Orquestração
-├── .env                 # Segredos (NÃO COMITAR)
-├── frontend/            # Web Server (Nginx)
-│   ├── mensal.html
-│   ├── iseo.html
-│   └── js/api.js        # Fetch wrapper
-├── backend/             # API Server
-│   ├── src/
-│   │   ├── routes/      # Endpoints
-│   │   └── models/      # Queries DB
-└── database/
-    └── init.sql         # Schema inicial
+├── .gitignore
+├── .env.example
+├── README.md
+├── docker-compose.yml  # Orquestração
+├── nginx.conf
+├── database/
+│   └── init.sql        # Schema inicial
+├── backend/            # API Server
+│   ├── Dockerfile
+│   ├── package.json
+│   └── src/
+│       ├── index.js
+│       ├── config/
+│       │   └── db.js
+│       ├── middleware/
+│       │   └── auth.js
+│       └── routes/     # Endpoints
+│           ├── auth.js
+│           ├── usuarios.js
+│           ├── unidades.js
+│           └── escalas.js
+└── frontend/           # Web Server (Nginx)
+    ├── index.html
+    ├── cadastro.html
+    ├── mensal.html
+    ├── iseo.html
+    ├── admin.html
+    ├── 404.html
+    ├── css/
+    │   └── styles.css
+    └── js/
+        ├── api.js      # Fetch wrapper
+        └── auth.js
 ```
 
 ## 📝 Licença
