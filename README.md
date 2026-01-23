@@ -1,6 +1,6 @@
 # 👮‍♂️ PMES - Gestão de Escalas & ISEO
 
-Sistema desenvolvido para gerenciamento de escalas mensais (COPOM) e ISEO. Foco em performance, self-hosting e arquitetura leve para rodar em hardware ARM (Orange Pi).
+Sistema desenvolvido para gerenciamento de escalas mensais e ISEO. Foco em performance, self-hosting e arquitetura leve para rodar em hardware ARM (Orange Pi).
 
 ## 🏗️ Arquitetura
 
@@ -14,8 +14,8 @@ graph TD
     subgraph OPI [Docker Host]
         Tun[cloudflared] -->|http| Nginx[Nginx :80]
         Nginx -->|Static| Front[Frontend Files]
-        Nginx -->|Proxy /api| Node[Node.js API :3000]
-        Node -->|TCP :5432| PG[(PostgreSQL 16)]
+        Nginx -->|Proxy /api| Node[Node.js API :8003]
+        Node -->|TCP :5434| PG[(PostgreSQL 16)]
     end
 
 ```
@@ -25,7 +25,7 @@ graph TD
 ```text
 ┌─────────────────────────────────────────────────────┐
 │                   CLOUDFLARE                        │
-│            escalas.technove.com.br                  │
+│            pmes.technove.com.br                  │
 │                (SSL + Proxy + Tunnel)               │
 └─────────────────────┬───────────────────────────────┘
                       │
@@ -46,11 +46,16 @@ graph TD
 │  └────────────────────┬───────────────────────────┘ │
 │                       │                             │
 │  ┌────────────────────▼───────────────────────────┐ │
-│  │           postgres:16 (:5432)                  │ │
+│  │           postgres:16 (:5434)                  │ │
 │  │              Volume persistente                │ │
 │  └────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────┘
 ```
+
+## 📋 Módulos
+
+- **Escala Mensal** - Escala 12x24/12x72 com equipes A-E
+- **Escala ISEO** - Escala diária de operações
 
 ## 🛠️ Tech Stack
 
@@ -61,10 +66,31 @@ graph TD
 * **Infra:** Docker Compose + Cloudflare Tunnel.
 * **Hardware:** Orange Pi 5 (ARM64).
 
-## 📂 Estrutura
+## 🚀 Deploy
+```bash
+# Clone
+git clone https://github.com/Self-Labs/pmes.git
+cd pmes
 
+# Configurar ambiente
+cp .env.example .env
+# Edite o .env com suas credenciais
+
+# Subir containers
+docker-compose up -d
+```
+
+## 🌐 Acesso
+
+- **URL:** https://pmes.technove.com.br
+- **Portas locais:**
+  - Frontend: 3002
+  - API: 8003
+  - Database: 5434
+
+## 📂 Estrutura
 ```text
-escalas-pmes/
+pmes/
 ├── docker-compose.yml   # Orquestração
 ├── .env                 # Segredos (NÃO COMITAR)
 ├── frontend/            # Web Server (Nginx)
@@ -79,40 +105,6 @@ escalas-pmes/
     └── init.sql         # Schema inicial
 ```
 
-## 🚀 Como Rodar (Dev / Prod)
+## 📝 Licença
 
-1. **Clone o repo:**
-```bash
-git clone [https://github.com/seu-user/pmes.git](https://github.com/seu-user/pmes.git)
-cd pmes
-```
-
-2. **Configure o ambiente:**
-Crie o arquivo `.env` baseado no exemplo:
-```env
-DB_USER=postgres
-DB_PASS=sua_senha
-DB_NAME=pmes_db
-JWT_SECRET=segredo_super_seguro
-TUNNEL_TOKEN=seu_token_cloudflare
-```
-
-3. **Suba a stack:**
-```bash
-docker compose up -d --build
-```
-
-
-4. **Acesse:**
-* Local: `http://localhost`
-* Web: `https://pmes.technove.com.br`
-
-## ✅ Todo List
-
-* [x] Estrutura Docker
-* [x] Frontend Escala Mensal (v2.4.4)
-* [ ] Backend API (Auth)
-* [ ] Backend API (CRUD Escalas)
-* [ ] Integração PostgreSQL
-
-© 2026 Self-Labs
+© 2026 Self-Labs. Todos os direitos reservados.

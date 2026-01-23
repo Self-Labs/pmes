@@ -1,0 +1,18 @@
+# Ambiente
+.env
+node_modules/
+
+# Logs
+*.log
+logs/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Docker volumes locais
+data/
