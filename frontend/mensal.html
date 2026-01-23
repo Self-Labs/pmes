@@ -172,3 +172,612 @@
       </div>
       <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
     </div>
+
+    <!-- Tab: Militares -->
+    <div id="tab-militares" class="tab-content card">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">👥 Cadastro de Militares</h2>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 16px; padding: 12px; background: #f9fafb; border-radius: 8px; align-items: flex-end;">
+        <div style="flex: 1;">
+          <label style="font-size: 12px; color: #666;">Posto/Grad</label>
+          <select id="novoPosto" class="form-select" onchange="togglePostoManual()">
+            <option value="">Selecione</option>
+            <option>CEL</option>
+            <option>TEN CEL</option>
+            <option>MAJ</option>
+            <option>CAP</option>
+            <option>1º TEN</option>
+            <option>2º TEN</option>
+            <option>ASP</option>
+            <option>ST</option>
+            <option>1º SGT</option>
+            <option>2º SGT</option>
+            <option>3º SGT</option>
+            <option>CB</option>
+            <option>SD</option>
+            <option value="OUTRO">Outro (digitar)</option>
+          </select>
+          <input type="text" id="novoPostoManual" class="form-input hidden mt-2" placeholder="Digite o posto">
+        </div>
+        <div style="flex: 1;">
+          <label style="font-size: 12px; color: #666;">Nome de Guerra</label>
+          <input type="text" id="novoNome" class="form-input" placeholder="Nome">
+        </div>
+        <div style="flex: 1;">
+          <label style="font-size: 12px; color: #666;">RG</label>
+          <input type="text" id="novoRG" class="form-input" placeholder="00.000-0" maxlength="9" oninput="mascaraRG(this)">
+        </div>
+        <button onclick="adicionarMilitar()" class="btn btn-primary">➕ Adicionar</button>
+      </div>
+
+      <div style="border: 1px solid #ddd; border-radius: 8px; max-height: 400px; overflow-y: auto;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Posto/Grad</th>
+              <th>Nome</th>
+              <th>RG</th>
+              <th style="width: 100px;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="listaMilitares"></tbody>
+        </table>
+      </div>
+      <p style="font-size: 12px; color: #666; margin-top: 8px;">💡 Os militares cadastrados ficam disponíveis para seleção nas equipes.</p>
+      
+      <div class="mt-4">
+        <button onclick="salvarTudo()" class="btn btn-primary">💾 Salvar Tudo</button>
+      </div>
+      <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
+    </div>
+
+    <!-- Tab: Equipes -->
+    <div id="tab-equipes" class="tab-content card">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">📋 Composição das Equipes</h2>
+
+      <div style="margin-bottom: 16px; padding: 12px; background: #f9fafb; border-radius: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h3 style="font-size: 14px; font-weight: bold;">📊 Colunas da Tabela (Funções)</h3>
+          <div style="display: flex; gap: 8px;">
+            <button onclick="adicionarColuna()" class="btn btn-primary" style="padding: 4px 12px; font-size: 12px;">➕ Coluna</button>
+            <button onclick="removerColuna()" class="btn btn-secondary" style="padding: 4px 12px; font-size: 12px;">➖ Coluna</button>
+          </div>
+        </div>
+        <div id="colunasContainer" style="display: grid; gap: 8px;"></div>
+      </div>
+
+      <div id="equipesContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+
+      <div class="mt-4">
+        <button onclick="salvarTudo()" class="btn btn-primary">💾 Salvar Tudo</button>
+      </div>
+      <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
+    </div>
+
+    <!-- Tab: Observações -->
+    <div id="tab-observacoes" class="tab-content card">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">📝 Observações</h2>
+      <div id="observacoesContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+      <button onclick="adicionarObservacao()" class="btn btn-secondary mt-4">➕ Adicionar Observação</button>
+      <div class="mt-4">
+        <button onclick="salvarTudo()" class="btn btn-primary">💾 Salvar Tudo</button>
+      </div>
+      <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
+    </div>
+
+  </div>
+
+  <!-- MODO VISUALIZAÇÃO -->
+  <div id="modoVisualizacao" class="hidden">
+    <div id="documento" style="background: white; max-width: 1400px; margin: 24px auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+
+      <header style="padding: 4px 16px;">
+        <div style="display: flex; justify-content: center; align-items: center; gap: 112px; padding: 8px 16px;">
+          <div id="brasaoEsqView"></div>
+          <div style="text-align: center; line-height: 1.3;" id="headerTexto"></div>
+          <div id="brasaoDirView"></div>
+        </div>
+      </header>
+
+      <main style="padding: 8px 16px;">
+        <table id="tabelaFinal"></table>
+        <table id="calendarioFinal"></table>
+      </main>
+
+      <footer style="padding: 8px 16px 12px;">
+        <div style="font-size: 12px;" id="observacoesTexto"></div>
+        <div style="text-align: center; padding: 12px 0;">
+          <div style="display: inline-block; border-top: 1px solid black; padding-top: 4px; padding-left: 32px; padding-right: 32px;">
+            <p style="font-size: 14px; font-weight: bold;" id="assinaturaTexto"></p>
+            <p style="font-size: 12px;" id="assinaturaInfoTexto"></p>
+          </div>
+        </div>
+        <div style="text-align: center; font-size: 12px; border-top: 1px solid #ddd; padding-top: 8px;">
+          <p style="font-style: italic; font-weight: bold;" id="footerLemaTexto"></p>
+          <p style="margin-top: 4px;" id="footerEnderecoTexto1"></p>
+          <p style="margin-top: 4px;" id="footerEnderecoTexto2"></p>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    // Verifica autenticação
+    if (!initProtectedPage()) throw new Error('Não autenticado');
+
+    // === Estado Global ===
+    const DB = {
+      config: {},
+      militares: [],
+      colunas: ['CHEFE DE OPERAÇÕES', 'RELATORISTA', 'DRO 9º BPM', 'DRO 9º BPM', 'DRO 3º BPM', 'DRO 9ª CIA IND', 'DRO 10ª/15ª CIA IND'],
+      equipes: {
+        A: [null, null, null, null, null, null, null],
+        B: [null, null, null, null, null, null, null],
+        C: [null, null, null, null, null, null, null],
+        D: [null, null, null, null, null, null, null],
+        E: [null, null, null, null, null, null, null]
+      },
+      observacoes: []
+    };
+
+    // === Tabs ===
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // === Edição/Visualização ===
+    document.getElementById('btnEditar').addEventListener('click', () => {
+      document.getElementById('modoEdicao').classList.remove('hidden');
+      document.getElementById('modoVisualizacao').classList.add('hidden');
+      document.getElementById('btnEditar').className = 'btn btn-active';
+      document.getElementById('btnVisualizar').className = 'btn btn-secondary';
+    });
+
+    document.getElementById('btnVisualizar').addEventListener('click', () => {
+      coletarConfig();
+      renderizarDocumento();
+      document.getElementById('modoEdicao').classList.add('hidden');
+      document.getElementById('modoVisualizacao').classList.remove('hidden');
+      document.getElementById('btnVisualizar').className = 'btn btn-active';
+      document.getElementById('btnEditar').className = 'btn btn-secondary';
+    });
+
+    // === Máscara RG ===
+    function mascaraRG(input) {
+      let v = input.value.replace(/\D/g, '');
+      if (v.length > 6) v = v.slice(0, 6);
+      let formatted = '';
+      if (v.length > 0) formatted = v.slice(0, 2);
+      if (v.length > 2) formatted += '.' + v.slice(2, 5);
+      if (v.length > 5) formatted += '-' + v.slice(5, 6);
+      input.value = formatted;
+    }
+
+    // === Toggle posto manual ===
+    function togglePostoManual() {
+      const sel = document.getElementById('novoPosto');
+      const manual = document.getElementById('novoPostoManual');
+      manual.classList.toggle('hidden', sel.value !== 'OUTRO');
+    }
+
+    // === Brasões ===
+    function carregarBrasao(lado) {
+      const input = document.getElementById(lado === 'esq' ? 'brasaoEsqFile' : 'brasaoDirFile');
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        if (lado === 'esq') DB.config.brasaoEsq = e.target.result;
+        else DB.config.brasaoDir = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // === Legenda offset ===
+    function atualizarLegenda(input, targetId) {
+      const val = parseInt(input.value);
+      const legenda = document.getElementById(targetId);
+      if (isNaN(val)) return;
+      if (val === 0) legenda.textContent = "(D)";
+      else if (val === 1) legenda.textContent = "(N)";
+      else legenda.textContent = "(F)";
+    }
+
+    // === CRUD Militares ===
+    function adicionarMilitar() {
+      let posto = document.getElementById('novoPosto').value;
+      if (posto === 'OUTRO') {
+        posto = document.getElementById('novoPostoManual').value.trim().toUpperCase();
+      }
+      const nome = document.getElementById('novoNome').value.trim().toUpperCase();
+      const rg = document.getElementById('novoRG').value.trim();
+      if (!posto || !nome || !rg) { alert('Preencha todos os campos!'); return; }
+      DB.militares.push({ id: Date.now(), posto, nome, rg });
+      renderMilitares();
+      renderEquipes();
+      document.getElementById('novoPosto').value = '';
+      document.getElementById('novoPostoManual').value = '';
+      document.getElementById('novoPostoManual').classList.add('hidden');
+      document.getElementById('novoNome').value = '';
+      document.getElementById('novoRG').value = '';
+    }
+
+    function removerMilitar(id) {
+      DB.militares = DB.militares.filter(m => m.id !== id);
+      renderMilitares();
+      renderEquipes();
+    }
+
+    function renderMilitares() {
+      const ordemPostos = ['CEL', 'TEN CEL', 'MAJ', 'CAP', '1º TEN', '2º TEN', 'ASP', 'ST', '1º SGT', '2º SGT', '3º SGT', 'CB', 'SD'];
+      const militaresOrdenados = [...DB.militares].sort((a, b) => {
+        const posA = ordemPostos.indexOf(a.posto);
+        const posB = ordemPostos.indexOf(b.posto);
+        const idxA = posA === -1 ? 999 : posA;
+        const idxB = posB === -1 ? 999 : posB;
+        if (idxA !== idxB) return idxA - idxB;
+        return a.rg.localeCompare(b.rg);
+      });
+
+      document.getElementById('listaMilitares').innerHTML = militaresOrdenados.map(m => `
+        <tr>
+          <td>${m.posto}</td>
+          <td style="font-weight: 600;">${m.nome}</td>
+          <td>${m.rg}</td>
+          <td style="text-align: center;">
+            <button onclick="removerMilitar(${m.id})" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;">🗑️</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // === Colunas ===
+    function renderColunas() {
+      const container = document.getElementById('colunasContainer');
+      container.style.gridTemplateColumns = `repeat(${DB.colunas.length}, 1fr)`;
+      container.innerHTML = DB.colunas.map((col, i) => `
+        <input type="text" class="form-input col-input" data-col="${i}" value="${col}" style="font-size: 12px;">
+      `).join('');
+    }
+
+    function adicionarColuna() {
+      coletarColunas();
+      DB.colunas.push('NOVA COLUNA');
+      ['A','B','C','D','E'].forEach(eq => DB.equipes[eq].push(null));
+      renderColunas();
+      renderEquipes();
+    }
+
+    function removerColuna() {
+      if (DB.colunas.length <= 1) { alert('Mínimo 1 coluna!'); return; }
+      coletarColunas();
+      DB.colunas.pop();
+      ['A','B','C','D','E'].forEach(eq => DB.equipes[eq].pop());
+      renderColunas();
+      renderEquipes();
+    }
+
+    function coletarColunas() {
+      document.querySelectorAll('.col-input').forEach(input => {
+        DB.colunas[parseInt(input.dataset.col)] = input.value;
+      });
+    }
+
+    // === Equipes ===
+    function renderEquipes() {
+      const usados = new Set();
+      ['A','B','C','D','E'].forEach(eq => {
+        DB.equipes[eq].forEach(id => { if (id) usados.add(id); });
+      });
+
+      const container = document.getElementById('equipesContainer');
+      container.innerHTML = ['A', 'B', 'C', 'D', 'E'].map(eq => `
+        <div style="padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f9fafb;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <span style="width: 32px; height: 32px; background: var(--pm-gold); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold;">${eq}</span>
+            <span style="font-weight: 600;">Equipe ${eq}</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(${DB.colunas.length}, 1fr); gap: 8px;">
+            ${DB.colunas.map((_, i) => {
+              const selId = DB.equipes[eq][i];
+              return `
+              <select class="form-select equipe-select" data-equipe="${eq}" data-col="${i}" style="font-size: 12px;">
+                <option value="">XXX</option>
+                ${DB.militares.map(m => {
+                  const jaUsado = usados.has(m.id) && m.id !== selId;
+                  return jaUsado ? '' : `<option value="${m.id}" ${selId == m.id ? 'selected' : ''}>${m.posto} ${m.nome}</option>`;
+                }).join('')}
+              </select>`;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.equipe-select').forEach(sel => {
+        sel.addEventListener('change', e => {
+          const eq = e.target.dataset.equipe;
+          const col = parseInt(e.target.dataset.col);
+          DB.equipes[eq][col] = e.target.value ? parseInt(e.target.value) : null;
+          renderEquipes();
+        });
+      });
+    }
+
+    // === Observações ===
+    function renderObservacoes() {
+      document.getElementById('observacoesContainer').innerHTML = DB.observacoes.map((obs, i) => `
+        <div style="display: flex; gap: 8px; align-items: flex-start;">
+          <span style="color: #999; margin-top: 8px;">➢</span>
+          <textarea class="form-input obs-input" data-index="${i}" rows="2" style="flex: 1;">${obs}</textarea>
+          <button onclick="removerObservacao(${i})" class="btn btn-danger" style="padding: 8px;">🗑️</button>
+        </div>
+      `).join('');
+    }
+
+    function adicionarObservacao() {
+      coletarObservacoes();
+      DB.observacoes.push('');
+      renderObservacoes();
+    }
+
+    function removerObservacao(index) {
+      coletarObservacoes();
+      DB.observacoes.splice(index, 1);
+      renderObservacoes();
+    }
+
+    function coletarObservacoes() {
+      DB.observacoes = [];
+      document.querySelectorAll('.obs-input').forEach(input => {
+        DB.observacoes.push(input.value);
+      });
+    }
+
+    // === Coletar Config ===
+    function coletarConfig() {
+      const getOffset = (id, def) => {
+        const v = parseInt(document.getElementById(id).value);
+        return isNaN(v) ? def : v;
+      };
+      DB.config = {
+        mesInicio: parseInt(document.getElementById('mesInicio').value),
+        anoEscala: parseInt(document.getElementById('anoEscala').value),
+        diaInicio: parseInt(document.getElementById('diaInicio').value),
+        diaFim: parseInt(document.getElementById('diaFim').value),
+        offsetA: getOffset('offsetA', 1),
+        offsetB: getOffset('offsetB', 0),
+        offsetC: getOffset('offsetC', 4),
+        offsetD: getOffset('offsetD', 3),
+        offsetE: getOffset('offsetE', 2),
+        brasaoEsq: DB.config.brasaoEsq || '',
+        brasaoDir: DB.config.brasaoDir || '',
+        headerLinha1: document.getElementById('headerLinha1').value,
+        headerLinha2: document.getElementById('headerLinha2').value,
+        headerLinha3: document.getElementById('headerLinha3').value,
+        headerLinha4: document.getElementById('headerLinha4').value,
+        headerLema: document.getElementById('headerLema').value,
+        assinaturaNome: document.getElementById('assinaturaNome').value,
+        assinaturaPosto: document.getElementById('assinaturaPosto').value,
+        assinaturaInfo: document.getElementById('assinaturaInfo').value,
+        footerLema: document.getElementById('footerLema').value,
+        footerEndereco1: document.getElementById('footerEndereco1').value,
+        footerEndereco2: document.getElementById('footerEndereco2').value,
+      };
+      coletarColunas();
+      coletarObservacoes();
+    }
+
+    // === Carregar Config ===
+    function carregarConfig() {
+      if (!DB.config.headerLinha1) return;
+      document.getElementById('mesInicio').value = DB.config.mesInicio || 0;
+      document.getElementById('anoEscala').value = DB.config.anoEscala || 2026;
+      document.getElementById('diaInicio').value = DB.config.diaInicio || 15;
+      document.getElementById('diaFim').value = DB.config.diaFim || 15;
+      document.getElementById('offsetA').value = DB.config.offsetA ?? 1;
+      document.getElementById('offsetB').value = DB.config.offsetB ?? 0;
+      document.getElementById('offsetC').value = DB.config.offsetC ?? 4;
+      document.getElementById('offsetD').value = DB.config.offsetD ?? 3;
+      document.getElementById('offsetE').value = DB.config.offsetE ?? 2;
+      document.getElementById('headerLinha1').value = DB.config.headerLinha1;
+      document.getElementById('headerLinha2').value = DB.config.headerLinha2;
+      document.getElementById('headerLinha3').value = DB.config.headerLinha3;
+      document.getElementById('headerLinha4').value = DB.config.headerLinha4 || '';
+      document.getElementById('headerLema').value = DB.config.headerLema;
+      document.getElementById('assinaturaNome').value = DB.config.assinaturaNome;
+      document.getElementById('assinaturaPosto').value = DB.config.assinaturaPosto;
+      document.getElementById('assinaturaInfo').value = DB.config.assinaturaInfo;
+      document.getElementById('footerLema').value = DB.config.footerLema || '';
+      document.getElementById('footerEndereco1').value = DB.config.footerEndereco1 || '';
+      document.getElementById('footerEndereco2').value = DB.config.footerEndereco2 || '';
+      ['A','B','C','D','E'].forEach(eq => {
+        const input = document.getElementById('offset' + eq);
+        if(input) atualizarLegenda(input, 'leg' + eq);
+      });
+    }
+
+    // === Salvar Tudo ===
+    async function salvarTudo() {
+      try {
+        coletarConfig();
+        await salvarEscalaMensal({
+          config: DB.config,
+          militares: DB.militares,
+          colunas: DB.colunas,
+          equipes: DB.equipes,
+          observacoes: DB.observacoes
+        });
+        alert('✅ Escala salva com sucesso!');
+      } catch (err) {
+        alert('❌ Erro ao salvar: ' + err.message);
+      }
+    }
+
+    // === Carregar Dados do Servidor ===
+    async function carregarDados() {
+      try {
+        const dados = await buscarEscalaMensal();
+        if (dados) {
+          DB.config = dados.config || {};
+          DB.militares = dados.militares || [];
+          DB.colunas = dados.colunas || DB.colunas;
+          DB.equipes = dados.equipes || DB.equipes;
+          DB.observacoes = dados.observacoes || [];
+        }
+      } catch (err) {
+        console.log('Nenhuma escala salva ainda');
+      }
+      carregarConfig();
+      renderMilitares();
+      renderColunas();
+      renderEquipes();
+      renderObservacoes();
+    }
+
+    // === Renderizar Documento ===
+    function renderizarDocumento() {
+      const c = DB.config;
+
+      // Brasões
+      const brasaoEsqHTML = c.brasaoEsq ? `<img src="${c.brasaoEsq}" style="height: 80px; width: auto; object-fit: contain;">` : '<div style="width: 80px; height: 80px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #999;">Brasão</div>';
+      const brasaoDirHTML = c.brasaoDir ? `<img src="${c.brasaoDir}" style="height: 80px; width: auto; object-fit: contain;">` : '<div style="width: 80px; height: 80px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #999;">Brasão</div>';
+
+      document.getElementById('brasaoEsqView').innerHTML = brasaoEsqHTML;
+      document.getElementById('brasaoDirView').innerHTML = brasaoDirHTML;
+
+      document.getElementById('headerTexto').innerHTML = `
+        <p style="font-size: 14px; font-weight: bold; text-transform: uppercase;">${c.headerLinha1 || 'ESTADO DO ESPÍRITO SANTO'}</p>
+        <p style="font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">${c.headerLinha2 || 'POLÍCIA MILITAR'}</p>
+        <p style="font-size: 14px; font-weight: bold; text-transform: uppercase;">${c.headerLinha3 || '3º COMANDO DE POLÍCIA OSTENSIVA REGIONAL'}</p>
+        <p style="font-size: 16px; font-weight: bold; text-transform: uppercase;">${c.headerLinha4 || 'COPOM'}</p>
+        <p style="font-size: 14px; font-weight: bold; font-style: italic; margin-top: 4px;">${c.headerLema || '"Policial Militar, herói protetor da sociedade"'}</p>
+      `;
+
+      // Tabela Superior
+      const getMilitar = id => DB.militares.find(m => m.id === id);
+      const formatMilitar = id => {
+        const m = getMilitar(id);
+        return m ? `<div style="line-height: 1.2;"><span style="font-weight: bold;">${m.posto} ${m.nome}</span><br>RG ${m.rg}</div>` : 'XXX';
+      };
+
+      let html = `
+        <colgroup><col style="width:4.5%;">${DB.colunas.map(() => '<col>').join('')}</colgroup>
+        <thead><tr class="bg-pm-gold">
+          <th style="height: 32px;"></th>
+          ${DB.colunas.map(col => `<th style="height: 32px; font-weight: bold; text-align: center; vertical-align: middle; font-size: 10px; text-transform: uppercase;">${col}</th>`).join('')}
+        </tr></thead>
+        <tbody style="text-align: center; vertical-align: middle;">
+      `;
+
+      ['A','B','C','D','E'].forEach(eq => {
+        html += `<tr style="height: 45px;">
+          <td style="font-weight: bold; background: #FFD966; vertical-align: middle;">${eq}</td>
+          ${DB.colunas.map((_, i) => `<td style="vertical-align: middle; background: white;">${formatMilitar(DB.equipes[eq][i])}</td>`).join('')}
+        </tr>`;
+      });
+      html += '</tbody>';
+
+      const tabFinal = document.getElementById('tabelaFinal');
+      tabFinal.className = 'print-table';
+      tabFinal.style.marginBottom = '0';
+      tabFinal.innerHTML = html;
+
+      // Calendário
+      renderizarCalendario();
+
+      // Observações
+      document.getElementById('observacoesTexto').innerHTML = DB.observacoes.filter(o => o.trim()).map(o => `<p style="margin-bottom: 4px; text-align: justify; line-height: 1.3;"><strong>➢</strong> ${o}</p>`).join('');
+
+      // Assinatura
+      document.getElementById('assinaturaTexto').textContent = `${c.assinaturaNome || 'NOME'} – ${c.assinaturaPosto || 'POSTO/GRAD'}`;
+      document.getElementById('assinaturaInfoTexto').textContent = c.assinaturaInfo || '';
+      document.getElementById('footerLemaTexto').textContent = c.footerLema || '';
+      document.getElementById('footerEnderecoTexto1').textContent = c.footerEndereco1 || '';
+      document.getElementById('footerEnderecoTexto2').textContent = c.footerEndereco2 || '';
+    }
+
+    function renderizarCalendario() {
+      const mesInicio = DB.config.mesInicio ?? 0;
+      const ano = DB.config.anoEscala || 2026;
+      const diaInicio = DB.config.diaInicio || 15;
+      const diaFim = DB.config.diaFim || 15;
+
+      const meses = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+      const diasSemana = ['D','S','T','Q','Q','S','S'];
+
+      const dias = [];
+      const mesFim = (mesInicio + 1) % 12;
+      const anoFim = mesFim === 0 ? ano + 1 : ano;
+
+      const ultimoDia1 = new Date(ano, mesInicio + 1, 0).getDate();
+      for (let d = diaInicio; d <= ultimoDia1; d++) {
+        dias.push({ dia: d, mes: mesInicio, diaSemana: new Date(ano, mesInicio, d).getDay() });
+      }
+      for (let d = 1; d <= diaFim; d++) {
+        dias.push({ dia: d, mes: mesFim, diaSemana: new Date(anoFim, mesFim, d).getDay() });
+      }
+
+      const offsets = {
+        A: DB.config.offsetA ?? 1,
+        B: DB.config.offsetB ?? 0,
+        C: DB.config.offsetC ?? 4,
+        D: DB.config.offsetD ?? 3,
+        E: DB.config.offsetE ?? 2
+      };
+
+      function getTurno(equipe, diaIndex) {
+        const pos = (diaIndex + offsets[equipe]) % 5;
+        if (pos === 0) return 'D';
+        if (pos === 1) return 'N';
+        return '';
+      }
+
+      const getBg = d => (d.diaSemana === 0 || d.diaSemana === 6) ? 'background-color:#e5e7eb !important;' : '';
+
+      const diasMes1 = dias.filter(d => d.mes === mesInicio).length;
+      const diasMes2 = dias.filter(d => d.mes === mesFim).length;
+
+      let html = `<colgroup><col style="width:4.5%;">${dias.map(() => `<col style="width:${95.5/dias.length}%;">`).join('')}</colgroup>`;
+
+      html += `<tr class="bg-pm-gold" style="font-weight: bold; text-align: center; height: 24px;">
+        <td style="border: 1px solid black; padding: 4px;" colspan="${diasMes1+1}">${meses[mesInicio]}</td>
+        <td style="border: 1px solid black; padding: 4px;" colspan="${diasMes2}">${meses[mesFim]}</td>
+      </tr>`;
+
+      html += `<tr style="font-weight: bold; height: 24px; background-color: #f8d7da;">
+        <td style="border: 1px solid black; padding: 4px; text-align: center; font-weight: bold;">SEMANA</td>
+        ${dias.map(d => `<td style="border: 1px solid black; padding: 4px; text-align: center;">${diasSemana[d.diaSemana]}</td>`).join('')}
+      </tr>`;
+
+      html += `<tr style="font-weight: bold; height: 24px; background-color: #d4edda;">
+        <td style="border: 1px solid black; padding: 4px; text-align: center; font-weight: bold;">DATA</td>
+        ${dias.map(d => `<td style="border: 1px solid black; padding: 4px; text-align: center;">${String(d.dia).padStart(2,'0')}</td>`).join('')}
+      </tr>`;
+
+      ['A','B','C','D','E'].forEach(eq => {
+        html += `<tr style="height: 24px;">
+          <td style="border: 1px solid black; padding: 4px; font-weight: bold; background: #FFD966; text-align: center;">${eq}</td>
+          ${dias.map((d, i) => `<td style="border: 1px solid black; padding: 4px; text-align: center; font-weight: bold; ${getBg(d)}">${getTurno(eq, i)}</td>`).join('')}
+        </tr>`;
+      });
+
+      const calDiv = document.getElementById('calendarioFinal');
+      calDiv.className = 'print-table overlap-top';
+      calDiv.innerHTML = html;
+    }
+
+    // === Init ===
+    carregarDados();
+    console.log('🚀 PMES Escala Mensal v1.0.0');
+  </script>
+
+</body>
+</html>

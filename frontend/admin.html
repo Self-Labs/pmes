@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - PMES Escalas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar-content" style="max-width: 1200px;">
+      <div class="navbar-brand">
+        ⚙️ Administração
+        <span class="navbar-version">v1.0.0</span>
+      </div>
+      <div class="navbar-menu">
+        <span id="navbarUser" class="navbar-user"></span>
+        <a href="/mensal.html" class="btn btn-secondary">📅 Mensal</a>
+        <a href="/iseo.html" class="btn btn-secondary">📋 ISEO</a>
+        <a href="/admin.html" class="btn btn-active">⚙️ Admin</a>
+        <button onclick="logout()" class="btn btn-secondary">🚪 Sair</button>
+      </div>
+    </div>
+  </nav>
+
+  <div style="max-width: 1200px; margin: 24px auto; padding: 0 16px;">
+
+    <!-- Tabs -->
+    <div style="display: flex; border-bottom: 1px solid #ddd; margin-bottom: 24px;">
+      <button class="tab-btn active" data-tab="pendentes">🕐 Pendentes</button>
+      <button class="tab-btn" data-tab="usuarios">👥 Usuários</button>
+      <button class="tab-btn" data-tab="unidades">🏛️ Unidades</button>
+    </div>
+
+    <!-- Tab: Pendentes -->
+    <div id="tab-pendentes" class="tab-content active card">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">🕐 Usuários Aguardando Aprovação</h2>
+      <div id="listaPendentes"></div>
+      <p id="semPendentes" class="hidden" style="color: #666; text-align: center; padding: 24px;">Nenhum usuário pendente.</p>
+    </div>
+
+    <!-- Tab: Usuários -->
+    <div id="tab-usuarios" class="tab-content card">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">👥 Todos os Usuários</h2>
+      <div style="border: 1px solid #ddd; border-radius: 8px; overflow-x: auto;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Email</th>
+              <th>Unidade</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th style="width: 150px;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="listaUsuarios"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab: Unidades -->
+    <div id="tab-unidades" class="tab-content card">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">🏛️ Gerenciar Unidades</h2>
+
+      <!-- Form Nova Unidade -->
+      <div style="display: flex; gap: 8px; margin-bottom: 16px; padding: 12px; background: #f9fafb; border-radius: 8px; align-items: flex-end; flex-wrap: wrap;">
+        <div style="flex: 2; min-width: 200px;">
+          <label style="font-size: 12px; color: #666;">Nome</label>
+          <input type="text" id="novoNome" class="form-input" placeholder="Ex: 9º Batalhão de Polícia Militar">
+        </div>
+        <div style="flex: 1; min-width: 100px;">
+          <label style="font-size: 12px; color: #666;">Sigla</label>
+          <input type="text" id="novaSigla" class="form-input" placeholder="Ex: 9º BPM">
+        </div>
+        <div style="flex: 1; min-width: 120px;">
+          <label style="font-size: 12px; color: #666;">Tipo</label>
+          <select id="novoTipo" class="form-select">
+            <option value="">Selecione</option>
+            <option value="CPOR">CPOR</option>
+            <option value="CPOE">CPOE</option>
+            <option value="BPM">BPM</option>
+            <option value="CIA_IND">CIA IND</option>
+            <option value="CIA">CIA</option>
+            <option value="COPOM">COPOM</option>
+            <option value="PELOTAO">PELOTÃO</option>
+            <option value="OUTRO">OUTRO</option>
+          </select>
+        </div>
+        <div style="flex: 1; min-width: 150px;">
+          <label style="font-size: 12px; color: #666;">Unidade Pai</label>
+          <select id="novoParent" class="form-select">
+            <option value="">Nenhuma (raiz)</option>
+          </select>
+        </div>
+        <button onclick="criarNovaUnidade()" class="btn btn-primary">➕ Adicionar</button>
+      </div>
+
+      <!-- Lista Unidades -->
+      <div style="border: 1px solid #ddd; border-radius: 8px; overflow-x: auto;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Sigla</th>
+              <th>Nome</th>
+              <th>Tipo</th>
+              <th>Pai</th>
+              <th style="width: 100px;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="listaUnidades"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    // Verifica autenticação admin
+    if (!initAdminPage()) throw new Error('Não autorizado');
+
+    let unidadesCache = [];
+
+    // === Tabs ===
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // === Pendentes ===
+    async function carregarPendentes() {
+      try {
+        const pendentes = await listarUsuariosPendentes();
+        const container = document.getElementById('listaPendentes');
+        const semPendentes = document.getElementById('semPendentes');
+
+        if (pendentes.length === 0) {
+          container.innerHTML = '';
+          semPendentes.classList.remove('hidden');
+          return;
+        }
+
+        semPendentes.classList.add('hidden');
+        container.innerHTML = pendentes.map(u => `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 8px; background: #fffbeb;">
+            <div>
+              <p style="font-weight: bold;">${u.nome}</p>
+              <p style="font-size: 13px; color: #666;">${u.email} • ${u.unidade_sigla || 'Sem unidade'}</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button onclick="aprovar('${u.id}')" class="btn btn-success" style="padding: 6px 12px;">✅ Aprovar</button>
+              <button onclick="rejeitar('${u.id}')" class="btn btn-danger" style="padding: 6px 12px;">❌ Rejeitar</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Erro ao carregar pendentes:', err);
+      }
+    }
+
+    async function aprovar(id) {
+      try {
+        await aprovarUsuario(id);
+        alert('✅ Usuário aprovado!');
+        carregarPendentes();
+        carregarUsuarios();
+      } catch (err) {
+        alert('❌ Erro: ' + err.message);
+      }
+    }
+
+    async function rejeitar(id) {
+      if (!confirm('Tem certeza que deseja rejeitar e remover este usuário?')) return;
+      try {
+        await removerUsuario(id);
+        alert('Usuário removido.');
+        carregarPendentes();
+      } catch (err) {
+        alert('❌ Erro: ' + err.message);
+      }
+    }
+
+    // === Usuários ===
+    async function carregarUsuarios() {
+      try {
+        const usuarios = await listarUsuarios();
+        document.getElementById('listaUsuarios').innerHTML = usuarios.map(u => `
+          <tr>
+            <td style="font-weight: 600;">${u.nome}</td>
+            <td>${u.email}</td>
+            <td>${u.unidade_sigla || '-'}</td>
+            <td>
+              <select onchange="mudarRole('${u.id}', this.value)" class="form-select" style="width: auto; padding: 4px 8px; font-size: 12px;">
+                <option value="editor" ${u.role === 'editor' ? 'selected' : ''}>Editor</option>
+                <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+              </select>
+            </td>
+            <td>
+              <span style="padding: 2px 8px; border-radius: 4px; font-size: 12px; ${u.ativo ? 'background: #d4edda; color: #155724;' : 'background: #f8d7da; color: #721c24;'}">
+                ${u.ativo ? 'Ativo' : 'Pendente'}
+              </span>
+            </td>
+            <td>
+              <button onclick="excluirUsuario('${u.id}', '${u.nome}')" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;">🗑️</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error('Erro ao carregar usuários:', err);
+      }
+    }
+
+    async function mudarRole(id, role) {
+      try {
+        await alterarRoleUsuario(id, role);
+      } catch (err) {
+        alert('❌ Erro: ' + err.message);
+        carregarUsuarios();
+      }
+    }
+
+    async function excluirUsuario(id, nome) {
+      if (!confirm(`Tem certeza que deseja excluir "${nome}"?`)) return;
+      try {
+        await removerUsuario(id);
+        carregarUsuarios();
+      } catch (err) {
+        alert('❌ Erro: ' + err.message);
+      }
+    }
+
+    // === Unidades ===
+    async function carregarUnidades() {
+      try {
+        unidadesCache = await listarUnidades();
+        renderUnidades();
+        renderSelectParent();
+      } catch (err) {
+        console.error('Erro ao carregar unidades:', err);
+      }
+    }
+
+    function renderUnidades() {
+      const getParentSigla = id => {
+        const parent = unidadesCache.find(u => u.id === id);
+        return parent ? parent.sigla : '-';
+      };
+
+      document.getElementById('listaUnidades').innerHTML = unidadesCache.map(u => `
+        <tr>
+          <td style="font-weight: 600;">${u.sigla}</td>
+          <td>${u.nome}</td>
+          <td><span style="padding: 2px 8px; background: #e5e7eb; border-radius: 4px; font-size: 11px;">${u.tipo}</span></td>
+          <td>${getParentSigla(u.parent_id)}</td>
+          <td>
+            <button onclick="excluirUnidade('${u.id}', '${u.sigla}')" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;">🗑️</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderSelectParent() {
+      const select = document.getElementById('novoParent');
+      select.innerHTML = '<option value="">Nenhuma (raiz)</option>' + 
+        unidadesCache.map(u => `<option value="${u.id}">${u.sigla} - ${u.nome}</option>`).join('');
+    }
+
+    async function criarNovaUnidade() {
+      const nome = document.getElementById('novoNome').value.trim();
+      const sigla = document.getElementById('novaSigla').value.trim();
+      const tipo = document.getElementById('novoTipo').value;
+      const parent_id = document.getElementById('novoParent').value || null;
+
+      if (!nome || !sigla || !tipo) {
+        alert('Preencha Nome, Sigla e Tipo!');
+        return;
+      }
+
+      try {
+        await criarUnidade({ nome, sigla, tipo, parent_id });
+        document.getElementById('novoNome').value = '';
+        document.getElementById('novaSigla').value = '';
+        document.getElementById('novoTipo').value = '';
+        document.getElementById('novoParent').value = '';
+        carregarUnidades();
+      } catch (err) {
+        alert('❌ Erro: ' + err.message);
+      }
+    }
+
+    async function excluirUnidade(id, sigla) {
+      if (!confirm(`Tem certeza que deseja excluir "${sigla}"? Subunidades também serão removidas.`)) return;
+      try {
+        await removerUnidade(id);
+        carregarUnidades();
+      } catch (err) {
+        alert('❌ Erro: ' + err.message);
+      }
+    }
+
+    // === Init ===
+    carregarPendentes();
+    carregarUsuarios();
+    carregarUnidades();
+    console.log('🚀 PMES Admin v1.0.0');
+  </script>
+
+</body>
+</html>

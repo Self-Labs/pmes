@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<!--
+  Sistema de Escala ISEO - PMES
+  Versão: 1.0.0
+-->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escala ISEO - PMES</title>
+  <link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <style>
+    /* === ESTILOS ESPECÍFICOS ESCALA ISEO === */
+    .print-table { 
+      width: 100% !important; 
+      border-collapse: collapse !important; 
+      font-size: 12px !important;
+    }
+
+    .print-table td, .print-table th { 
+      border: 1px solid #000 !important;
+      padding: 4px 8px !important; 
+      vertical-align: middle !important;
+    }
+
+    @media print {
+      @page { size: A4 portrait; margin: 10mm; }
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .no-print { display: none !important; }
+      #documento { box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar no-print">
+    <div class="navbar-content" style="max-width: 1000px;">
+      <div class="navbar-brand">
+        📋 Escala ISEO
+        <span class="navbar-version">v1.0.0</span>
+      </div>
+      <div class="navbar-menu">
+        <span id="navbarUser" class="navbar-user"></span>
+        <a href="/mensal.html" class="btn btn-secondary">📅 Mensal</a>
+        <a href="/iseo.html" class="btn btn-active">📋 ISEO</a>
+        <a href="/admin.html" id="adminMenu" class="btn btn-secondary hidden">⚙️ Admin</a>
+        <button onclick="logout()" class="btn btn-secondary">🚪 Sair</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- BARRA DE CONTROLE -->
+  <div class="no-print" style="background: var(--pm-blue); padding: 12px;">
+    <div style="max-width: 1000px; margin: 0 auto; display: flex; justify-content: center; gap: 16px;">
+      <button id="btnEditar" class="btn btn-active">🖊️ Edição</button>
+      <button id="btnVisualizar" class="btn btn-secondary">👁️ Visualizar</button>
+      <button onclick="window.print()" class="btn btn-success">🖨️ Imprimir/PDF</button>
+    </div>
+  </div>
+
+  <!-- MODO EDIÇÃO -->
+  <div id="modoEdicao" class="no-print" style="max-width: 800px; margin: 24px auto; padding: 0 16px;">
+
+    <!-- Tabs -->
+    <div style="display: flex; border-bottom: 1px solid #ddd; margin-bottom: 24px;">
+      <button class="tab-btn active" data-tab="config">⚙️ Configurações</button>
+      <button class="tab-btn" data-tab="dados">📅 Dados da Escala</button>
+      <button class="tab-btn" data-tab="militares">👥 Militares</button>
+      <button class="tab-btn" data-tab="observacoes">📝 Observações</button>
+    </div>
+
+    <!-- Tab: Configurações -->
+    <div id="tab-config" class="tab-content active card">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">⚙️ Configurações Gerais</h2>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <!-- Brasões -->
+        <div style="grid-column: span 2;">
+          <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">🏛️ Brasões</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label style="font-size: 12px; color: #666;">Brasão Esquerdo</label>
+              <input type="file" id="brasaoEsqFile" accept="image/*" class="form-input" style="font-size: 12px;" onchange="carregarBrasao('esq')">
+            </div>
+            <div>
+              <label style="font-size: 12px; color: #666;">Brasão Direito</label>
+              <input type="file" id="brasaoDirFile" accept="image/*" class="form-input" style="font-size: 12px;" onchange="carregarBrasao('dir')">
+            </div>
+          </div>
+        </div>
+
+        <!-- Cabeçalho -->
+        <div>
+          <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">📄 Cabeçalho</h3>
+          <input type="text" id="headerLinha1" class="form-input mb-2" value="ESTADO DO ESPÍRITO SANTO">
+          <input type="text" id="headerLinha2" class="form-input mb-2" value="POLÍCIA MILITAR">
+          <input type="text" id="headerLinha3" class="form-input mb-2" value="3º COMANDO DE POLÍCIA OSTENSIVA REGIONAL">
+          <input type="text" id="headerLema" class="form-input" value='"Policial Militar, herói protetor da sociedade"'>
+        </div>
+
+        <!-- Assinatura -->
+        <div>
+          <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">✍️ Assinatura</h3>
+          <input type="text" id="assinaturaNome" class="form-input mb-2" placeholder="Nome" value="EMILIA ALVES">
+          <input type="text" id="assinaturaPosto" class="form-input mb-2" placeholder="Posto" value="CEL QOCPM">
+          <input type="text" id="assinaturaCargo" class="form-input" placeholder="Cargo" value="COMANDANTE DO 3º CPOR">
+        </div>
+
+        <!-- Rodapé -->
+        <div style="grid-column: span 2;">
+          <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">📍 Rodapé</h3>
+          <input type="text" id="footerLema" class="form-input mb-2" value='"Polícia Militar, patrimônio do povo capixaba"'>
+          <input type="text" id="footerLinha1" class="form-input mb-2" value="3º COMANDO DE POLÍCIA OSTENSIVA REGIONAL">
+          <input type="text" id="footerLinha2" class="form-input mb-2" value="Av. Nossa Senhora da Consolação, 234, Vila Rica, Cachoeiro de Itapemirim/ES">
+          <input type="text" id="footerLinha3" class="form-input" value="CEP 29.301-080 – Telefone: (28) 3515-3371 - e-mail: chefedo.cpos@pm.es.gov.br">
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <button onclick="salvarTudo()" class="btn btn-primary">💾 Salvar Tudo</button>
+      </div>
+      <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
+    </div>
+
+    <!-- Tab: Dados da Escala -->
+    <div id="tab-dados" class="tab-content card">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">📅 Dados da Escala</h2>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <label style="font-size: 12px; color: #666;">Data</label>
+          <input type="date" id="dataEscala" class="form-input" onchange="atualizarDiaSemana()">
+        </div>
+        <div>
+          <label style="font-size: 12px; color: #666;">Dia da Semana</label>
+          <input type="text" id="diaSemana" class="form-input" readonly style="background: #f3f4f6;">
+        </div>
+        <div style="grid-column: span 2;">
+          <label style="font-size: 12px; color: #666;">Nome da Operação</label>
+          <input type="text" id="nomeOperacao" class="form-input" placeholder="Ex: OPERAÇÃO NATALINA">
+        </div>
+        <div>
+          <label style="font-size: 12px; color: #666;">Rubrica ISEO</label>
+          <input type="text" id="rubricaISEO" class="form-input" placeholder="Ex: ISEO Nº 020/2026">
+        </div>
+        <div>
+          <label style="font-size: 12px; color: #666;">Horário da Escala</label>
+          <input type="text" id="horarioEscala" class="form-input" placeholder="Ex: 17h00min às 23h00min">
+        </div>
+        <div style="grid-column: span 2;">
+          <label style="font-size: 12px; color: #666;">Horário de Apresentação</label>
+          <input type="text" id="horarioApresentacao" class="form-input" placeholder="Ex: 16h30min no 9º BPM">
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <button onclick="salvarTudo()" class="btn btn-primary">💾 Salvar Tudo</button>
+      </div>
+      <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
+    </div>
+
+    <!-- Tab: Militares -->
+    <div id="tab-militares" class="tab-content card">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">👥 Militares da Escala</h2>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 16px; padding: 12px; background: #f9fafb; border-radius: 8px; align-items: flex-end; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 120px;">
+          <label style="font-size: 12px; color: #666;">Posto/Grad</label>
+          <select id="novoPosto" class="form-select" onchange="togglePostoManual()">
+            <option value="">Selecione</option>
+            <option>CEL</option>
+            <option>TEN CEL</option>
+            <option>MAJ</option>
+            <option>CAP</option>
+            <option>1º TEN</option>
+            <option>2º TEN</option>
+            <option>ASP</option>
+            <option>ST</option>
+            <option>1º SGT</option>
+            <option>2º SGT</option>
+            <option>3º SGT</option>
+            <option>CB</option>
+            <option>SD</option>
+            <option value="OUTRO">Outro (digitar)</option>
+          </select>
+          <input type="text" id="novoPostoManual" class="form-input hidden mt-2" placeholder="Digite o posto">
+        </div>
+        <div style="flex: 1; min-width: 100px;">
+          <label style="font-size: 12px; color: #666;">Quadro</label>
+          <select id="novoQuadro" class="form-select">
+            <option value="">-</option>
+            <option>QOCPM</option>
+            <option>QOAEM</option>
+            <option>QPCPM</option>
+            <option>QPRAEM</option>
+          </select>
+        </div>
+        <div style="flex: 2; min-width: 150px;">
+          <label style="font-size: 12px; color: #666;">Nome de Guerra</label>
+          <input type="text" id="novoNome" class="form-input" placeholder="Nome">
+        </div>
+        <div style="flex: 1; min-width: 100px;">
+          <label style="font-size: 12px; color: #666;">RG</label>
+          <input type="text" id="novoRG" class="form-input" placeholder="00.000-0" maxlength="9" oninput="mascaraRG(this)">
+        </div>
+        <div style="flex: 1; min-width: 100px;">
+          <label style="font-size: 12px; color: #666;">NF</label>
+          <input type="text" id="novoNF" class="form-input" placeholder="000000">
+        </div>
+        <button onclick="adicionarMilitar()" class="btn btn-primary">➕ Adicionar</button>
+      </div>
+
+      <div style="border: 1px solid #ddd; border-radius: 8px; max-height: 400px; overflow-y: auto;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width: 40px;">#</th>
+              <th>Posto/Grad</th>
+              <th>Quadro</th>
+              <th>Nome</th>
+              <th>RG</th>
+              <th>NF</th>
+              <th style="width: 120px;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="listaMilitares"></tbody>
+        </table>
+      </div>
+      <p style="font-size: 12px; color: #666; margin-top: 8px;">💡 Use as setas para reordenar os militares na lista.</p>
+
+      <div class="mt-4">
+        <button onclick="salvarTudo()" class="btn btn-primary">💾 Salvar Tudo</button>
+      </div>
+      <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
+    </div>
+
+    <!-- Tab: Observações -->
+    <div id="tab-observacoes" class="tab-content card">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">📝 Observações</h2>
+
+      <div class="mb-4">
+        <label style="font-size: 12px; color: #666;">Setor</label>
+        <input type="text" id="setorObs" class="form-input" placeholder="Ex: SETOR I - ÁREA CENTRAL">
+      </div>
+
+      <div id="observacoesContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+      <button onclick="adicionarObservacao()" class="btn btn-secondary mt-4">➕ Adicionar Observação</button>
+
+      <div class="mt-4">
+        <button onclick="salvarTudo()" class="btn btn-primary">💾 Salvar Tudo</button>
+      </div>
+      <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
+    </div>
+
+  </div>
+
+  <!-- MODO VISUALIZAÇÃO -->
+  <div id="modoVisualizacao" class="hidden">
+    <div id="documento" style="background: white; max-width: 210mm; margin: 24px auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 16px;">
+
+      <!-- Cabeçalho -->
+      <header style="margin-bottom: 16px;">
+        <div style="display: flex; justify-content: center; align-items: center; gap: 48px;">
+          <div id="brasaoEsqView"></div>
+          <div style="text-align: center; line-height: 1.4;" id="headerTexto"></div>
+          <div id="brasaoDirView"></div>
+        </div>
+      </header>
+
+      <!-- Título Operação -->
+      <div style="text-align: center; margin-bottom: 16px;">
+        <h2 id="tituloOperacao" style="font-size: 16px; font-weight: bold; text-transform: uppercase;"></h2>
+        <p id="subtituloISEO" style="font-size: 14px; font-weight: bold;"></p>
+      </div>
+
+      <!-- Info Escala -->
+      <div style="margin-bottom: 16px; font-size: 13px;">
+        <p><strong>DIA:</strong> <span id="viewDia"></span> (<span id="viewDiaSemana"></span>)</p>
+        <p><strong>HORÁRIO:</strong> <span id="viewHorario"></span></p>
+        <p><strong>APRESENTAÇÃO:</strong> <span id="viewApresentacao"></span></p>
+      </div>
+
+      <!-- Tabela Militares -->
+      <table id="tabelaMilitares" class="print-table" style="margin-bottom: 16px;"></table>
+
+      <!-- Observações -->
+      <div id="observacoesView" style="font-size: 12px; margin-bottom: 24px;"></div>
+
+      <!-- Assinatura -->
+      <div style="text-align: center; margin-top: 48px; margin-bottom: 24px;">
+        <div style="display: inline-block; border-top: 1px solid black; padding-top: 8px; min-width: 300px;">
+          <p style="font-size: 14px; font-weight: bold;" id="assinaturaTexto"></p>
+          <p style="font-size: 12px;" id="assinaturaCargoTexto"></p>
+        </div>
+      </div>
+
+      <!-- Rodapé -->
+      <footer style="text-align: center; font-size: 11px; border-top: 1px solid #ccc; padding-top: 12px;">
+        <p style="font-style: italic; font-weight: bold;" id="footerLemaTexto"></p>
+        <p id="footerLinha1Texto"></p>
+        <p id="footerLinha2Texto"></p>
+        <p id="footerLinha3Texto"></p>
+      </footer>
+
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    // Verifica autenticação
+    if (!initProtectedPage()) throw new Error('Não autenticado');
+
+    // === Estado Global ===
+    const DB = {
+      config: {},
+      dados: {},
+      militares: [],
+      observacoes: [],
+      setor: ''
+    };
+
+    // === Tabs ===
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // === Edição/Visualização ===
+    document.getElementById('btnEditar').addEventListener('click', () => {
+      document.getElementById('modoEdicao').classList.remove('hidden');
+      document.getElementById('modoVisualizacao').classList.add('hidden');
+      document.getElementById('btnEditar').className = 'btn btn-active';
+      document.getElementById('btnVisualizar').className = 'btn btn-secondary';
+    });
+
+    document.getElementById('btnVisualizar').addEventListener('click', () => {
+      coletarTudo();
+      renderizarDocumento();
+      document.getElementById('modoEdicao').classList.add('hidden');
+      document.getElementById('modoVisualizacao').classList.remove('hidden');
+      document.getElementById('btnVisualizar').className = 'btn btn-active';
+      document.getElementById('btnEditar').className = 'btn btn-secondary';
+    });
+
+    // === Máscara RG ===
+    function mascaraRG(input) {
+      let v = input.value.replace(/\D/g, '');
+      if (v.length > 6) v = v.slice(0, 6);
+      let formatted = '';
+      if (v.length > 0) formatted = v.slice(0, 2);
+      if (v.length > 2) formatted += '.' + v.slice(2, 5);
+      if (v.length > 5) formatted += '-' + v.slice(5, 6);
+      input.value = formatted;
+    }
+
+    // === Toggle posto manual ===
+    function togglePostoManual() {
+      const sel = document.getElementById('novoPosto');
+      const manual = document.getElementById('novoPostoManual');
+      manual.classList.toggle('hidden', sel.value !== 'OUTRO');
+    }
+
+    // === Brasões ===
+    function carregarBrasao(lado) {
+      const input = document.getElementById(lado === 'esq' ? 'brasaoEsqFile' : 'brasaoDirFile');
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        if (lado === 'esq') DB.config.brasaoEsq = e.target.result;
+        else DB.config.brasaoDir = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // === Dia da Semana ===
+    function atualizarDiaSemana() {
+      const input = document.getElementById('dataEscala');
+      const diaSemanaEl = document.getElementById('diaSemana');
+      if (!input.value) { diaSemanaEl.value = ''; return; }
+      const dias = ['DOMINGO', 'SEGUNDA-FEIRA', 'TERÇA-FEIRA', 'QUARTA-FEIRA', 'QUINTA-FEIRA', 'SEXTA-FEIRA', 'SÁBADO'];
+      const data = new Date(input.value + 'T12:00:00');
+      diaSemanaEl.value = dias[data.getDay()];
+    }
+
+    // === CRUD Militares ===
+    function adicionarMilitar() {
+      let posto = document.getElementById('novoPosto').value;
+      if (posto === 'OUTRO') {
+        posto = document.getElementById('novoPostoManual').value.trim().toUpperCase();
+      }
+      const quadro = document.getElementById('novoQuadro').value;
+      const nome = document.getElementById('novoNome').value.trim().toUpperCase();
+      const rg = document.getElementById('novoRG').value.trim();
+      const nf = document.getElementById('novoNF').value.trim();
+
+      if (!posto || !nome || !rg) { alert('Preencha Posto, Nome e RG!'); return; }
+
+      DB.militares.push({ id: Date.now(), posto, quadro, nome, rg, nf });
+      renderMilitares();
+
+      // Limpar campos
+      document.getElementById('novoPosto').value = '';
+      document.getElementById('novoPostoManual').value = '';
+      document.getElementById('novoPostoManual').classList.add('hidden');
+      document.getElementById('novoQuadro').value = '';
+      document.getElementById('novoNome').value = '';
+      document.getElementById('novoRG').value = '';
+      document.getElementById('novoNF').value = '';
+    }
+
+    function removerMilitar(id) {
+      DB.militares = DB.militares.filter(m => m.id !== id);
+      renderMilitares();
+    }
+
+    function moverMilitar(id, direcao) {
+      const idx = DB.militares.findIndex(m => m.id === id);
+      if (idx === -1) return;
+      const novoIdx = idx + direcao;
+      if (novoIdx < 0 || novoIdx >= DB.militares.length) return;
+      [DB.militares[idx], DB.militares[novoIdx]] = [DB.militares[novoIdx], DB.militares[idx]];
+      renderMilitares();
+    }
+
+    function renderMilitares() {
+      document.getElementById('listaMilitares').innerHTML = DB.militares.map((m, i) => `
+        <tr>
+          <td style="text-align: center; color: #999;">${i + 1}</td>
+          <td>${m.posto}</td>
+          <td>${m.quadro || '-'}</td>
+          <td style="font-weight: 600;">${m.nome}</td>
+          <td>${m.rg}</td>
+          <td>${m.nf || '-'}</td>
+          <td style="text-align: center;">
+            <button onclick="moverMilitar(${m.id}, -1)" class="btn btn-secondary" style="padding: 2px 6px; font-size: 11px;">⬆️</button>
+            <button onclick="moverMilitar(${m.id}, 1)" class="btn btn-secondary" style="padding: 2px 6px; font-size: 11px;">⬇️</button>
+            <button onclick="removerMilitar(${m.id})" class="btn btn-danger" style="padding: 2px 6px; font-size: 11px;">🗑️</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // === Observações ===
+    function renderObservacoes() {
+      document.getElementById('observacoesContainer').innerHTML = DB.observacoes.map((obs, i) => `
+        <div style="display: flex; gap: 8px; align-items: flex-start;">
+          <span style="color: #999; margin-top: 8px;">➢</span>
+          <textarea class="form-input obs-input" data-index="${i}" rows="2" style="flex: 1;">${obs}</textarea>
+          <button onclick="removerObservacao(${i})" class="btn btn-danger" style="padding: 8px;">🗑️</button>
+        </div>
+      `).join('');
+    }
+
+    function adicionarObservacao() {
+      coletarObservacoes();
+      DB.observacoes.push('');
+      renderObservacoes();
+    }
+
+    function removerObservacao(index) {
+      coletarObservacoes();
+      DB.observacoes.splice(index, 1);
+      renderObservacoes();
+    }
+
+    function coletarObservacoes() {
+      DB.observacoes = [];
+      document.querySelectorAll('.obs-input').forEach(input => {
+        DB.observacoes.push(input.value);
+      });
+    }
+
+    // === Coletar Tudo ===
+    function coletarTudo() {
+      DB.config = {
+        brasaoEsq: DB.config.brasaoEsq || '',
+        brasaoDir: DB.config.brasaoDir || '',
+        headerLinha1: document.getElementById('headerLinha1').value,
+        headerLinha2: document.getElementById('headerLinha2').value,
+        headerLinha3: document.getElementById('headerLinha3').value,
+        headerLema: document.getElementById('headerLema').value,
+        assinaturaNome: document.getElementById('assinaturaNome').value,
+        assinaturaPosto: document.getElementById('assinaturaPosto').value,
+        assinaturaCargo: document.getElementById('assinaturaCargo').value,
+        footerLema: document.getElementById('footerLema').value,
+        footerLinha1: document.getElementById('footerLinha1').value,
+        footerLinha2: document.getElementById('footerLinha2').value,
+        footerLinha3: document.getElementById('footerLinha3').value,
+      };
+
+      DB.dados = {
+        dataEscala: document.getElementById('dataEscala').value,
+        diaSemana: document.getElementById('diaSemana').value,
+        nomeOperacao: document.getElementById('nomeOperacao').value,
+        rubricaISEO: document.getElementById('rubricaISEO').value,
+        horarioEscala: document.getElementById('horarioEscala').value,
+        horarioApresentacao: document.getElementById('horarioApresentacao').value,
+      };
+
+      DB.setor = document.getElementById('setorObs').value;
+      coletarObservacoes();
+    }
+
+    // === Carregar Dados ===
+    function carregarDadosUI() {
+      if (DB.config.headerLinha1) {
+        document.getElementById('headerLinha1').value = DB.config.headerLinha1;
+        document.getElementById('headerLinha2').value = DB.config.headerLinha2;
+        document.getElementById('headerLinha3').value = DB.config.headerLinha3;
+        document.getElementById('headerLema').value = DB.config.headerLema || '';
+        document.getElementById('assinaturaNome').value = DB.config.assinaturaNome || '';
+        document.getElementById('assinaturaPosto').value = DB.config.assinaturaPosto || '';
+        document.getElementById('assinaturaCargo').value = DB.config.assinaturaCargo || '';
+        document.getElementById('footerLema').value = DB.config.footerLema || '';
+        document.getElementById('footerLinha1').value = DB.config.footerLinha1 || '';
+        document.getElementById('footerLinha2').value = DB.config.footerLinha2 || '';
+        document.getElementById('footerLinha3').value = DB.config.footerLinha3 || '';
+      }
+
+      if (DB.dados.dataEscala) {
+        document.getElementById('dataEscala').value = DB.dados.dataEscala;
+        document.getElementById('diaSemana').value = DB.dados.diaSemana || '';
+        document.getElementById('nomeOperacao').value = DB.dados.nomeOperacao || '';
+        document.getElementById('rubricaISEO').value = DB.dados.rubricaISEO || '';
+        document.getElementById('horarioEscala').value = DB.dados.horarioEscala || '';
+        document.getElementById('horarioApresentacao').value = DB.dados.horarioApresentacao || '';
+      }
+
+      document.getElementById('setorObs').value = DB.setor || '';
+      renderMilitares();
+      renderObservacoes();
+    }
+
+    // === Salvar Tudo ===
+    async function salvarTudo() {
+      try {
+        coletarTudo();
+        await salvarEscalaISEO({
+          config: DB.config,
+          dados: DB.dados,
+          militares: DB.militares,
+          observacoes: DB.observacoes,
+          setor: DB.setor
+        });
+        alert('✅ Escala salva com sucesso!');
+      } catch (err) {
+        alert('❌ Erro ao salvar: ' + err.message);
+      }
+    }
+
+    // === Carregar Dados do Servidor ===
+    async function carregarDados() {
+      try {
+        const dados = await buscarEscalaISEO();
+        if (dados) {
+          DB.config = dados.config || {};
+          DB.dados = dados.dados || {};
+          DB.militares = dados.militares || [];
+          DB.observacoes = dados.observacoes || [];
+          DB.setor = dados.setor || '';
+        }
+      } catch (err) {
+        console.log('Nenhuma escala ISEO salva ainda');
+      }
+      carregarDadosUI();
+    }
+
+    // === Renderizar Documento ===
+    function renderizarDocumento() {
+      const c = DB.config;
+      const d = DB.dados;
+
+      // Brasões
+      const brasaoEsqHTML = c.brasaoEsq 
+        ? `<img src="${c.brasaoEsq}" style="height: 70px; width: auto;">` 
+        : '<div style="width: 70px; height: 70px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #999;">Brasão</div>';
+      const brasaoDirHTML = c.brasaoDir 
+        ? `<img src="${c.brasaoDir}" style="height: 70px; width: auto;">` 
+        : '<div style="width: 70px; height: 70px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #999;">Brasão</div>';
+
+      document.getElementById('brasaoEsqView').innerHTML = brasaoEsqHTML;
+      document.getElementById('brasaoDirView').innerHTML = brasaoDirHTML;
+
+      // Cabeçalho
+      document.getElementById('headerTexto').innerHTML = `
+        <p style="font-size: 13px; font-weight: bold; text-transform: uppercase;">${c.headerLinha1 || ''}</p>
+        <p style="font-size: 18px; font-weight: bold; text-transform: uppercase;">${c.headerLinha2 || ''}</p>
+        <p style="font-size: 13px; font-weight: bold; text-transform: uppercase;">${c.headerLinha3 || ''}</p>
+        <p style="font-size: 12px; font-style: italic;">${c.headerLema || ''}</p>
+      `;
+
+      // Título
+      document.getElementById('tituloOperacao').textContent = d.nomeOperacao || 'OPERAÇÃO';
+      document.getElementById('subtituloISEO').textContent = d.rubricaISEO || '';
+
+      // Info
+      const dataFormatada = d.dataEscala ? d.dataEscala.split('-').reverse().join('/') : '';
+      document.getElementById('viewDia').textContent = dataFormatada;
+      document.getElementById('viewDiaSemana').textContent = d.diaSemana || '';
+      document.getElementById('viewHorario').textContent = d.horarioEscala || '';
+      document.getElementById('viewApresentacao').textContent = d.horarioApresentacao || '';
+
+      // Tabela Militares
+      let html = `
+        <thead>
+          <tr style="background: #FFD966;">
+            <th style="width: 40px; text-align: center;">Nº</th>
+            <th style="text-align: center;">POSTO/GRAD</th>
+            <th style="text-align: center;">NOME DE GUERRA</th>
+            <th style="text-align: center;">RG</th>
+            <th style="text-align: center;">NF</th>
+          </tr>
+        </thead>
+        <tbody>
+      `;
+
+      DB.militares.forEach((m, i) => {
+        const postoQuadro = m.quadro ? `${m.posto} ${m.quadro}` : m.posto;
+        html += `
+          <tr>
+            <td style="text-align: center;">${String(i + 1).padStart(2, '0')}</td>
+            <td style="text-align: center;">${postoQuadro}</td>
+            <td style="font-weight: bold;">${m.nome}</td>
+            <td style="text-align: center;">${m.rg}</td>
+            <td style="text-align: center;">${m.nf || '-'}</td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody>';
+      document.getElementById('tabelaMilitares').innerHTML = html;
+
+      // Observações
+      let obsHtml = '';
+      if (DB.setor) {
+        obsHtml += `<p style="font-weight: bold; margin-bottom: 8px;">${DB.setor}</p>`;
+      }
+      obsHtml += '<p style="font-weight: bold;">OBSERVAÇÕES:</p>';
+      DB.observacoes.filter(o => o.trim()).forEach(o => {
+        obsHtml += `<p style="margin-left: 16px;">➢ ${o}</p>`;
+      });
+      document.getElementById('observacoesView').innerHTML = obsHtml;
+
+      // Assinatura
+      document.getElementById('assinaturaTexto').textContent = `${c.assinaturaNome || ''} – ${c.assinaturaPosto || ''}`;
+      document.getElementById('assinaturaCargoTexto').textContent = c.assinaturaCargo || '';
+
+      // Rodapé
+      document.getElementById('footerLemaTexto').textContent = c.footerLema || '';
+      document.getElementById('footerLinha1Texto').textContent = c.footerLinha1 || '';
+      document.getElementById('footerLinha2Texto').textContent = c.footerLinha2 || '';
+      document.getElementById('footerLinha3Texto').textContent = c.footerLinha3 || '';
+    }
+
+    // === Init ===
+    carregarDados();
+    console.log('🚀 PMES Escala ISEO v1.0.0');
+  </script>
+
+</body>
+</html>
