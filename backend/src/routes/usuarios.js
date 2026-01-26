@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Usuarios Routes
-  Versão: 1.0.0
+  Versão: 1.0.1
 */
 
 const express = require('express');
@@ -32,7 +32,7 @@ router.get('/pendentes', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const result = await db.query(`
       SELECT u.id, u.nome, u.email, u.created_at,
-             un.sigla as unidade_sigla, un.nome as unidade_nome
+             un.sigla as unidade_sigla
       FROM usuarios u
       LEFT JOIN unidades un ON u.unidade_id = un.id
       WHERE u.ativo = false

@@ -75,7 +75,7 @@
         unidades.forEach(u => {
           const opt = document.createElement('option');
           opt.value = u.id;
-          opt.textContent = `${u.sigla} - ${u.nome}`;
+          opt.textContent = u.sigla;
           select.appendChild(opt);
         });
       } catch (err) {

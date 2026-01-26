@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Unidades Routes
-  Versão: 1.0.0
+  Versão: 1.0.1
 */
 
 const express = require('express');
@@ -13,7 +13,7 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const result = await db.query(`
-      SELECT id, parent_id, nome, sigla, tipo, ativo
+      SELECT id, parent_id, sigla, tipo, ativo
       FROM unidades
       WHERE ativo = true
       ORDER BY sigla
@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
 router.get('/arvore', async (req, res) => {
   try {
     const result = await db.query(`
-      SELECT id, parent_id, nome, sigla, tipo, ativo
+      SELECT id, parent_id, sigla, tipo, ativo
       FROM unidades
       WHERE ativo = true
       ORDER BY tipo, sigla
@@ -62,10 +62,10 @@ router.get('/arvore', async (req, res) => {
 // POST /unidades - Cria unidade (admin)
 router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const { parent_id, nome, sigla, tipo } = req.body;
+    const { parent_id, sigla, tipo } = req.body;
 
-    if (!nome || !sigla || !tipo) {
-      return res.status(400).json({ error: 'Nome, sigla e tipo são obrigatórios' });
+    if (!sigla || !tipo) {
+      return res.status(400).json({ error: 'Sigla e tipo são obrigatórios' });
     }
 
     const tipos = ['CPOR', 'CPOE', 'BPM', 'CIA_IND', 'CIA', 'COPOM', 'PELOTAO', 'OUTRO'];
@@ -74,10 +74,10 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
     }
 
     const result = await db.query(
-      `INSERT INTO unidades (parent_id, nome, sigla, tipo)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO unidades (parent_id, sigla, tipo)
+       VALUES ($1, $2, $3)
        RETURNING *`,
-      [parent_id || null, nome, sigla, tipo]
+      [parent_id || null, sigla, tipo]
     );
 
     res.status(201).json(result.rows[0]);
@@ -87,19 +87,16 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
   }
 });
 
-// PUT /unidades/:id - Atualiza unidade (admin)
-router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
+// GET /usuarios - Lista usuários (admin)
+router.get('/', authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const { id } = req.params;
-    const { parent_id, nome, sigla, tipo, ativo } = req.body;
-
-    const result = await db.query(
-      `UPDATE unidades 
-       SET parent_id = $1, nome = $2, sigla = $3, tipo = $4, ativo = $5, updated_at = CURRENT_TIMESTAMP
-       WHERE id = $6
-       RETURNING *`,
-      [parent_id || null, nome, sigla, tipo, ativo, id]
-    );
+    const result = await db.query(`
+      SELECT u.id, u.nome, u.email, u.role, u.ativo, u.created_at,
+             un.sigla as unidade_sigla
+      FROM usuarios u
+      LEFT JOIN unidades un ON u.unidade_id = un.id
+      ORDER BY u.created_at DESC
+    `);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Unidade não encontrada' });
