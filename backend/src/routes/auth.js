@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
+const { enviarEmailNovoUsuario } = require('../config/email');
 
 const router = express.Router();
 
@@ -89,9 +90,18 @@ router.post('/cadastro', async (req, res) => {
       [nome, email.toLowerCase(), senhaHash, unidade_id]
     );
 
+    const novoUsuario = result.rows[0];
+
+    // Busca sigla da unidade para o email
+    const unidadeResult = await db.query('SELECT sigla FROM unidades WHERE id = $1', [unidade_id]);
+    const unidadeSigla = unidadeResult.rows[0]?.sigla || null;
+
+    // Envia email para o admin
+    enviarEmailNovoUsuario(novoUsuario, unidadeSigla);
+
     res.status(201).json({
       message: 'Cadastro realizado. Aguarde aprovação do administrador.',
-      usuario: result.rows[0]
+      usuario: novoUsuario
     });
   } catch (err) {
     console.error('Erro no cadastro:', err);
