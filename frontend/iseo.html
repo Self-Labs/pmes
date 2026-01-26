@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala ISEO
-  Versão: 1.0.3
+  Versão: 1.0.4
 -->
 <html lang="pt-BR">
 <head>
@@ -286,8 +286,11 @@
     // === Auto-save ===
     let autoSaveTimer = null;
     let dadosAlterados = false;
+    let isLoading = true;
 
     function marcarAlterado() {
+      if (isLoading) return;
+
       dadosAlterados = true;
       atualizarStatus('pendente');
 
@@ -311,6 +314,7 @@
 
     async function salvarAgora() {
       if (autoSaveTimer) clearTimeout(autoSaveTimer);
+      if (isLoading) return;
 
       atualizarStatus('salvando');
 
@@ -565,6 +569,7 @@
 
     // === Carregar Dados do Servidor ===
     async function carregarDados() {
+      isLoading = true;
       try {
         const dados = await buscarEscalaISEO();
         if (dados) {
@@ -578,6 +583,8 @@
         console.log('Nenhuma escala ISEO salva ainda');
       }
       carregarDadosUI();
+      
+      setTimeout(() => { isLoading = false; }, 500);
     }
 
     // === Renderizar Documento ===
@@ -686,7 +693,7 @@
 
     // === Init ===
     carregarDados();
-    console.log('🚀 Escala ISEO v1.0.3');
+    console.log('🚀 Escala ISEO v1.0.4');
   </script>
 
 </body>

@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Unidades Routes
-  Versão: 1.0.1
+  Versão: 1.0.2
 */
 
 const express = require('express');
@@ -87,22 +87,25 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
   }
 });
 
-// GET /usuarios - Lista usuários (admin)
-router.get('/', authMiddleware, adminMiddleware, async (req, res) => {
+// PUT /unidades/:id - Atualiza unidade (admin)
+router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const result = await db.query(`
-      SELECT u.id, u.nome, u.email, u.role, u.ativo, u.created_at,
-             un.sigla as unidade_sigla
-      FROM usuarios u
-      LEFT JOIN unidades un ON u.unidade_id = un.id
-      ORDER BY u.created_at DESC
-    `);
+    const { id } = req.params;
+    const { sigla, tipo, parent_id, ativo } = req.body;
+
+    const result = await db.query(
+      `UPDATE unidades 
+       SET sigla = $1, tipo = $2, parent_id = $3, ativo = $4, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $5
+       RETURNING *`,
+      [sigla, tipo, parent_id || null, ativo, id]
+    );
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Unidade não encontrada' });
     }
 
-    res.json(result.rows[0]);
+    res.json({ message: 'Unidade atualizada', unidade: result.rows[0] });
   } catch (err) {
     console.error('Erro ao atualizar unidade:', err);
     res.status(500).json({ error: 'Erro interno do servidor' });

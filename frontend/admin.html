@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Admin
-  Versão: 1.0.3
+  Versão: 1.0.4
 -->
 <html lang="pt-BR">
 <head>
@@ -376,7 +376,7 @@
     function renderSelectParent() {
       const select = document.getElementById('novoParent');
       select.innerHTML = '<option value="">Nenhuma (raiz)</option>' + 
-        unidadesCache.map(u => `<option value="${u.id}">${u.sigla} - ${u.nome}</option>`).join('');
+        unidadesCache.map(u => `<option value="${u.id}">${u.sigla}</option>`).join('');
     }
 
     async function criarNovaUnidade() {
@@ -541,7 +541,7 @@
     carregarPendentes();
     carregarUsuarios();
     carregarUnidades();
-    console.log('🚀 Admin v1.0.0');
+    console.log('🚀 Admin v1.0.4');
   </script>
 
 </body>

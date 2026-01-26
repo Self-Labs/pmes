@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Usuarios Routes
-  Versão: 1.0.2
+  Versão: 1.0.3
 */
 
 const express = require('express');
@@ -15,7 +15,7 @@ router.get('/', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const result = await db.query(`
       SELECT u.id, u.nome, u.email, u.role, u.ativo, u.created_at,
-             un.sigla as unidade_sigla, un.nome as unidade_nome
+             un.sigla as unidade_sigla
       FROM usuarios u
       LEFT JOIN unidades un ON u.unidade_id = un.id
       ORDER BY u.created_at DESC
