@@ -56,4 +56,5 @@ services:
 
 networks:
   pmes_net:
+    name: pmes_net
     driver: bridge
