@@ -16,3 +16,4 @@ Thumbs.db
 
 # Docker volumes locais
 data/
+postgres/
