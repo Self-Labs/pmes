@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Admin
-  Versão: 1.0.1
+  Versão: 1.0.2
 -->
 <html lang="pt-BR">
 <head>
@@ -18,7 +18,7 @@
     <div class="navbar-content" style="max-width: 1200px;">
       <div class="navbar-brand">
         ⚙️ Administração
-        <span class="navbar-version">v1.0.0</span>
+        <span class="navbar-version">v3.0</span>
       </div>
       <div class="navbar-menu">
         <span id="navbarUser" class="navbar-user"></span>
@@ -117,6 +117,60 @@
 
   </div>
 
+  <!-- Modal Editar Usuário -->
+  <div id="modalEditarUsuario" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100;">
+    <div class="card" style="width: 100%; max-width: 500px; margin: 20px;">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">✏️ Editar Usuário</h2>
+      
+      <input type="hidden" id="editUserId">
+      
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Nome</label>
+        <input type="text" id="editUserNome" class="form-input">
+      </div>
+
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Email</label>
+        <input type="email" id="editUserEmail" class="form-input">
+      </div>
+
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Role</label>
+        <select id="editUserRole" class="form-select">
+          <option value="editor">Editor</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Comando</label>
+        <select id="editUserComando" class="form-select" onchange="carregarSubunidadesEdit()">
+          <option value="">Selecione o comando</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Unidade</label>
+        <select id="editUserUnidade" class="form-select">
+          <option value="">Selecione a unidade</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Status</label>
+        <select id="editUserAtivo" class="form-select">
+          <option value="true">Ativo</option>
+          <option value="false">Pendente</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 12px;">
+        <button onclick="fecharModalUsuario()" class="btn btn-secondary" style="flex: 1;">Cancelar</button>
+        <button onclick="salvarUsuario()" class="btn btn-primary" style="flex: 1;">💾 Salvar</button>
+      </div>
+    </div>
+  </div>
+
   <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
 
   <script src="/js/api.js"></script>
@@ -194,6 +248,7 @@
     async function carregarUsuarios() {
       try {
         const usuarios = await listarUsuarios();
+        usuariosCache = usuarios;
         document.getElementById('listaUsuarios').innerHTML = usuarios.map(u => `
           <tr>
             <td style="font-weight: 600;">${u.nome}</td>
@@ -211,6 +266,7 @@
               </span>
             </td>
             <td>
+              <button onclick="abrirEditarUsuario('${u.id}')" class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">✏️</button>
               <button onclick="excluirUsuario('${u.id}', '${u.nome}')" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;">🗑️</button>
             </td>
           </tr>
@@ -300,6 +356,86 @@
       try {
         await removerUnidade(id);
         carregarUnidades();
+      } catch (err) {
+        alert('❌ Erro: ' + err.message);
+      }
+    }
+
+    // === Modal Editar Usuário ===
+    let usuariosCache = [];
+
+    async function abrirEditarUsuario(id) {
+      const usuario = usuariosCache.find(u => u.id === id);
+      if (!usuario) return;
+
+      document.getElementById('editUserId').value = usuario.id;
+      document.getElementById('editUserNome').value = usuario.nome;
+      document.getElementById('editUserEmail').value = usuario.email;
+      document.getElementById('editUserRole').value = usuario.role;
+      document.getElementById('editUserAtivo').value = usuario.ativo.toString();
+
+      // Popula comandos
+      const selectComando = document.getElementById('editUserComando');
+      selectComando.innerHTML = '<option value="">Selecione o comando</option>';
+      const comandos = unidadesCache.filter(u => u.tipo === 'CPOR' || u.tipo === 'CPOE');
+      comandos.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = u.sigla;
+        selectComando.appendChild(opt);
+      });
+
+      // Encontra comando do usuário (parent da unidade atual)
+      const unidadeAtual = unidadesCache.find(u => u.sigla === usuario.unidade_sigla);
+      if (unidadeAtual && unidadeAtual.parent_id) {
+        selectComando.value = unidadeAtual.parent_id;
+        carregarSubunidadesEdit();
+        document.getElementById('editUserUnidade').value = unidadeAtual.id;
+      } else if (unidadeAtual) {
+        // Usuário está em um CPOR/CPOE diretamente
+        selectComando.value = unidadeAtual.id;
+        carregarSubunidadesEdit();
+      }
+
+      document.getElementById('modalEditarUsuario').classList.remove('hidden');
+    }
+
+    function fecharModalUsuario() {
+      document.getElementById('modalEditarUsuario').classList.add('hidden');
+    }
+
+    function carregarSubunidadesEdit() {
+      const comandoId = document.getElementById('editUserComando').value;
+      const select = document.getElementById('editUserUnidade');
+
+      select.innerHTML = '<option value="">Selecione a unidade</option>';
+
+      if (!comandoId) return;
+
+      const subunidades = unidadesCache.filter(u => u.parent_id === comandoId);
+      subunidades.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = u.sigla;
+        select.appendChild(opt);
+      });
+    }
+
+    async function salvarUsuario() {
+      const id = document.getElementById('editUserId').value;
+      const dados = {
+        nome: document.getElementById('editUserNome').value,
+        email: document.getElementById('editUserEmail').value,
+        role: document.getElementById('editUserRole').value,
+        unidade_id: document.getElementById('editUserUnidade').value || document.getElementById('editUserComando').value || null,
+        ativo: document.getElementById('editUserAtivo').value === 'true'
+      };
+
+      try {
+        await atualizarUsuario(id, dados);
+        fecharModalUsuario();
+        carregarUsuarios();
+        alert('✅ Usuário atualizado!');
       } catch (err) {
         alert('❌ Erro: ' + err.message);
       }

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<!--
+  Sistema de Escalas - Perfil
+  Versão: 1.0.0
+-->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meu Perfil - Sistema de Escalas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="auth-loading">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar-content" style="max-width: 800px;">
+      <div class="navbar-brand">
+        👤 Meu Perfil
+        <span class="navbar-version">v3.0</span>
+      </div>
+      <div class="navbar-menu">
+        <a href="/home" class="btn btn-secondary">🏠 Home</a>
+        <button onclick="logout()" class="btn btn-secondary">🚪 Sair</button>
+      </div>
+    </div>
+  </nav>
+
+  <div style="max-width: 500px; margin: 24px auto; padding: 0 16px;">
+
+    <div id="alertBox" class="hidden"></div>
+
+    <div class="card">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">📝 Meus Dados</h2>
+
+      <form id="perfilForm">
+        <div class="mb-4">
+          <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Nome</label>
+          <input type="text" id="nome" class="form-input" required>
+        </div>
+
+        <div class="mb-4">
+          <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Email</label>
+          <input type="email" id="email" class="form-input" required>
+        </div>
+
+        <div class="mb-4">
+          <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Unidade</label>
+          <input type="text" id="unidade" class="form-input" readonly style="background: #f3f4f6;">
+        </div>
+
+        <button type="submit" id="btnSalvar" class="btn btn-primary" style="width: 100%;">💾 Salvar Alterações</button>
+      </form>
+    </div>
+
+    <div class="card mt-4">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">🔒 Alterar Senha</h2>
+
+      <form id="senhaForm">
+        <div class="mb-4">
+          <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Senha Atual</label>
+          <input type="password" id="senhaAtual" class="form-input" required>
+        </div>
+
+        <div class="mb-4">
+          <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Nova Senha</label>
+          <input type="password" id="senhaNova" class="form-input" minlength="6" required>
+        </div>
+
+        <div class="mb-4">
+          <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Confirmar Nova Senha</label>
+          <input type="password" id="senhaConfirma" class="form-input" minlength="6" required>
+        </div>
+
+        <button type="submit" id="btnSenha" class="btn btn-secondary" style="width: 100%;">🔑 Alterar Senha</button>
+      </form>
+    </div>
+
+    <p class="footer mt-6">© 2026 Self-Labs. Todos os direitos reservados.</p>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    if (!initProtectedPage()) throw new Error('Não autenticado');
+
+    const alertBox = document.getElementById('alertBox');
+
+    // Carrega dados do perfil
+    async function carregarPerfil() {
+      try {
+        const perfil = await buscarMeuPerfil();
+        document.getElementById('nome').value = perfil.nome;
+        document.getElementById('email').value = perfil.email;
+        document.getElementById('unidade').value = perfil.unidade_sigla || 'Não definida';
+      } catch (err) {
+        alertBox.className = 'alert alert-error';
+        alertBox.textContent = 'Erro ao carregar perfil: ' + err.message;
+      }
+    }
+
+    // Salvar dados
+    document.getElementById('perfilForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnSalvar');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span>';
+      alertBox.className = 'hidden';
+
+      try {
+        const dados = {
+          nome: document.getElementById('nome').value,
+          email: document.getElementById('email').value,
+        };
+        await atualizarMeuPerfil(dados);
+        
+        // Atualiza localStorage
+        const usuario = getUsuario();
+        usuario.nome = dados.nome;
+        usuario.email = dados.email;
+        setUsuario(usuario);
+
+        alertBox.className = 'alert alert-success';
+        alertBox.textContent = '✅ Dados atualizados com sucesso!';
+      } catch (err) {
+        alertBox.className = 'alert alert-error';
+        alertBox.textContent = err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '💾 Salvar Alterações';
+      }
+    });
+
+    // Alterar senha
+    document.getElementById('senhaForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnSenha');
+      const senhaNova = document.getElementById('senhaNova').value;
+      const senhaConfirma = document.getElementById('senhaConfirma').value;
+
+      if (senhaNova !== senhaConfirma) {
+        alertBox.className = 'alert alert-error';
+        alertBox.textContent = 'As senhas não coincidem!';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span>';
+      alertBox.className = 'hidden';
+
+      try {
+        await atualizarMeuPerfil({
+          senhaAtual: document.getElementById('senhaAtual').value,
+          senhaNova: senhaNova,
+        });
+
+        alertBox.className = 'alert alert-success';
+        alertBox.textContent = '✅ Senha alterada com sucesso!';
+        document.getElementById('senhaForm').reset();
+      } catch (err) {
+        alertBox.className = 'alert alert-error';
+        alertBox.textContent = err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🔑 Alterar Senha';
+      }
+    });
+
+    carregarPerfil();
+  </script>
+
+</body>
+</html>

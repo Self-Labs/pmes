@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - API Client
-  Versão: 1.0.1
+  Versão: 1.0.2
 */
 
 const API_URL = '/api';
@@ -141,6 +141,28 @@ async function alterarRoleUsuario(id, role) {
 async function removerUsuario(id) {
   return api(`/usuarios/${id}`, {
     method: 'DELETE',
+  });
+}
+
+// =============================================
+// Perfil do Usuário
+// =============================================
+
+async function buscarMeuPerfil() {
+  return api('/usuarios/me');
+}
+
+async function atualizarMeuPerfil(dados) {
+  return api('/usuarios/me', {
+    method: 'PUT',
+    body: dados,
+  });
+}
+
+async function atualizarUsuario(id, dados) {
+  return api(`/usuarios/${id}`, {
+    method: 'PUT',
+    body: dados,
   });
 }
 
