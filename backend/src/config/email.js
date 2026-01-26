@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Email Config
-  Versão: 1.0.0
+  Versão: 1.0.1
 */
 
 const nodemailer = require('nodemailer');
@@ -24,14 +24,14 @@ async function enviarEmailNovoUsuario(usuario, unidadeSigla) {
   }
 
   const html = `
-    <h2>📋 Novo cadastro no Sistem de Escalas</h2>
+    <h2>📋 Novo cadastro no Sistema de Escalas</h2>
     <p>Um novo usuário solicitou acesso ao sistema:</p>
     <table style="border-collapse: collapse; margin: 16px 0;">
       <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Nome:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${usuario.nome}</td></tr>
       <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Email:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${usuario.email}</td></tr>
       <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Unidade:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${unidadeSigla || 'Não informada'}</td></tr>
     </table>
-    <p>Acesse o painel administrativo para aprovar ou rejeitar.</p>
+    <p>Acesse o <a href="https://pmes.selflabs.org/admin" style="color: #007bff; text-decoration: underline;">painel administrativo</a> para aprovar ou rejeitar.</p>
     <p style="color: #666; font-size: 12px;">— Sistema de Escalas</p>
   `;
 

@@ -4,7 +4,7 @@ set -e
 # Garante que o comando rode na pasta onde o script está (raiz do repo)
 cd "$(dirname "$0")"
 echo "=========================================="
-echo "--- Verificando atualizações PMES Escalas em $(date) ---"
+echo "--- Verificando atualizações Sistema de Escalas em $(date) ---"
 # --- CONFIGURAÇÃO ---
 BRANCH="master"
 # Atualiza referências do git sem baixar os arquivos ainda
