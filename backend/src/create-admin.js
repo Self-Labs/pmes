@@ -1,3 +1,8 @@
+/*
+  Sistema de Escalas - Create Admin Script
+  Versão: 1.0.0
+*/
+
 const bcrypt = require('bcryptjs');
 const db = require('./config/db');
 

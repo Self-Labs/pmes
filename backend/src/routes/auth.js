@@ -1,3 +1,8 @@
+/*
+  Sistema de Escalas - Auth Routes
+  Versão: 1.0.0
+*/
+
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');

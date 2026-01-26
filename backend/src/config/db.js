@@ -1,3 +1,8 @@
+/*
+  Sistema de Escalas - Database Config
+  Versão: 1.0.0
+*/
+
 const { Pool } = require('pg');
 
 const pool = new Pool({

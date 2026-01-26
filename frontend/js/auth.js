@@ -1,6 +1,7 @@
-// =============================================
-// PMES - Auth Helper
-// =============================================
+/*
+  Sistema de Escalas - Auth Helper
+  Versão: 1.0.0
+*/
 
 // Verifica se usuário está logado, senão redireciona
 function requireAuth() {
@@ -53,6 +54,7 @@ function renderMenu() {
 // Inicializa página protegida
 function initProtectedPage() {
   if (!requireAuth()) return false;
+  document.body.classList.remove('auth-loading');
   renderUserInfo();
   renderMenu();
   return true;
@@ -62,6 +64,7 @@ function initProtectedPage() {
 function initAdminPage() {
   if (!requireAuth()) return false;
   if (!requireAdmin()) return false;
+  document.body.classList.remove('auth-loading');
   renderUserInfo();
   renderMenu();
   return true;

@@ -1,3 +1,8 @@
+/*
+  Sistema de Escalas - Email Config
+  Versão: 1.0.0
+*/
+
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({

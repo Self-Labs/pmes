@@ -1,7 +1,9 @@
-/* =============================================
-   PMES - Estilos Compartilhados
-   ============================================= */
+/*
+  Sistema de Escalas - Estilos
+  Versão: 1.0.0
+*/
 
+/* Variáveis de Cores */
 :root {
   --pm-gold: #FFD966;
   --pm-gold-dark: #BF9000;
@@ -9,6 +11,11 @@
   --pm-red: #f8d7da;
   --pm-green: #d4edda;
   --pm-gray: #e5e7eb;
+}
+
+/* Esconde conteúdo até verificar auth */
+body.auth-loading {
+  visibility: hidden;
 }
 
 * {
@@ -55,6 +62,10 @@ body {
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+a.btn {
+  text-decoration: none;
 }
 
 .btn-primary {

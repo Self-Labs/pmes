@@ -1,3 +1,8 @@
+/*
+  Sistema de Escalas - Usuarios Routes
+  Versão: 1.0.0
+*/
+
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const db = require('../config/db');

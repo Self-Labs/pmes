@@ -1,3 +1,8 @@
+/*
+  Sistema de Escalas - Unidades Routes
+  Versão: 1.0.0
+*/
+
 const express = require('express');
 const db = require('../config/db');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');

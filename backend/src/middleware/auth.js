@@ -1,3 +1,8 @@
+/*
+  Sistema de Escalas - Auth Middleware
+  Versão: 1.0.0
+*/
+
 const jwt = require('jsonwebtoken');
 
 const authMiddleware = (req, res, next) => {
