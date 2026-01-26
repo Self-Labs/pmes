@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala Mensal
-  Versão: 1.0.1
+  Versão: 1.0.3
 -->
 <html lang="pt-BR">
 <head>
@@ -10,37 +10,6 @@
   <title>Escala Mensal - Sistema de Escalas</title>
   <link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/styles.css">
-  
-  <style>
-    /* === ESTILOS ESPECÍFICOS ESCALA MENSAL === */
-    .print-table { 
-      width: 100% !important; 
-      border-collapse: collapse !important; 
-      table-layout: fixed !important; 
-      font-size: 11px !important;
-    }
-
-    .print-table td, .print-table th { 
-      border: 1px solid #000 !important;
-      padding: 0 2px !important; 
-      vertical-align: middle !important;
-      line-height: 1.1 !important; 
-    }
-
-    .print-table tr { height: 20px !important; }
-    .overlap-top { margin-top: -1px !important; }
-    .bg-pm-gold { background-color: #FFD966 !important; }
-    .bg-pm-red { background-color: #f8d7da !important; }
-    .bg-pm-green { background-color: #d4edda !important; }
-
-    @media print {
-      @page { size: A4 landscape; margin: 5mm; }
-      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .no-print { display: none !important; }
-      #documento { box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
-      .print-header-text p { margin: 2px 0; }
-    }
-  </style>
 </head>
 
 <body class="auth-loading">
@@ -64,10 +33,12 @@
 
   <!-- BARRA DE CONTROLE -->
   <div class="no-print" style="background: var(--pm-blue); padding: 12px;">
-    <div style="max-width: 1400px; margin: 0 auto; display: flex; justify-content: center; gap: 16px;">
+    <div style="max-width: 1400px; margin: 0 auto; display: flex; justify-content: center; align-items: center; gap: 16px;">
       <button id="btnEditar" class="btn btn-active">🖊️ Edição</button>
       <button id="btnVisualizar" class="btn btn-secondary">👁️ Visualizar</button>
+      <button onclick="salvarAgora()" class="btn btn-primary">💾 Salvar</button>
       <button onclick="window.print()" class="btn btn-success">🖨️ Imprimir/PDF</button>
+      <span id="statusSalvo" class="status-salvo salvo">✓ Salvo</span>
     </div>
   </div>
 
@@ -167,9 +138,6 @@
         </div>
       </div>
 
-      <div class="mt-4">
-        <button onclick="salvarTudo()" class="btn btn-primary">💾 Salvar Tudo</button>
-      </div>
       <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
     </div>
 
@@ -224,10 +192,7 @@
         </table>
       </div>
       <p style="font-size: 12px; color: #666; margin-top: 8px;">💡 Os militares cadastrados ficam disponíveis para seleção nas equipes.</p>
-      
-      <div class="mt-4">
-        <button onclick="salvarTudo()" class="btn btn-primary">💾 Salvar Tudo</button>
-      </div>
+
       <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
     </div>
 
@@ -248,9 +213,6 @@
 
       <div id="equipesContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
 
-      <div class="mt-4">
-        <button onclick="salvarTudo()" class="btn btn-primary">💾 Salvar Tudo</button>
-      </div>
       <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
     </div>
 
@@ -259,9 +221,7 @@
       <h2 style="font-size: 18px; margin-bottom: 16px;">📝 Observações</h2>
       <div id="observacoesContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
       <button onclick="adicionarObservacao()" class="btn btn-secondary mt-4">➕ Adicionar Observação</button>
-      <div class="mt-4">
-        <button onclick="salvarTudo()" class="btn btn-primary">💾 Salvar Tudo</button>
-      </div>
+
       <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
     </div>
 
@@ -307,6 +267,54 @@
   <script>
     // Verifica autenticação
     if (!initProtectedPage()) throw new Error('Não autenticado');
+
+    // === Auto-save ===
+    let autoSaveTimer = null;
+    let dadosAlterados = false;
+
+    function marcarAlterado() {
+      dadosAlterados = true;
+      atualizarStatus('pendente');
+
+      if (autoSaveTimer) clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(() => {
+        salvarAgora();
+      }, 3000);
+    }
+
+    function atualizarStatus(status) {
+      const el = document.getElementById('statusSalvo');
+      el.className = 'status-salvo ' + status;
+
+      switch(status) {
+        case 'salvando': el.innerHTML = '⏳ Salvando...'; break;
+        case 'salvo': el.innerHTML = '✓ Salvo'; break;
+        case 'erro': el.innerHTML = '❌ Erro'; break;
+        case 'pendente': el.innerHTML = '● Alterado'; break;
+      }
+    }
+
+    async function salvarAgora() {
+      if (autoSaveTimer) clearTimeout(autoSaveTimer);
+
+      atualizarStatus('salvando');
+
+      try {
+        coletarConfig();
+        await salvarEscalaMensal({
+          config: DB.config,
+          militares: DB.militares,
+          colunas: DB.colunas,
+          equipes: DB.equipes,
+          observacoes: DB.observacoes
+        });
+        dadosAlterados = false;
+        atualizarStatus('salvo');
+      } catch (err) {
+        atualizarStatus('erro');
+        console.error('Erro ao salvar:', err);
+      }
+    }
 
     // === Estado Global ===
     const DB = {
@@ -377,6 +385,7 @@
       reader.onload = e => {
         if (lado === 'esq') DB.config.brasaoEsq = e.target.result;
         else DB.config.brasaoDir = e.target.result;
+        marcarAlterado();
       };
       reader.readAsDataURL(file);
     }
@@ -403,6 +412,7 @@
       DB.militares.push({ id: Date.now(), posto, nome, rg });
       renderMilitares();
       renderEquipes();
+      marcarAlterado();
       document.getElementById('novoPosto').value = '';
       document.getElementById('novoPostoManual').value = '';
       document.getElementById('novoPostoManual').classList.add('hidden');
@@ -414,6 +424,7 @@
       DB.militares = DB.militares.filter(m => m.id !== id);
       renderMilitares();
       renderEquipes();
+      marcarAlterado();
     }
 
     function renderMilitares() {
@@ -454,6 +465,7 @@
       ['A','B','C','D','E'].forEach(eq => DB.equipes[eq].push(null));
       renderColunas();
       renderEquipes();
+      marcarAlterado();
     }
 
     function removerColuna() {
@@ -463,6 +475,7 @@
       ['A','B','C','D','E'].forEach(eq => DB.equipes[eq].pop());
       renderColunas();
       renderEquipes();
+      marcarAlterado();
     }
 
     function coletarColunas() {
@@ -526,12 +539,14 @@
       coletarObservacoes();
       DB.observacoes.push('');
       renderObservacoes();
+      marcarAlterado();
     }
 
     function removerObservacao(index) {
       coletarObservacoes();
       DB.observacoes.splice(index, 1);
       renderObservacoes();
+      marcarAlterado();
     }
 
     function coletarObservacoes() {
@@ -602,23 +617,6 @@
         const input = document.getElementById('offset' + eq);
         if(input) atualizarLegenda(input, 'leg' + eq);
       });
-    }
-
-    // === Salvar Tudo ===
-    async function salvarTudo() {
-      try {
-        coletarConfig();
-        await salvarEscalaMensal({
-          config: DB.config,
-          militares: DB.militares,
-          colunas: DB.colunas,
-          equipes: DB.equipes,
-          observacoes: DB.observacoes
-        });
-        alert('✅ Escala salva com sucesso!');
-      } catch (err) {
-        alert('❌ Erro ao salvar: ' + err.message);
-      }
     }
 
     // === Carregar Dados do Servidor ===
@@ -774,9 +772,23 @@
       calDiv.innerHTML = html;
     }
 
+    // === Listeners para auto-save ===
+    document.querySelectorAll('#tab-config input, #tab-config select, #tab-config textarea').forEach(el => {
+      el.addEventListener('input', marcarAlterado);
+      el.addEventListener('change', marcarAlterado);
+    });
+
+    // Observer para mudanças dinâmicas (colunas, equipes, observações)
+    const observerCallback = () => marcarAlterado();
+    
+    const observer = new MutationObserver(observerCallback);
+    observer.observe(document.getElementById('colunasContainer'), { childList: true, subtree: true });
+    observer.observe(document.getElementById('equipesContainer'), { childList: true, subtree: true });
+    observer.observe(document.getElementById('observacoesContainer'), { childList: true, subtree: true });
+
     // === Init ===
     carregarDados();
-    console.log('🚀 Escala Mensal v1.0.0');
+    console.log('🚀 Escala Mensal v1.0.3');
   </script>
 
 </body>

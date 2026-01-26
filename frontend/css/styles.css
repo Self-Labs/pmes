@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Estilos
-  Versão: 1.0.0
+  Versão: 1.0.2
 */
 
 /* Variáveis de Cores */
@@ -243,4 +243,70 @@ a.btn {
   padding: 16px;
   color: #9ca3af;
   font-size: 12px;
+}
+
+/* Status Auto-save */
+.status-salvo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.status-salvo.salvando { background: #fef3c7; color: #92400e; }
+.status-salvo.salvo { background: #d1fae5; color: #065f46; }
+.status-salvo.erro { background: #fee2e2; color: #991b1b; }
+.status-salvo.pendente { background: #e5e7eb; color: #6b7280; }
+
+/* Estilos Específicos Escala Mensal */
+.print-table { 
+  width: 100% !important; 
+  border-collapse: collapse !important; 
+  table-layout: fixed !important; 
+  font-size: 11px !important;
+}
+
+.print-table td, .print-table th { 
+  border: 1px solid #000 !important;
+  padding: 0 2px !important; 
+  vertical-align: middle !important;
+  line-height: 1.1 !important; 
+}
+
+.print-table tr { height: 20px !important; }
+.overlap-top { margin-top: -1px !important; }
+.bg-pm-gold { background-color: #FFD966 !important; }
+.bg-pm-red { background-color: #f8d7da !important; }
+.bg-pm-green { background-color: #d4edda !important; }
+
+@media print {
+  @page { size: A4 landscape; margin: 5mm; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .no-print { display: none !important; }
+  #documento { box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
+  .print-header-text p { margin: 2px 0; }
+}
+
+/* Estilos Específicos Escala ISEO */
+.print-table { 
+  width: 100% !important; 
+  border-collapse: collapse !important; 
+  font-size: 12px !important;
+}
+
+.print-table td, .print-table th { 
+  border: 1px solid #000 !important;
+  padding: 4px 8px !important; 
+  vertical-align: middle !important;
+}
+
+@media print {
+  @page { size: A4 portrait; margin: 10mm; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .no-print { display: none !important; }
+  #documento { box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
 }

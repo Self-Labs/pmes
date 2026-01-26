@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Admin
-  Versão: 1.0.2
+  Versão: 1.0.3
 -->
 <html lang="pt-BR">
 <head>
@@ -171,6 +171,54 @@
     </div>
   </div>
 
+  <!-- Modal Editar Unidade -->
+  <div id="modalEditarUnidade" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100;">
+    <div class="card" style="width: 100%; max-width: 400px; margin: 20px;">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">✏️ Editar Unidade</h2>
+      
+      <input type="hidden" id="editUnidadeId">
+      
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Sigla</label>
+        <input type="text" id="editUnidadeSigla" class="form-input">
+      </div>
+
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Tipo</label>
+        <select id="editUnidadeTipo" class="form-select">
+          <option value="CPOR">CPOR</option>
+          <option value="CPOE">CPOE</option>
+          <option value="BPM">BPM</option>
+          <option value="CIA_IND">CIA IND</option>
+          <option value="CIA">CIA</option>
+          <option value="COPOM">COPOM</option>
+          <option value="PELOTAO">PELOTÃO</option>
+          <option value="OUTRO">OUTRO</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Unidade Pai</label>
+        <select id="editUnidadeParent" class="form-select">
+          <option value="">Nenhuma (raiz)</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Status</label>
+        <select id="editUnidadeAtivo" class="form-select">
+          <option value="true">Ativo</option>
+          <option value="false">Inativo</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 12px;">
+        <button onclick="fecharModalUnidade()" class="btn btn-secondary" style="flex: 1;">Cancelar</button>
+        <button onclick="salvarUnidade()" class="btn btn-primary" style="flex: 1;">💾 Salvar</button>
+      </div>
+    </div>
+  </div>
+
   <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
 
   <script src="/js/api.js"></script>
@@ -318,6 +366,7 @@
           <td><span style="padding: 2px 8px; background: #e5e7eb; border-radius: 4px; font-size: 11px;">${u.tipo}</span></td>
           <td>${getParentSigla(u.parent_id)}</td>
           <td>
+            <button onclick="abrirEditarUnidade('${u.id}')" class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">✏️</button>
             <button onclick="excluirUnidade('${u.id}', '${u.sigla}')" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;">🗑️</button>
           </td>
         </tr>
@@ -436,6 +485,53 @@
         fecharModalUsuario();
         carregarUsuarios();
         alert('✅ Usuário atualizado!');
+      } catch (err) {
+        alert('❌ Erro: ' + err.message);
+      }
+    }
+
+    // === Modal Editar Unidade ===
+    function abrirEditarUnidade(id) {
+      const unidade = unidadesCache.find(u => u.id === id);
+      if (!unidade) return;
+
+      document.getElementById('editUnidadeId').value = unidade.id;
+      document.getElementById('editUnidadeSigla').value = unidade.sigla;
+      document.getElementById('editUnidadeTipo').value = unidade.tipo;
+      document.getElementById('editUnidadeAtivo').value = unidade.ativo.toString();
+
+      // Popula select de parent (excluindo a própria unidade)
+      const selectParent = document.getElementById('editUnidadeParent');
+      selectParent.innerHTML = '<option value="">Nenhuma (raiz)</option>';
+      unidadesCache.filter(u => u.id !== id).forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = u.sigla;
+        if (u.id === unidade.parent_id) opt.selected = true;
+        selectParent.appendChild(opt);
+      });
+
+      document.getElementById('modalEditarUnidade').classList.remove('hidden');
+    }
+
+    function fecharModalUnidade() {
+      document.getElementById('modalEditarUnidade').classList.add('hidden');
+    }
+
+    async function salvarUnidade() {
+      const id = document.getElementById('editUnidadeId').value;
+      const dados = {
+        sigla: document.getElementById('editUnidadeSigla').value,
+        tipo: document.getElementById('editUnidadeTipo').value,
+        parent_id: document.getElementById('editUnidadeParent').value || null,
+        ativo: document.getElementById('editUnidadeAtivo').value === 'true'
+      };
+
+      try {
+        await atualizarUnidade(id, dados);
+        fecharModalUnidade();
+        carregarUnidades();
+        alert('✅ Unidade atualizada!');
       } catch (err) {
         alert('❌ Erro: ' + err.message);
       }
