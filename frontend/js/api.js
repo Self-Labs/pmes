@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - API Client
-  Versão: 1.0.2
+  Versão: 1.0.3
 */
 
 const API_URL = '/api';
@@ -34,7 +34,8 @@ async function api(endpoint, options = {}) {
 
   const response = await fetch(`${API_URL}${endpoint}`, config);
 
-  if (response.status === 401) {
+  // Ignora redirect se for login (deixa o try/catch do login lidar com erro de senha)
+  if (response.status === 401 && !endpoint.includes('/auth/login')) {
     removeToken();
     removeUsuario();
     window.location.href = '/';
