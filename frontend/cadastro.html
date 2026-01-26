@@ -98,13 +98,22 @@
 
       try {
         await cadastro(nome, email, senha, unidade_id);
+        document.getElementById('cadastroForm').classList.add('hidden');
         alertBox.className = 'alert alert-success';
-        alertBox.textContent = 'Cadastro realizado! Aguarde aprovação do administrador.';
-        document.getElementById('cadastroForm').reset();
+        alertBox.innerHTML = '✅ Cadastro realizado!<br>Aguarde aprovação do administrador.<br><br>Redirecionando para login em <strong id="contador">5</strong>s...';
+        
+        let seg = 5;
+        const interval = setInterval(() => {
+          seg--;
+          document.getElementById('contador').textContent = seg;
+          if (seg <= 0) {
+            clearInterval(interval);
+            window.location.href = '/index.html';
+          }
+        }, 1000);
       } catch (err) {
         alertBox.className = 'alert alert-error';
         alertBox.textContent = err.message;
-      } finally {
         btn.disabled = false;
         btn.textContent = 'Cadastrar';
       }
