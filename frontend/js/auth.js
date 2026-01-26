@@ -1,12 +1,12 @@
 /*
   Sistema de Escalas - Auth Helper
-  Versão: 1.0.0
+  Versão: 1.0.1
 */
 
 // Verifica se usuário está logado, senão redireciona
 function requireAuth() {
   if (!isLoggedIn()) {
-    window.location.href = '/index.html';
+    window.location.href = '/';
     return false;
   }
   return true;
@@ -16,7 +16,7 @@ function requireAuth() {
 function requireAdmin() {
   const usuario = getUsuario();
   if (!usuario || usuario.role !== 'admin') {
-    window.location.href = '/mensal.html';
+    window.location.href = '/mensal';
     return false;
   }
   return true;
@@ -25,7 +25,7 @@ function requireAdmin() {
 // Redireciona se já logado (para página de login)
 function redirectIfLogged() {
   if (isLoggedIn()) {
-    window.location.href = '/mensal.html';
+    window.location.href = '/home';
     return true;
   }
   return false;

@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - API Client
-  Versão: 1.0.0
+  Versão: 1.0.1
 */
 
 const API_URL = '/api';
@@ -37,7 +37,7 @@ async function api(endpoint, options = {}) {
   if (response.status === 401) {
     removeToken();
     removeUsuario();
-    window.location.href = '/index.html';
+    window.location.href = '/';
     return;
   }
 
@@ -74,7 +74,7 @@ async function cadastro(nome, email, senha, unidade_id) {
 function logout() {
   removeToken();
   removeUsuario();
-  window.location.href = '/index.html';
+  window.location.href = '/';
 }
 
 function isLoggedIn() {

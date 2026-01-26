@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<!--
+  Sistema de Escalas - Home
+  Versão: 1.0.0
+-->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home - Sistema de Escalas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="auth-loading" style="display: flex; align-items: center; justify-content: center;">
+
+  <div class="card text-center" style="max-width: 500px; margin: 20px; padding: 40px;">
+    <div style="font-size: 64px; margin-bottom: 16px;">📋</div>
+    <h1 style="color: var(--pm-blue); font-size: 24px; margin-bottom: 8px;">Sistema de Escalas</h1>
+    <p style="color: #666; margin-bottom: 8px;">Bem-vindo(a), <strong id="nomeUsuario"></strong>!</p>
+    <p style="color: #999; font-size: 13px; margin-bottom: 32px;">Selecione uma opção abaixo:</p>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <a href="/mensal" class="btn btn-primary" style="padding: 16px; font-size: 16px;">📅 Escala Mensal</a>
+      <a href="/iseo" class="btn btn-primary" style="padding: 16px; font-size: 16px;">📋 Escala ISEO</a>
+      <a href="/admin" id="btnAdmin" class="btn btn-secondary hidden" style="padding: 16px; font-size: 16px;">⚙️ Administração</a>
+    </div>
+
+    <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+      <button onclick="logout()" class="btn btn-secondary" style="padding: 8px 24px;">🚪 Sair</button>
+    </div>
+
+    <p class="footer mt-6">© 2026 Self-Labs. Todos os direitos reservados.</p>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    if (!initProtectedPage()) throw new Error('Não autenticado');
+
+    const usuario = getUsuario();
+    document.getElementById('nomeUsuario').textContent = usuario.nome;
+
+    if (usuario.role === 'admin') {
+      document.getElementById('btnAdmin').classList.remove('hidden');
+    }
+  </script>
+
+</body>
+</html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Cadastro
-  Versão: 1.0.0
+  Versão: 1.0.1
 -->
 <html lang="pt-BR">
 <head>
@@ -51,7 +51,7 @@
 
     <div class="text-center mt-4">
       <p style="font-size: 14px; color: #666;">
-        Já tem conta? <a href="/index.html" style="color: var(--pm-gold-dark); font-weight: bold;">Entrar</a>
+        Já tem conta? <a href="/" style="color: var(--pm-gold-dark); font-weight: bold;">Entrar</a>
       </p>
     </div>
 
@@ -112,7 +112,7 @@
           document.getElementById('contador').textContent = seg;
           if (seg <= 0) {
             clearInterval(interval);
-            window.location.href = '/index.html';
+            window.location.href = '/';
           }
         }, 1000);
       } catch (err) {
