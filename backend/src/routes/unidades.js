@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Unidades Routes
-  Versão: 1.0.2
+  Versão: 1.0.3
 */
 
 const express = require('express');
@@ -55,6 +55,21 @@ router.get('/arvore', async (req, res) => {
     res.json(raiz);
   } catch (err) {
     console.error('Erro ao listar árvore:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// GET /unidades/todas - Lista todas inclusive inativas (admin)
+router.get('/todas', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const result = await db.query(`
+      SELECT id, parent_id, sigla, tipo, ativo
+      FROM unidades
+      ORDER BY sigla
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Erro ao listar todas unidades:', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });

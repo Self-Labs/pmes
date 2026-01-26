@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - API Client
-  Versão: 1.0.3
+  Versão: 1.0.5
 */
 
 const API_URL = '/api';
@@ -90,6 +90,11 @@ async function listarUnidades() {
   return api('/unidades');
 }
 
+// Busca todas (ativas e inativas) para o Admin
+async function listarTodasUnidades() {
+  return api('/unidades/todas');
+}
+
 async function listarUnidadesArvore() {
   return api('/unidades/arvore');
 }
@@ -124,6 +129,14 @@ async function listarUsuarios() {
 
 async function listarUsuariosPendentes() {
   return api('/usuarios/pendentes');
+}
+
+// Cria usuário manualmente (Admin)
+async function criarUsuarioManual(dados) {
+  return api('/usuarios', {
+    method: 'POST',
+    body: dados,
+  });
 }
 
 async function aprovarUsuario(id) {

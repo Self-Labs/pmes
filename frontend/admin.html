@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Admin
-  Versão: 1.0.4
+  Versão: 1.0.6
 -->
 <html lang="pt-BR">
 <head>
@@ -48,7 +48,10 @@
 
     <!-- Tab: Usuários -->
     <div id="tab-usuarios" class="tab-content card">
-      <h2 style="font-size: 18px; margin-bottom: 16px;">👥 Todos os Usuários</h2>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2 style="font-size: 18px;">👥 Todos os Usuários</h2>
+        <button onclick="abrirCriarUsuario()" class="btn btn-primary">➕ Novo Usuário</button>
+      </div>
       <div style="border: 1px solid #ddd; border-radius: 8px; overflow-x: auto;">
         <table class="table">
           <thead>
@@ -219,6 +222,62 @@
     </div>
   </div>
 
+  <div id="modalCriarUsuario" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100;">
+    <div class="card" style="width: 100%; max-width: 500px; margin: 20px;">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">➕ Novo Usuário</h2>
+      
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Nome</label>
+        <input type="text" id="newUserNome" class="form-input" placeholder="Nome completo">
+      </div>
+
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Email</label>
+        <input type="email" id="newUserEmail" class="form-input" placeholder="email@exemplo.com">
+      </div>
+
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Senha</label>
+        <input type="password" id="newUserSenha" class="form-input" placeholder="Mínimo 6 caracteres">
+      </div>
+
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Role</label>
+        <select id="newUserRole" class="form-select">
+          <option value="editor">Editor</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Comando</label>
+        <select id="newUserComando" class="form-select" onchange="carregarSubunidadesNew()">
+          <option value="">Selecione o comando</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Unidade</label>
+        <select id="newUserUnidade" class="form-select">
+          <option value="">Selecione a unidade</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Status Inicial</label>
+        <select id="newUserAtivo" class="form-select">
+          <option value="true">Ativo (Aprovado)</option>
+          <option value="false">Pendente</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 12px;">
+        <button onclick="fecharModalCriarUsuario()" class="btn btn-secondary" style="flex: 1;">Cancelar</button>
+        <button onclick="salvarNovoUsuario()" class="btn btn-primary" style="flex: 1;">💾 Criar</button>
+      </div>
+    </div>
+  </div>
+
   <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
 
   <script src="/js/api.js"></script>
@@ -346,7 +405,8 @@
     // === Unidades ===
     async function carregarUnidades() {
       try {
-        unidadesCache = await listarUnidades();
+        // Correção Item 2: Busca TODAS (incluindo inativas)
+        unidadesCache = await listarTodasUnidades();
         renderUnidades();
         renderSelectParent();
       } catch (err) {
@@ -354,29 +414,100 @@
       }
     }
 
-    function renderUnidades() {
-      const getParentSigla = id => {
-        const parent = unidadesCache.find(u => u.id === id);
-        return parent ? parent.sigla : '-';
-      };
+    // Helper para agrupar unidades (Pais e Filhos)
+    function agruparUnidades() {
+      const pais = unidadesCache.filter(u => !u.parent_id);
+      const grupos = [];
 
-      document.getElementById('listaUnidades').innerHTML = unidadesCache.map(u => `
-        <tr>
-          <td style="font-weight: 600;">${u.sigla}</td>
-          <td><span style="padding: 2px 8px; background: #e5e7eb; border-radius: 4px; font-size: 11px;">${u.tipo}</span></td>
-          <td>${getParentSigla(u.parent_id)}</td>
+      pais.forEach(pai => {
+        const filhas = unidadesCache.filter(u => u.parent_id === pai.id);
+        grupos.push({ pai, filhas });
+      });
+
+      // Adiciona orfãs (caso existam unidades filhas sem pai carregado) ou raízes soltas
+      const processados = new Set(pais.map(p => p.id).concat(pais.flatMap(p => unidadesCache.filter(u => u.parent_id === p.id).map(u => u.id))));
+      const sobras = unidadesCache.filter(u => !processados.has(u.id));
+      if (sobras.length > 0) {
+        grupos.push({ pai: { id: 'outros', sigla: 'OUTROS / SEM PAI', tipo: 'OUTRO' }, filhas: sobras });
+      }
+
+      return grupos;
+    }
+
+    function renderUnidades() {
+      const grupos = agruparUnidades();
+      let html = '';
+
+      grupos.forEach(grupo => {
+        // Renderiza o Pai (Cabeçalho de Seção)
+        if (grupo.pai.id !== 'outros') {
+          html += criarLinhaUnidade(grupo.pai, true);
+        } else if (grupo.filhas.length > 0) {
+           html += `<tr style="background: #f3f4f6;"><td colspan="4" style="font-weight:bold; color:#666; text-align:center;">OUTROS</td></tr>`;
+        }
+
+        // Renderiza as Filhas
+        grupo.filhas.forEach(filha => {
+          html += criarLinhaUnidade(filha, false);
+        });
+      });
+
+      document.getElementById('listaUnidades').innerHTML = html;
+    }
+
+    function criarLinhaUnidade(u, isPai) {
+      const styleRow = isPai ? 'background: #e5e7eb;' : '';
+      const styleSigla = isPai ? 'font-weight: 800; font-size: 14px;' : 'padding-left: 32px; font-weight: 500;';
+      
+      const statusBadge = u.ativo 
+        ? '<span style="color:green; font-size:10px;">●</span>' 
+        : '<span style="color:red; font-size:10px;">● Inativa</span>';
+
+      return `
+        <tr style="${styleRow}">
+          <td style="${styleSigla}">${u.sigla} ${statusBadge}</td>
+          <td><span style="padding: 2px 6px; background: #fff; border: 1px solid #ccc; border-radius: 4px; font-size: 10px;">${u.tipo}</span></td>
+          <td style="font-size: 11px; color: #666;">${isPai ? '-' : 'Subordinada'}</td>
           <td>
-            <button onclick="abrirEditarUnidade('${u.id}')" class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">✏️</button>
-            <button onclick="excluirUnidade('${u.id}', '${u.sigla}')" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;">🗑️</button>
+            <button onclick="abrirEditarUnidade('${u.id}')" class="btn btn-secondary" style="padding: 2px 6px; font-size: 11px;">✏️</button>
+            <button onclick="excluirUnidade('${u.id}', '${u.sigla}')" class="btn btn-danger" style="padding: 2px 6px; font-size: 11px;">🗑️</button>
           </td>
         </tr>
-      `).join('');
+      `;
     }
 
     function renderSelectParent() {
       const select = document.getElementById('novoParent');
-      select.innerHTML = '<option value="">Nenhuma (raiz)</option>' + 
-        unidadesCache.map(u => `<option value="${u.id}">${u.sigla}</option>`).join('');
+      select.innerHTML = '<option value="">Nenhuma (raiz)</option>' + gerarOpcoesAgrupadas();
+    }
+    
+    function gerarOpcoesAgrupadas(ignorarId = null) {
+      const grupos = agruparUnidades();
+      let html = '';
+
+      grupos.forEach(grupo => {
+        if (grupo.pai.id === 'outros') return; // Pula virtuais
+        if (grupo.pai.id === ignorarId) return; // Não lista a si mesmo
+
+        // Adiciona o Pai como opção (se for raiz real)
+        html += `<option value="${grupo.pai.id}" style="font-weight: bold;">${grupo.pai.sigla}</option>`;
+
+        // Cria grupo para as filhas (opcional, ou apenas lista abaixo)
+        // Aqui vou usar optgroup para ficar visualmente separado como pediu
+        if (grupo.filhas.length > 0) {
+           // html += `<optgroup label="↳ Subunidades de ${grupo.pai.sigla}">`;
+           // Na verdade, CPOR é pai, BPM é filho. BPM pode ser pai? No seu modelo atual, só 1 nível.
+           // Vamos listar as filhas com identação visual
+           grupo.filhas.forEach(f => {
+             if (f.id !== ignorarId) {
+               html += `<option value="${f.id}">&nbsp;&nbsp;&nbsp;↳ ${f.sigla}</option>`;
+             }
+           });
+           // html += `</optgroup>`;
+        }
+      });
+      
+      return html;
     }
 
     async function criarNovaUnidade() {
@@ -502,14 +633,11 @@
 
       // Popula select de parent (excluindo a própria unidade)
       const selectParent = document.getElementById('editUnidadeParent');
-      selectParent.innerHTML = '<option value="">Nenhuma (raiz)</option>';
-      unidadesCache.filter(u => u.id !== id).forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u.id;
-        opt.textContent = u.sigla;
-        if (u.id === unidade.parent_id) opt.selected = true;
-        selectParent.appendChild(opt);
-      });
+      selectParent.innerHTML = '<option value="">Nenhuma (raiz)</option>' + gerarOpcoesAgrupadas(id);
+      
+      if (unidade.parent_id) {
+        selectParent.value = unidade.parent_id;
+      }
 
       document.getElementById('modalEditarUnidade').classList.remove('hidden');
     }
@@ -537,11 +665,80 @@
       }
     }
 
+    // === Modal Criar Usuário ===
+    function abrirCriarUsuario() {
+      // Limpa campos
+      document.getElementById('newUserNome').value = '';
+      document.getElementById('newUserEmail').value = '';
+      document.getElementById('newUserSenha').value = '';
+      document.getElementById('newUserRole').value = 'editor';
+      document.getElementById('newUserAtivo').value = 'true';
+
+      // Popula comandos
+      const selectComando = document.getElementById('newUserComando');
+      selectComando.innerHTML = '<option value="">Selecione o comando</option>';
+      const comandos = unidadesCache.filter(u => u.tipo === 'CPOR' || u.tipo === 'CPOE');
+      comandos.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = u.sigla;
+        selectComando.appendChild(opt);
+      });
+
+      document.getElementById('newUserUnidade').innerHTML = '<option value="">Selecione a unidade</option>';
+      document.getElementById('modalCriarUsuario').classList.remove('hidden');
+    }
+
+    function fecharModalCriarUsuario() {
+      document.getElementById('modalCriarUsuario').classList.add('hidden');
+    }
+
+    function carregarSubunidadesNew() {
+      const comandoId = document.getElementById('newUserComando').value;
+      const select = document.getElementById('newUserUnidade');
+      select.innerHTML = '<option value="">Selecione a unidade</option>';
+      
+      if (!comandoId) return;
+
+      const subunidades = unidadesCache.filter(u => u.parent_id === comandoId);
+      subunidades.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = u.sigla;
+        select.appendChild(opt);
+      });
+    }
+
+    async function salvarNovoUsuario() {
+      const dados = {
+        nome: document.getElementById('newUserNome').value,
+        email: document.getElementById('newUserEmail').value,
+        senha: document.getElementById('newUserSenha').value,
+        role: document.getElementById('newUserRole').value,
+        unidade_id: document.getElementById('newUserUnidade').value || document.getElementById('newUserComando').value || null,
+        ativo: document.getElementById('newUserAtivo').value === 'true'
+      };
+
+      if (!dados.nome || !dados.email || !dados.senha) {
+        alert('Preencha nome, email e senha!');
+        return;
+      }
+
+      try {
+        await criarUsuarioManual(dados);
+        fecharModalCriarUsuario();
+        carregarUsuarios();
+        alert('✅ Usuário criado com sucesso!');
+      } catch (err) {
+        alert('❌ Erro: ' + err.message);
+      }
+    }
+
     // === Init ===
     carregarPendentes();
     carregarUsuarios();
     carregarUnidades();
-    console.log('🚀 Admin v1.0.4');
+    console.log('🚀 Admin v1.0.6');
   </script>
 
 </body>

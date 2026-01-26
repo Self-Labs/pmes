@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Usuarios Routes
-  Versão: 1.0.3
+  Versão: 1.0.4
 */
 
 const express = require('express');
@@ -41,6 +41,37 @@ router.get('/pendentes', authMiddleware, adminMiddleware, async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error('Erro ao listar pendentes:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// POST /usuarios - Cria usuário manualmente (admin)
+router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { nome, email, senha, unidade_id, role, ativo } = req.body;
+
+    if (!nome || !email || !senha) {
+      return res.status(400).json({ error: 'Nome, email e senha são obrigatórios' });
+    }
+
+    const emailLower = email.toLowerCase();
+    const existe = await db.query('SELECT id FROM usuarios WHERE email = $1', [emailLower]);
+    if (existe.rows.length > 0) {
+      return res.status(400).json({ error: 'Email já cadastrado' });
+    }
+
+    const senhaHash = await bcrypt.hash(senha, 10);
+
+    const result = await db.query(
+      `INSERT INTO usuarios (nome, email, senha, unidade_id, role, ativo)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id, nome, email, role, ativo`,
+      [nome, emailLower, senhaHash, unidade_id || null, role || 'editor', ativo !== undefined ? ativo : true]
+    );
+
+    res.status(201).json({ message: 'Usuário criado', usuario: result.rows[0] });
+  } catch (err) {
+    console.error('Erro ao criar usuário:', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
