@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Auth Routes
-  Versão: 1.0.0
+  Versão: 1.0
 */
 
 const express = require('express');

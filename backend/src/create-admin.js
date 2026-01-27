@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Create Admin Script
-  Versão: 1.0.0
+  Versão: 1.0
 */
 
 const bcrypt = require('bcryptjs');

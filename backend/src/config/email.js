@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Email Config
-  Versão: 1.0.1
+  Versão: 1.1
 */
 
 const nodemailer = require('nodemailer');

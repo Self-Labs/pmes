@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala ISEO
-  Versão: 1.0.5
+  Versão: 1.6
 -->
 <html lang="pt-BR">
 <head>
@@ -24,14 +24,14 @@
     <div class="navbar-content" style="max-width: 1000px;">
       <div class="navbar-brand">
         📋 Escala ISEO
-        <span class="navbar-version">v3.5</span>
+        <span class="navbar-version">v3.6</span>
       </div>
       <div class="navbar-menu">
         <select id="adminUnitSelect" class="form-select hidden" style="width: 150px; padding: 4px; font-size: 12px; margin-right: 10px;">
           <option value="">Carregando...</option>
         </select>
         
-        <span id="navbarUser" class="navbar-user"></span>
+        <a href="/perfil" id="navbarUser" class="navbar-user" style="text-decoration: none; color: inherit; margin-right: 8px;" title="Ir para Perfil"></a>
         <a href="/mensal" class="btn btn-secondary">📅 Mensal</a>
         <a href="/iseo" class="btn btn-active">📋 ISEO</a>
         <a href="/admin" id="adminMenu" class="btn btn-secondary hidden">⚙️ Admin</a>
@@ -749,7 +749,7 @@
 
     // === Init ===
     // Removido o carregarDados() daqui pois é chamado no bloco async
-    console.log('🚀 Escala ISEO v1.0.8');
+    console.log('🚀 Escala ISEO v1.6');
   </script>
 
 </body>

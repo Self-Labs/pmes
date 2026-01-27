@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Usuarios Routes
-  Versão: 1.0.4
+  Versão: 1.4
 */
 
 const express = require('express');

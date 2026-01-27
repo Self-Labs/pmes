@@ -1,6 +1,6 @@
 {
   "name": "pmes-api",
-  "version": "1.0.0",
+  "version": "1.0",
   "description": "API do Sistema de Escalas PMES",
   "main": "src/index.js",
   "scripts": {

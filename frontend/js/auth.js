@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Auth Helper
-  Versão: 1.0.1
+  Versão: 1.1
 */
 
 // Verifica se usuário está logado, senão redireciona

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Admin
-  Versão: 1.0.7
+  Versão: 1.8
 -->
 <html lang="pt-BR">
 <head>
@@ -18,10 +18,10 @@
     <div class="navbar-content" style="max-width: 1200px;">
       <div class="navbar-brand">
         ⚙️ Administração
-        <span class="navbar-version">v3.5</span>
+        <span class="navbar-version">v3.6</span>
       </div>
       <div class="navbar-menu">
-        <span id="navbarUser" class="navbar-user"></span>
+        <a href="/perfil" id="navbarUser" class="navbar-user" style="text-decoration: none; color: inherit; margin-right: 8px;" title="Ir para Perfil"></a>
         <a href="/mensal" class="btn btn-secondary">📅 Mensal</a>
         <a href="/iseo" class="btn btn-secondary">📋 ISEO</a>
         <a href="/admin" class="btn btn-active">⚙️ Admin</a>
@@ -733,7 +733,7 @@
     carregarPendentes();
     carregarUsuarios();
     carregarUnidades();
-    console.log('🚀 Admin v1.0.7');
+    console.log('🚀 Admin v1.8');
   </script>
 
 </body>

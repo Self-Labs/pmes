@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Estilos
-  Versão: 1.0.4
+  Versão: 1.5
 */
 
 /* Variáveis de Cores */
@@ -47,7 +47,7 @@ body {
 
 /* Buttons */
 .btn {
-  padding: 10px 20px;
+  padding: 6px 12px;
   border-radius: 4px;
   font-weight: bold;
   cursor: pointer;

@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - API Client
-  Versão: 1.0.6
+  Versão: 1.6
 */
 
 const API_URL = '/api';
