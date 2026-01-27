@@ -804,10 +804,10 @@
       };
 
       let html = `
-        <colgroup><col style="width:4.5%;">${DB.colunas.map(() => '<col>').join('')}</colgroup>
+        <colgroup><col style="width:6%;">${DB.colunas.map(() => '<col>').join('')}</colgroup>
         <thead><tr class="bg-pm-gold">
           <th style="height: 32px;"></th>
-          ${DB.colunas.map(col => `<th style="height: 32px; font-weight: bold; text-align: center; vertical-align: middle; font-size: 10px; text-transform: uppercase;">${col}</th>`).join('')}
+          ${DB.colunas.map(col => `<th style="height: 32px; font-weight: bold; text-align: center; vertical-align: middle; text-transform: uppercase;">${col}</th>`).join('')}
         </tr></thead>
         <tbody style="text-align: center; vertical-align: middle;">
       `;
@@ -880,7 +880,7 @@
       const diasMes1 = dias.filter(d => d.mes === mesInicio).length;
       const diasMes2 = dias.filter(d => d.mes === mesFim).length;
 
-      let html = `<colgroup><col style="width:4.5%;">${dias.map(() => `<col style="width:${95.5/dias.length}%;">`).join('')}</colgroup>`;
+      let html = `<colgroup><col style="width:6%;">${dias.map(() => `<col style="width:${94/dias.length}%;">`).join('')}</colgroup>`;
 
       html += `<tr class="bg-pm-gold" style="font-weight: bold; text-align: center; height: 24px;">
         <td style="border: 1px solid black; padding: 4px;" colspan="${diasMes1+1}">${meses[mesInicio]}</td>
