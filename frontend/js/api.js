@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - API Client
-  Versão: 1.0.5
+  Versão: 1.0.6
 */
 
 const API_URL = '/api';
@@ -184,11 +184,15 @@ async function atualizarUsuario(id, dados) {
 // Escalas Mensal
 // =============================================
 
-async function buscarEscalaMensal() {
-  return api('/escalas/mensal');
+async function buscarEscalaMensal(unidadeId = null) {
+  let url = '/escalas/mensal';
+  if (unidadeId) url += `?unidade_id=${unidadeId}`;
+  return api(url);
 }
 
-async function salvarEscalaMensal(dados) {
+async function salvarEscalaMensal(dados, unidadeId = null) {
+  if (unidadeId) dados.unidade_id = unidadeId;
+  
   return api('/escalas/mensal', {
     method: 'POST',
     body: dados,
@@ -199,11 +203,15 @@ async function salvarEscalaMensal(dados) {
 // Escalas ISEO
 // =============================================
 
-async function buscarEscalaISEO() {
-  return api('/escalas/iseo');
+async function buscarEscalaISEO(unidadeId = null) {
+  let url = '/escalas/iseo';
+  if (unidadeId) url += `?unidade_id=${unidadeId}`;
+  return api(url);
 }
 
-async function salvarEscalaISEO(dados) {
+async function salvarEscalaISEO(dados, unidadeId = null) {
+  if (unidadeId) dados.unidade_id = unidadeId;
+
   return api('/escalas/iseo', {
     method: 'POST',
     body: dados,
