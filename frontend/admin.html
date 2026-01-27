@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Admin
-  Versão: 1.9
+  Versão: 2.0
 -->
 <html lang="pt-BR">
 <head>
@@ -18,7 +18,7 @@
     <div class="navbar-content" style="max-width: 1200px;">
       <div class="navbar-brand">
         ⚙️ Administração
-        <span class="navbar-version">v3.7</span>
+        <span class="navbar-version">v3.8</span>
       </div>
       <div class="navbar-menu">
         <a href="/perfil" id="navbarUser" class="navbar-user" style="text-decoration: none; color: inherit; margin-right: 8px;" title="Ir para Perfil"></a>
@@ -145,17 +145,18 @@
       </div>
 
       <div class="mb-4">
-        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Comando</label>
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Unidade Principal (BPM/Independente)</label>
         <select id="editUserComando" class="form-select" onchange="carregarSubunidadesEdit()">
-          <option value="">Selecione o comando</option>
+          <option value="">Selecione...</option>
         </select>
       </div>
 
       <div class="mb-4">
-        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Unidade</label>
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Subunidade (Cia/Pelotão)</label>
         <select id="editUserUnidade" class="form-select">
-          <option value="">Selecione a unidade</option>
+          <option value="">Selecione a unidade principal primeiro</option>
         </select>
+        <p style="font-size: 11px; color: #666; margin-top: 2px;">* Se vazio, o usuário pertencerá à Unidade Principal.</p>
       </div>
 
       <div class="mb-4">
@@ -559,11 +560,14 @@
       document.getElementById('editUserRole').value = usuario.role;
       document.getElementById('editUserAtivo').value = usuario.ativo.toString();
 
-      // Popula comandos
+      // Popula Unidades Principais (Raízes)
       const selectComando = document.getElementById('editUserComando');
-      selectComando.innerHTML = '<option value="">Selecione o comando</option>';
-      const comandos = unidadesCache.filter(u => u.tipo === 'CPOR' || u.tipo === 'CPOE');
-      comandos.forEach(u => {
+      selectComando.innerHTML = '<option value="">Selecione...</option>';
+
+      const principais = unidadesCache.filter(u => !u.parent_id);
+      principais.sort((a,b) => a.sigla.localeCompare(b.sigla));
+
+      principais.forEach(u => {
         const opt = document.createElement('option');
         opt.value = u.id;
         opt.textContent = u.sigla;
@@ -593,11 +597,13 @@
       const comandoId = document.getElementById('editUserComando').value;
       const select = document.getElementById('editUserUnidade');
 
-      select.innerHTML = '<option value="">Selecione a unidade</option>';
+      select.innerHTML = '<option value="">Selecione a subunidade (opcional)</option>';
 
       if (!comandoId) return;
 
-      const subunidades = unidadesCache.filter(u => u.parent_id === comandoId);
+      const subunidades = unidadesCache.filter(u => u.parent_id == comandoId);
+      subunidades.sort((a,b) => a.sigla.localeCompare(b.sigla));
+
       subunidades.forEach(u => {
         const opt = document.createElement('option');
         opt.value = u.id;
@@ -745,7 +751,7 @@
     carregarPendentes();
     carregarUsuarios();
     carregarUnidades();
-    console.log('🚀 Admin v1.9');
+    console.log('🚀 Admin v2.0');
   </script>
 
 </body>

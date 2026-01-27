@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Schema
-  Versão: 1.0.1
+  Versão: 1.2
 */
 
 -- Extensão para UUID
@@ -9,7 +9,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- =============================================
 -- TABELA: unidades (hierárquica)
 -- =============================================
-CREATE TABLE unidades (
+CREATE TABLE IF NOT EXISTS unidades (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     parent_id UUID REFERENCES unidades(id) ON DELETE CASCADE,
     sigla VARCHAR(30) NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE unidades (
 -- =============================================
 -- TABELA: usuarios
 -- =============================================
-CREATE TABLE usuarios (
+CREATE TABLE IF NOT EXISTS usuarios (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) UNIQUE NOT NULL,
     senha VARCHAR(255) NOT NULL,
@@ -35,9 +35,9 @@ CREATE TABLE usuarios (
 );
 
 -- =============================================
--- TABELA: escalas_mensal (1 por unidade - modelo)
+-- TABELA: escalas_mensal (1 por unidade)
 -- =============================================
-CREATE TABLE escalas_mensal (
+CREATE TABLE IF NOT EXISTS escalas_mensal (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     unidade_id UUID UNIQUE NOT NULL REFERENCES unidades(id),
     config JSONB DEFAULT '{}',
@@ -45,14 +45,17 @@ CREATE TABLE escalas_mensal (
     colunas JSONB DEFAULT '[]',
     equipes JSONB DEFAULT '{}',
     observacoes JSONB DEFAULT '[]',
+    -- Campos de Auditoria adicionados
+    ultima_alteracao TIMESTAMP,
+    alterado_por VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- =============================================
--- TABELA: escalas_iseo (1 por unidade - modelo)
+-- TABELA: escalas_iseo (1 por unidade)
 -- =============================================
-CREATE TABLE escalas_iseo (
+CREATE TABLE IF NOT EXISTS escalas_iseo (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     unidade_id UUID UNIQUE NOT NULL REFERENCES unidades(id),
     config JSONB DEFAULT '{}',
@@ -60,6 +63,9 @@ CREATE TABLE escalas_iseo (
     militares JSONB DEFAULT '[]',
     observacoes JSONB DEFAULT '[]',
     setor TEXT,
+    -- Campos de Auditoria adicionados
+    ultima_alteracao TIMESTAMP,
+    alterado_por VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -67,10 +73,10 @@ CREATE TABLE escalas_iseo (
 -- =============================================
 -- ÍNDICES
 -- =============================================
-CREATE INDEX idx_unidades_parent ON unidades(parent_id);
-CREATE INDEX idx_unidades_tipo ON unidades(tipo);
-CREATE INDEX idx_usuarios_unidade ON usuarios(unidade_id);
-CREATE INDEX idx_usuarios_email ON usuarios(email);
+CREATE INDEX IF NOT EXISTS idx_unidades_parent ON unidades(parent_id);
+CREATE INDEX IF NOT EXISTS idx_unidades_tipo ON unidades(tipo);
+CREATE INDEX IF NOT EXISTS idx_usuarios_unidade ON usuarios(unidade_id);
+CREATE INDEX IF NOT EXISTS idx_usuarios_email ON usuarios(email);
 
 -- =============================================
 -- DADOS INICIAIS: Comandos Regionais
@@ -82,7 +88,8 @@ INSERT INTO unidades (sigla, tipo) VALUES
 ('4º CPOR', 'CPOR'),
 ('5º CPOR', 'CPOR'),
 ('6º CPOR', 'CPOR'),
-('CPOE', 'CPOE');
+('CPOE', 'CPOE')
+ON CONFLICT DO NOTHING;
 
 -- =============================================
 -- 1º CPOR - Subunidades
@@ -96,7 +103,7 @@ SELECT id, '12ª Cia Ind', 'CIA_IND' FROM unidades WHERE sigla = '1º CPOR';
 INSERT INTO unidades (parent_id, sigla, tipo)
 SELECT id, '14ª Cia Ind', 'CIA_IND' FROM unidades WHERE sigla = '1º CPOR';
 INSERT INTO unidades (parent_id, sigla, tipo)
-SELECT id, 'COPOM/1º CPOR', 'COPOM' FROM unidades WHERE sigla = '1º CPOR';
+SELECT id, 'COPOM', 'COPOM' FROM unidades WHERE sigla = '1º CPOR';
 
 -- =============================================
 -- 2º CPOR - Subunidades
@@ -110,7 +117,7 @@ SELECT id, '13º BPM', 'BPM' FROM unidades WHERE sigla = '2º CPOR';
 INSERT INTO unidades (parent_id, sigla, tipo)
 SELECT id, '18ª Cia Ind', 'CIA_IND' FROM unidades WHERE sigla = '2º CPOR';
 INSERT INTO unidades (parent_id, sigla, tipo)
-SELECT id, 'COPOM/2º CPOR', 'COPOM' FROM unidades WHERE sigla = '2º CPOR';
+SELECT id, 'COPOM', 'COPOM' FROM unidades WHERE sigla = '2º CPOR';
 
 -- =============================================
 -- 3º CPOR - Subunidades
@@ -126,7 +133,7 @@ SELECT id, '10ª Cia Ind', 'CIA_IND' FROM unidades WHERE sigla = '3º CPOR';
 INSERT INTO unidades (parent_id, sigla, tipo)
 SELECT id, '15ª Cia Ind', 'CIA_IND' FROM unidades WHERE sigla = '3º CPOR';
 INSERT INTO unidades (parent_id, sigla, tipo)
-SELECT id, 'COPOM/3º CPOR', 'COPOM' FROM unidades WHERE sigla = '3º CPOR';
+SELECT id, 'COPOM', 'COPOM' FROM unidades WHERE sigla = '3º CPOR';
 
 -- =============================================
 -- 4º CPOR - Subunidades
@@ -140,7 +147,7 @@ SELECT id, '11º BPM', 'BPM' FROM unidades WHERE sigla = '4º CPOR';
 INSERT INTO unidades (parent_id, sigla, tipo)
 SELECT id, '19ª Cia Ind', 'CIA_IND' FROM unidades WHERE sigla = '4º CPOR';
 INSERT INTO unidades (parent_id, sigla, tipo)
-SELECT id, 'COPOM/4º CPOR', 'COPOM' FROM unidades WHERE sigla = '4º CPOR';
+SELECT id, 'COPOM', 'COPOM' FROM unidades WHERE sigla = '4º CPOR';
 
 -- =============================================
 -- 5º CPOR - Subunidades
@@ -154,7 +161,7 @@ SELECT id, '6ª Cia Ind', 'CIA_IND' FROM unidades WHERE sigla = '5º CPOR';
 INSERT INTO unidades (parent_id, sigla, tipo)
 SELECT id, '8ª Cia Ind', 'CIA_IND' FROM unidades WHERE sigla = '5º CPOR';
 INSERT INTO unidades (parent_id, sigla, tipo)
-SELECT id, 'COPOM/5º CPOR', 'COPOM' FROM unidades WHERE sigla = '5º CPOR';
+SELECT id, 'COPOM', 'COPOM' FROM unidades WHERE sigla = '5º CPOR';
 
 -- =============================================
 -- 6º CPOR - Subunidades
@@ -174,7 +181,7 @@ SELECT id, '16ª Cia Ind', 'CIA_IND' FROM unidades WHERE sigla = '6º CPOR';
 INSERT INTO unidades (parent_id, sigla, tipo)
 SELECT id, '17ª Cia Ind', 'CIA_IND' FROM unidades WHERE sigla = '6º CPOR';
 INSERT INTO unidades (parent_id, sigla, tipo)
-SELECT id, 'COPOM/6º CPOR', 'COPOM' FROM unidades WHERE sigla = '6º CPOR';
+SELECT id, 'COPOM', 'COPOM' FROM unidades WHERE sigla = '6º CPOR';
 
 -- =============================================
 -- CPOE - Subunidades
@@ -194,4 +201,4 @@ SELECT id, 'CEPE', 'CIA_IND' FROM unidades WHERE sigla = 'CPOE';
 INSERT INTO unidades (parent_id, sigla, tipo)
 SELECT id, 'CEPG', 'CIA_IND' FROM unidades WHERE sigla = 'CPOE';
 INSERT INTO unidades (parent_id, sigla, tipo)
-SELECT id, 'COPOM/CPOE', 'COPOM' FROM unidades WHERE sigla = 'CPOE';
+SELECT id, 'COPOM', 'COPOM' FROM unidades WHERE sigla = 'CPOE';
