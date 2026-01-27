@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Admin
-  Versão: 2.0
+  Versão: 2.1
 -->
 <html lang="pt-BR">
 <head>
@@ -145,18 +145,26 @@
       </div>
 
       <div class="mb-4">
-        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Unidade Principal (BPM/Independente)</label>
-        <select id="editUserComando" class="form-select" onchange="carregarSubunidadesEdit()">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Comando Regional</label>
+        <select id="editUserComando" class="form-select" onchange="carregarUnidadesPrincipaisEdit()">
           <option value="">Selecione...</option>
         </select>
       </div>
 
       <div class="mb-4">
-        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Subunidade (Cia/Pelotão)</label>
-        <select id="editUserUnidade" class="form-select">
-          <option value="">Selecione a unidade principal primeiro</option>
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Unidade (BPM/CIA IND)</label>
+        <select id="editUserUnidade" class="form-select" onchange="carregarSubunidadesEdit()">
+          <option value="">Selecione o comando regional primeiro</option>
         </select>
-        <p style="font-size: 11px; color: #666; margin-top: 2px;">* Se vazio, o usuário pertencerá à Unidade Principal.</p>
+        <p style="font-size: 11px; color: #666; margin-top: 2px;">* Deixe vazio se pertencer à sede do Comando.</p>
+      </div>
+
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Subunidade (Cia/Pelotão) - Opcional</label>
+        <select id="editUserSubunidade" class="form-select" disabled>
+          <option value="">Selecione a unidade primeiro</option>
+        </select>
+        <p style="font-size: 11px; color: #666; margin-top: 2px;">* Deixe vazio se pertencer à sede da Unidade.</p>
       </div>
 
       <div class="mb-4">
@@ -250,18 +258,26 @@
       </div>
 
       <div class="mb-4">
-        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Unidade Principal (BPM/Independente)</label>
-        <select id="newUserComando" class="form-select" onchange="carregarSubunidadesNew()">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Comando Regional</label>
+        <select id="newUserComando" class="form-select" onchange="carregarUnidadesPrincipaisNew()">
           <option value="">Selecione...</option>
         </select>
       </div>
       
       <div class="mb-4">
-        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Subunidade (Cia/Pelotão) - Opcional</label>
-        <select id="newUserUnidade" class="form-select">
-          <option value="">Selecione a unidade principal primeiro</option>
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Unidade (BPM/CIA IND)</label>
+        <select id="newUserUnidade" class="form-select" onchange="carregarSubunidadesNew()">
+          <option value="">Selecione o comando regional primeiro</option>
         </select>
-        <p style="font-size: 11px; color: #666; margin-top: 2px;">* Se vazio, o usuário pertencerá à Unidade Principal.</p>
+        <p style="font-size: 11px; color: #666; margin-top: 2px;">* Deixe vazio se pertencer à sede do Comando.</p>
+      </div>
+
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Subunidade (Cia/Pelotão) - Opcional</label>
+        <select id="newUserSubunidade" class="form-select" disabled>
+          <option value="">Selecione a unidade primeiro</option>
+        </select>
+        <p style="font-size: 11px; color: #666; margin-top: 2px;">* Deixe vazio se pertencer à sede da Unidade.</p>
       </div>
 
       <div class="mb-4">
@@ -459,7 +475,7 @@
         const padding = nivel * 24; 
         const isRaiz = nivel === 0;
         
-        // Classes do CSS (v1.0.3)
+        // Classes do CSS
         const rowClass = isRaiz ? 'unit-row-root' : 'unit-row-child';
         const siglaClass = isRaiz ? 'unit-sigla-root' : 'unit-sigla-child';
         
@@ -484,7 +500,7 @@
             </td>
           </tr>
         `;
-        
+
         u.children.forEach(filho => { row += renderLinha(filho, nivel + 1); });
         return row;
       };
@@ -497,17 +513,17 @@
       const select = document.getElementById('novoParent');
       select.innerHTML = '<option value="">Nenhuma (raiz)</option>' + gerarOpcoesRecursivas();
     }
-    
+
     function gerarOpcoesRecursivas(ignorarId = null) {
       const arvore = montarArvore(unidadesCache);
       let html = '';
 
       const renderOpt = (u, nivel) => {
         if (u.id === ignorarId) return '';
-        
+
         const prefixo = '&nbsp;&nbsp;'.repeat(nivel) + (nivel > 0 ? '↳ ' : '');
         let opt = `<option value="${u.id}">${prefixo}${u.sigla}</option>`;
-        
+
         u.children.forEach(filho => { opt += renderOpt(filho, nivel + 1); });
         return opt;
       };
@@ -547,9 +563,75 @@
       }
     }
 
-    // === Modal Editar Usuário ===
-    let usuariosCache = [];
+    // === Lógica de Selects em Cascata (Novo Usuário) ===
+    function carregarUnidadesPrincipaisNew() {
+      const parentId = document.getElementById('newUserComando').value;
+      const select = document.getElementById('newUserUnidade');
+      const selectSub = document.getElementById('newUserSubunidade');
 
+      select.innerHTML = '<option value="">Selecione a unidade (Opcional)</option>';
+      selectSub.innerHTML = '<option value="">Selecione a subunidade (Opcional)</option>';
+      selectSub.disabled = true;
+
+      if (!parentId) return;
+
+      const filhas = unidadesCache.filter(u => u.parent_id == parentId);
+      filhas.sort((a,b) => a.sigla.localeCompare(b.sigla));
+      filhas.forEach(u => select.appendChild(new Option(u.sigla, u.id)));
+    }
+
+    function carregarSubunidadesNew() {
+      const parentId = document.getElementById('newUserUnidade').value;
+      const select = document.getElementById('newUserSubunidade');
+
+      select.innerHTML = '<option value="">Selecione a subunidade (Opcional)</option>';
+
+      if (!parentId) {
+        select.disabled = true;
+        return;
+      }
+
+      const netas = unidadesCache.filter(u => u.parent_id == parentId);
+      netas.sort((a,b) => a.sigla.localeCompare(b.sigla));
+      netas.forEach(u => select.appendChild(new Option(u.sigla, u.id)));
+      select.disabled = false;
+    }
+
+    // === Lógica de Selects em Cascata (Editar Usuário) ===
+    function carregarUnidadesPrincipaisEdit() {
+      const parentId = document.getElementById('editUserComando').value;
+      const select = document.getElementById('editUserUnidade');
+      const selectSub = document.getElementById('editUserSubunidade');
+
+      select.innerHTML = '<option value="">Selecione a unidade (Opcional)</option>';
+      selectSub.innerHTML = '<option value="">Selecione a subunidade (Opcional)</option>';
+      selectSub.disabled = true;
+
+      if (!parentId) return;
+
+      const filhas = unidadesCache.filter(u => u.parent_id == parentId);
+      filhas.sort((a,b) => a.sigla.localeCompare(b.sigla));
+      filhas.forEach(u => select.appendChild(new Option(u.sigla, u.id)));
+    }
+
+    function carregarSubunidadesEdit() {
+      const parentId = document.getElementById('editUserUnidade').value;
+      const select = document.getElementById('editUserSubunidade');
+
+      select.innerHTML = '<option value="">Selecione a subunidade (Opcional)</option>';
+
+      if (!parentId) {
+        select.disabled = true;
+        return;
+      }
+
+      const netas = unidadesCache.filter(u => u.parent_id == parentId);
+      netas.sort((a,b) => a.sigla.localeCompare(b.sigla));
+      netas.forEach(u => select.appendChild(new Option(u.sigla, u.id)));
+      select.disabled = false;
+    }
+
+    // === Modal Editar Usuário (Lógica Reverso) ===
     async function abrirEditarUsuario(id) {
       const usuario = usuariosCache.find(u => u.id === id);
       if (!usuario) return;
@@ -560,30 +642,49 @@
       document.getElementById('editUserRole').value = usuario.role;
       document.getElementById('editUserAtivo').value = usuario.ativo.toString();
 
-      // Popula Unidades Principais (Raízes)
-      const selectComando = document.getElementById('editUserComando');
-      selectComando.innerHTML = '<option value="">Selecione...</option>';
+      // 1. Popula Comandos Regionais
+      const selCmd = document.getElementById('editUserComando');
+      selCmd.innerHTML = '<option value="">Selecione...</option>';
+      const raizes = unidadesCache.filter(u => !u.parent_id);
+      raizes.sort((a,b) => a.sigla.localeCompare(b.sigla));
+      raizes.forEach(u => selCmd.appendChild(new Option(u.sigla, u.id)));
 
-      const principais = unidadesCache.filter(u => !u.parent_id);
-      principais.sort((a,b) => a.sigla.localeCompare(b.sigla));
+      // 2. Tenta descobrir a hierarquia do usuário para preencher os selects
+      const selUni = document.getElementById('editUserUnidade');
+      const selSub = document.getElementById('editUserSubunidade');
 
-      principais.forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u.id;
-        opt.textContent = u.sigla;
-        selectComando.appendChild(opt);
-      });
+      // Reseta os filhos
+      selUni.innerHTML = '<option value="">Selecione a unidade (Opcional)</option>';
+      selSub.innerHTML = '<option value="">Selecione a subunidade (Opcional)</option>';
+      selSub.disabled = true;
 
-      // Encontra comando do usuário (parent da unidade atual)
-      const unidadeAtual = unidadesCache.find(u => u.sigla === usuario.unidade_sigla);
-      if (unidadeAtual && unidadeAtual.parent_id) {
-        selectComando.value = unidadeAtual.parent_id;
-        carregarSubunidadesEdit();
-        document.getElementById('editUserUnidade').value = unidadeAtual.id;
-      } else if (unidadeAtual) {
-        // Usuário está em um CPOR/CPOE diretamente
-        selectComando.value = unidadeAtual.id;
-        carregarSubunidadesEdit();
+      // Busca a unidade atual do usuário
+      let unidadeAlvo = unidadesCache.find(u => u.sigla === usuario.unidade_sigla);
+
+      if (unidadeAlvo) {
+        // Reconstrói o caminho até a raiz (Subunidade -> Unidade -> Comando)
+        const path = [unidadeAlvo];
+        let curr = unidadeAlvo;
+        while(curr.parent_id) {
+          curr = unidadesCache.find(u => u.id === curr.parent_id);
+          if(curr) path.unshift(curr);
+          else break;
+        }
+
+        // path[0] = Comando, path[1] = Unidade, path[2] = Subunidade
+        if (path[0]) {
+          selCmd.value = path[0].id;
+          carregarUnidadesPrincipaisEdit(); // Carrega o nível 2
+        }
+
+        if (path[1]) {
+          selUni.value = path[1].id;
+          carregarSubunidadesEdit(); // Carrega o nível 3
+        }
+
+        if (path[2]) {
+          selSub.value = path[2].id;
+        }
       }
 
       document.getElementById('modalEditarUsuario').classList.remove('hidden');
@@ -593,32 +694,17 @@
       document.getElementById('modalEditarUsuario').classList.add('hidden');
     }
 
-    function carregarSubunidadesEdit() {
-      const comandoId = document.getElementById('editUserComando').value;
-      const select = document.getElementById('editUserUnidade');
-
-      select.innerHTML = '<option value="">Selecione a subunidade (opcional)</option>';
-
-      if (!comandoId) return;
-
-      const subunidades = unidadesCache.filter(u => u.parent_id == comandoId);
-      subunidades.sort((a,b) => a.sigla.localeCompare(b.sigla));
-
-      subunidades.forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u.id;
-        opt.textContent = u.sigla;
-        select.appendChild(opt);
-      });
-    }
-
     async function salvarUsuario() {
       const id = document.getElementById('editUserId').value;
+      
+      // Lógica de Prioridade: Subunidade > Unidade > Comando Regional
+      const unidadeFinal = document.getElementById('editUserSubunidade').value || document.getElementById('editUserUnidade').value || document.getElementById('editUserComando').value;
+
       const dados = {
         nome: document.getElementById('editUserNome').value,
         email: document.getElementById('editUserEmail').value,
         role: document.getElementById('editUserRole').value,
-        unidade_id: document.getElementById('editUserUnidade').value || document.getElementById('editUserComando').value || null,
+        unidade_id: unidadeFinal || null,
         ativo: document.getElementById('editUserAtivo').value === 'true'
       };
 
@@ -645,7 +731,7 @@
       // Popula select de parent (excluindo a própria unidade)
       const selectParent = document.getElementById('editUnidadeParent');
       selectParent.innerHTML = '<option value="">Nenhuma (raiz)</option>' + gerarOpcoesRecursivas(id);
-      
+
       if (unidade.parent_id) {
         selectParent.value = unidade.parent_id;
       }
@@ -676,7 +762,7 @@
       }
     }
 
-    // === Modal Criar Usuário ===
+    // === Modal Criar Usuário (Inicialização) ===
     function abrirCriarUsuario() {
       // Limpa campos
       document.getElementById('newUserNome').value = '';
@@ -692,13 +778,13 @@
       const principais = unidadesCache.filter(u => !u.parent_id);
       principais.sort((a,b) => a.sigla.localeCompare(b.sigla));
       principais.forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u.id;
-        opt.textContent = u.sigla;
-        selectComando.appendChild(opt);
+        selectComando.appendChild(new Option(u.sigla, u.id));
       });
 
-      document.getElementById('newUserUnidade').innerHTML = '<option value="">Selecione a unidade</option>';
+      document.getElementById('newUserUnidade').innerHTML = '<option value="">Selecione a unidade primeiro</option>';
+      document.getElementById('newUserSubunidade').innerHTML = '<option value="">Selecione a unidade primeiro</option>';
+      document.getElementById('newUserSubunidade').disabled = true;
+
       document.getElementById('modalCriarUsuario').classList.remove('hidden');
     }
 
@@ -706,29 +792,15 @@
       document.getElementById('modalCriarUsuario').classList.add('hidden');
     }
 
-    function carregarSubunidadesNew() {
-      const comandoId = document.getElementById('newUserComando').value;
-      const select = document.getElementById('newUserUnidade');
-      select.innerHTML = '<option value="">Selecione a unidade</option>';
-      
-      if (!comandoId) return;
-
-      const subunidades = unidadesCache.filter(u => u.parent_id === comandoId);
-      subunidades.forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u.id;
-        opt.textContent = u.sigla;
-        select.appendChild(opt);
-      });
-    }
-
     async function salvarNovoUsuario() {
+      const unidadeFinal = document.getElementById('newUserSubunidade').value || document.getElementById('newUserUnidade').value || document.getElementById('newUserComando').value;
+
       const dados = {
         nome: document.getElementById('newUserNome').value,
         email: document.getElementById('newUserEmail').value,
         senha: document.getElementById('newUserSenha').value,
         role: document.getElementById('newUserRole').value,
-        unidade_id: document.getElementById('newUserUnidade').value || document.getElementById('newUserComando').value || null,
+        unidade_id: unidadeFinal || null,
         ativo: document.getElementById('newUserAtivo').value === 'true'
       };
 
@@ -751,7 +823,7 @@
     carregarPendentes();
     carregarUsuarios();
     carregarUnidades();
-    console.log('🚀 Admin v2.0');
+    console.log('🚀 Admin v2.1');
   </script>
 
 </body>

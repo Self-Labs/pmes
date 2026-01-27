@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Cadastro
-  Versão: 1.3
+  Versão: 1.4
 -->
 <html lang="pt-BR">
 <head>
@@ -38,18 +38,26 @@
       </div>
 
       <div class="mb-4">
-        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Unidade Principal (BPM/Independente)</label>
-        <select id="comando" class="form-select" required onchange="carregarSubunidades()">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Comando Regional</label>
+        <select id="comando" class="form-select" required onchange="carregarUnidadesPrincipais()">
           <option value="">Selecione...</option>
         </select>
       </div>
 
       <div class="mb-4">
-        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Subunidade (Cia/Pelotão) - Opcional</label>
-        <select id="unidade" class="form-select" disabled>
-          <option value="">Selecione a unidade principal primeiro</option>
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Unidade (BPM/CIA IND)</label>
+        <select id="unidade" class="form-select" onchange="carregarSubunidades()">
+          <option value="">Selecione o comando regional primeiro</option>
         </select>
-        <p style="font-size: 11px; color: #666; margin-top: 2px;">* Deixe vazio se pertencer à sede/unidade principal.</p>
+        <p style="font-size: 11px; color: #666; margin-top: 2px;">* Deixe vazio se pertencer à sede do Comando.</p>
+      </div>
+
+      <div class="mb-4">
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Subunidade (Cia/Pelotão) - Opcional</label>
+        <select id="subunidade" class="form-select" disabled>
+          <option value="">Selecione a unidade primeiro</option>
+        </select>
+        <p style="font-size: 11px; color: #666; margin-top: 2px;">* Deixe vazio se pertencer à sede da Unidade.</p>
       </div>
 
       <button type="submit" id="btnCadastro" class="btn btn-primary" style="width: 100%;">
@@ -76,12 +84,13 @@
 
     let todasUnidades = [];
 
-    // Carrega comandos (CPOR/CPOE)
+    // 1. Carrega Comandos Regionais (Unidades Raiz)
     async function carregarComandos() {
       try {
         todasUnidades = await listarUnidades();
         const select = document.getElementById('comando');
 
+        // Filtra unidades que não possuem unidade superior (Raízes)
         const principais = todasUnidades.filter(u => !u.parent_id);
         principais.sort((a,b) => a.sigla.localeCompare(b.sigla));
 
@@ -96,34 +105,65 @@
       }
     }
 
-    // Carrega subunidades do comando selecionado
-    function carregarSubunidades() {
+    // 2. Carrega Unidades Principais (Nível 2 - Subordinadas ao Comando)
+    function carregarUnidadesPrincipais() {
       const comandoId = document.getElementById('comando').value;
-      const select = document.getElementById('unidade');
+      const selectUnidade = document.getElementById('unidade');
+      const selectSub = document.getElementById('subunidade');
 
-      select.innerHTML = '<option value="">Selecione a subunidade (opcional)</option>';
+      // Reset
+      selectUnidade.innerHTML = '<option value="">Selecione a unidade (Opcional)</option>';
+      selectSub.innerHTML = '<option value="">Selecione a subunidade (Opcional)</option>';
+      selectSub.disabled = true;
 
       if (!comandoId) {
-        select.disabled = true;
+        selectUnidade.disabled = true;
         return;
       }
 
-      const subunidades = todasUnidades.filter(u => u.parent_id == comandoId);
-      subunidades.sort((a,b) => a.sigla.localeCompare(b.sigla));
+      // Filtra unidades subordinadas ao Comando selecionado
+      const nivel2 = todasUnidades.filter(u => u.parent_id === comandoId);
+      nivel2.sort((a,b) => a.sigla.localeCompare(b.sigla));
 
-      subunidades.forEach(u => {
+      nivel2.forEach(u => {
         const opt = document.createElement('option');
         opt.value = u.id;
         opt.textContent = u.sigla;
-        select.appendChild(opt);
+        selectUnidade.appendChild(opt);
       });
 
-      select.disabled = false;
+      selectUnidade.disabled = false;
+    }
+
+    // 3. Carrega Subunidades (Nível 3 - Subordinadas à Unidade Principal)
+    function carregarSubunidades() {
+      const unidadeId = document.getElementById('unidade').value;
+      const selectSub = document.getElementById('subunidade');
+
+      selectSub.innerHTML = '<option value="">Selecione a subunidade (Opcional)</option>';
+
+      if (!unidadeId) {
+        selectSub.disabled = true;
+        return;
+      }
+
+      // Filtra subunidades subordinadas à Unidade Principal selecionada
+      const nivel3 = todasUnidades.filter(u => u.parent_id === unidadeId);
+      nivel3.sort((a,b) => a.sigla.localeCompare(b.sigla));
+
+      nivel3.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = u.sigla;
+        selectSub.appendChild(opt);
+      });
+
+      selectSub.disabled = false;
     }
 
     carregarComandos();
 
-    // Form submit
+    // Form Submit
     document.getElementById('cadastroForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -132,8 +172,9 @@
       const nome = document.getElementById('nome').value;
       const email = document.getElementById('email').value;
       const senha = document.getElementById('senha').value;
-      // Se não selecionar subunidade, usa a principal
-      const unidade_id = document.getElementById('unidade').value || document.getElementById('comando').value;
+
+      // Lógica de Prioridade: Subunidade > Unidade Principal > Comando Regional
+      const unidade_id = document.getElementById('subunidade').value || document.getElementById('unidade').value || document.getElementById('comando').value;
 
       btn.disabled = true;
       btn.innerHTML = '<span class="loading"></span>';
@@ -144,7 +185,7 @@
         document.getElementById('cadastroForm').classList.add('hidden');
         alertBox.className = 'alert alert-success';
         alertBox.innerHTML = '✅ Cadastro realizado!<br>Aguarde aprovação do administrador.<br><br>Redirecionando para login em <strong id="contador">5</strong>s...';
-        
+
         let seg = 5;
         const interval = setInterval(() => {
           seg--;
