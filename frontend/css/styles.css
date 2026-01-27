@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Estilos
-  Versão: 1.0.3
+  Versão: 1.0.4
 */
 
 /* Variáveis de Cores */
@@ -284,7 +284,7 @@ a.btn {
 .bg-pm-green { background-color: #d4edda !important; }
 
 @media print {
-  @page { size: A4 landscape; margin: 5mm; }
+  /* @page movido para o HTML específico */
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .no-print { display: none !important; }
   #documento { box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
@@ -305,7 +305,7 @@ a.btn {
 }
 
 @media print {
-  @page { size: A4 portrait; margin: 10mm; }
+  /* @page movido para o HTML específico */
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .no-print { display: none !important; }
   #documento { box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
