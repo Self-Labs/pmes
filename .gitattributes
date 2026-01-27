@@ -1,0 +1,2 @@
+# Força arquivos de script a terem quebra de linha Linux (LF)
+*.sh text eol=lf
