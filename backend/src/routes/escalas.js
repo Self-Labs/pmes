@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Escalas Routes
-  Versão: 1.0.1
+  Versão: 1.0.2
 */
 
 const express = require('express');
@@ -44,14 +44,12 @@ router.get('/mensal', authMiddleware, async (req, res) => {
 // POST /escalas/mensal - Cria ou atualiza escala
 router.post('/mensal', authMiddleware, async (req, res) => {
   try {
-    // LÓGICA CORRIGIDA:
-    // Se for Admin, aceita unidade_id do corpo. Se não, força do token.
-    let targetUnidadeId = req.user.unidade_id;
-    if (req.user.role === 'admin' && req.body.unidade_id) {
-      targetUnidadeId = req.body.unidade_id;
-    }
+    // Prioridade para unidade_id do corpo se for admin
+    const isAdmin = req.user.role === 'admin';
+    const targetUnidadeId = (isAdmin && req.body.unidade_id) ? req.body.unidade_id : req.user.unidade_id;
 
-    if (!targetUnidadeId) {
+    if (!targetUnidadeId || targetUnidadeId === 'null') {
+      console.error(`[Escalas] Tentativa de salvamento sem unidade por: ${req.user.email}`);
       return res.status(400).json({ error: 'Operação falhou: Unidade não identificada.' });
     }
 
@@ -117,13 +115,12 @@ router.get('/iseo', authMiddleware, async (req, res) => {
 // POST /escalas/iseo - Cria ou atualiza escala
 router.post('/iseo', authMiddleware, async (req, res) => {
   try {
-    // LÓGICA CORRIGIDA:
-    let targetUnidadeId = req.user.unidade_id;
-    if (req.user.role === 'admin' && req.body.unidade_id) {
-      targetUnidadeId = req.body.unidade_id;
-    }
+    // Prioridade para unidade_id do corpo se for admin
+    const isAdmin = req.user.role === 'admin';
+    const targetUnidadeId = (isAdmin && req.body.unidade_id) ? req.body.unidade_id : req.user.unidade_id;
 
-    if (!targetUnidadeId) {
+    if (!targetUnidadeId || targetUnidadeId === 'null') {
+      console.error(`[ISEO] Tentativa de salvamento sem unidade por: ${req.user.email}`);
       return res.status(400).json({ error: 'Operação falhou: Unidade não identificada.' });
     }
 

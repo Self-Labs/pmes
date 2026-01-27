@@ -282,13 +282,15 @@
         
         currentUnidadeId = user.unidade_id;
 
-        // Seletor de Unidades (Apenas Admin)
+        // Lógica SUPER ADMIN
         if (user.role === 'admin') {
+          document.getElementById('adminMenu').classList.remove('hidden');
+
           const select = document.getElementById('adminUnitSelect');
           select.classList.remove('hidden'); 
-          
+
           const unidades = await listarTodasUnidades();
-          
+
           select.innerHTML = unidades
             .sort((a, b) => a.sigla.localeCompare(b.sigla))
             .map(u => `<option value="${u.id}">${u.sigla}</option>`)
@@ -850,7 +852,7 @@
 
     // === Init ===
     // Removido o carregarDados() daqui pois ele é chamado no bloco async inicial
-    console.log('🚀 Escala Mensal v1.0.5');
+    console.log('🚀 Escala Mensal v1.0.8');
   </script>
 
 </body>
