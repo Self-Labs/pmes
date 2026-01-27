@@ -369,24 +369,18 @@
     }
 
     // === Usuários ===
-    function getUnidadePath(unidadeId) {
-      if (!unidadeId) return '-';
-      const path = [];
-      let curr = unidadesCache.find(u => u.id === unidadeId);
-      while (curr) {
-        path.unshift(curr.sigla);
-        curr = unidadesCache.find(u => u.id === curr.parent_id);
-      }
-      return path.join(' / ');
-    }
-
     async function carregarUsuarios() {
       try {
         const usuarios = await listarUsuarios();
         usuariosCache = usuarios;
         document.getElementById('listaUsuarios').innerHTML = usuarios.map(u => {
-        // Usa a função recursiva para mostrar o caminho completo (Comando / Unidade / Subunidade)
-        const nomeUnidade = getUnidadePath(u.unidade_id);
+        // Lógica de Hierarquia Visual
+        let nomeUnidade = u.unidade_sigla || '-';
+        const unidade = unidadesCache.find(x => x.sigla === u.unidade_sigla); // Tenta achar pelo cache
+        if (unidade && unidade.parent_id) {
+           const parent = unidadesCache.find(x => x.id === unidade.parent_id);
+           if (parent) nomeUnidade = `${parent.sigla} / ${unidade.sigla}`;
+        }
 
         return `
         <tr>
@@ -671,8 +665,8 @@
       selSub.innerHTML = '<option value="">Selecione a subunidade (Opcional)</option>';
       selSub.disabled = true;
 
-      // Busca a unidade alvo pelo ID único (essencial para diferenciar COPOMs)
-      let unidadeAlvo = unidadesCache.find(u => u.id === usuario.unidade_id);
+      // Busca a unidade atual do usuário
+      let unidadeAlvo = unidadesCache.find(u => u.sigla === usuario.unidade_sigla);
 
       if (unidadeAlvo) {
         // Reconstrói o caminho até a raiz (Subunidade -> Unidade -> Comando)
