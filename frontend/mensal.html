@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala Mensal
-  Versão: 2.0
+  Versão: 2.1
 -->
 <html lang="pt-BR">
 <head>
@@ -317,17 +317,21 @@
             .map(u => `<option value="${u.id}">${u.nome}</option>`)
             .join('');
 
-          // Se Admin sem unidade (root), seleciona a primeira da lista
-          if (currentUnidadeId) {
-            select.value = currentUnidadeId;
-          } else if (unidades.length > 0) {
-            currentUnidadeId = unidades[0].id;
-            select.value = currentUnidadeId;
+          // Prioridade: 1. localStorage | 2. Unidade do Perfil | 3. Primeira da lista
+          const savedUnitId = localStorage.getItem('pmes_admin_last_unit');
+
+          if (savedUnitId && unidades.some(u => u.id === savedUnitId)) {
+            currentUnidadeId = savedUnitId;
+          } else {
+            currentUnidadeId = user.unidade_id || (unidades.length > 0 ? unidades[0].id : null);
           }
+
+          if (currentUnidadeId) select.value = currentUnidadeId;
 
           // Evento de troca de unidade
           select.addEventListener('change', (e) => {
             currentUnidadeId = e.target.value;
+            localStorage.setItem('pmes_admin_last_unit', currentUnidadeId); // Salva a escolha
             carregarDados(); // Recarrega para a nova unidade
           });
         }
@@ -957,7 +961,7 @@
 
     // === Init ===
     // Removido o carregarDados() daqui pois ele é chamado no bloco async inicial
-    console.log('🚀 Escala Mensal v2.0');
+    console.log('🚀 Escala Mensal v2.1');
   </script>
 
 </body>
