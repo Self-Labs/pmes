@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Admin
-  Versão: 2.2
+  Versão: 2.3
 -->
 <html lang="pt-BR">
 <head>
@@ -23,7 +23,7 @@
       <div class="navbar-menu">
         <a href="/perfil" id="navbarUser" class="navbar-user" style="text-decoration: none; color: inherit; margin-right: 8px;" title="Ir para Perfil"></a>
         <a href="/mensal" class="btn btn-secondary">📅 Mensal</a>
-        <a href="/iseo" class="btn btn-secondary">📋 ISEO</a>
+        <a href="/iseo" class="btn btn-secondary">🚓 ISEO</a>
         <a href="/admin" class="btn btn-active">⚙️ Admin</a>
         <button onclick="logout()" class="btn btn-secondary">🚪 Sair</button>
       </div>
@@ -35,7 +35,7 @@
     <!-- Tabs -->
     <div style="display: flex; border-bottom: 1px solid #ddd; margin-bottom: 24px;">
       <button class="tab-btn active" data-tab="pendentes">🕐 Pendentes</button>
-      <button class="tab-btn" data-tab="usuarios">👥 Usuários</button>
+      <button class="tab-btn" data-tab="usuarios">👮‍♂️ Usuários</button>
       <button class="tab-btn" data-tab="unidades">🏛️ Unidades</button>
     </div>
 
@@ -49,7 +49,7 @@
     <!-- Tab: Usuários -->
     <div id="tab-usuarios" class="tab-content card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <h2 style="font-size: 18px;">👥 Todos os Usuários</h2>
+        <h2 style="font-size: 18px;">👮‍♂️ Todos os Usuários</h2>
         <button onclick="abrirCriarUsuario()" class="btn btn-primary">➕ Novo Usuário</button>
       </div>
       <div style="border: 1px solid #ddd; border-radius: 8px; overflow-x: auto;">
@@ -369,18 +369,24 @@
     }
 
     // === Usuários ===
+    function getUnidadePath(unidadeId) {
+      if (!unidadeId) return '-';
+      const path = [];
+      let curr = unidadesCache.find(u => u.id === unidadeId);
+      while (curr) {
+        path.unshift(curr.sigla);
+        curr = unidadesCache.find(u => u.id === curr.parent_id);
+      }
+      return path.join(' / ');
+    }
+
     async function carregarUsuarios() {
       try {
         const usuarios = await listarUsuarios();
         usuariosCache = usuarios;
         document.getElementById('listaUsuarios').innerHTML = usuarios.map(u => {
-        // Lógica de Hierarquia Visual
-        let nomeUnidade = u.unidade_sigla || '-';
-        const unidade = unidadesCache.find(x => x.sigla === u.unidade_sigla); // Tenta achar pelo cache
-        if (unidade && unidade.parent_id) {
-           const parent = unidadesCache.find(x => x.id === unidade.parent_id);
-           if (parent) nomeUnidade = `${parent.sigla} / ${unidade.sigla}`;
-        }
+        // Usa a função recursiva para mostrar o caminho completo (Comando / Unidade / Subunidade)
+        const nomeUnidade = getUnidadePath(u.unidade_id);
 
         return `
         <tr>
@@ -665,8 +671,8 @@
       selSub.innerHTML = '<option value="">Selecione a subunidade (Opcional)</option>';
       selSub.disabled = true;
 
-      // Busca a unidade atual do usuário
-      let unidadeAlvo = unidadesCache.find(u => u.sigla === usuario.unidade_sigla);
+      // Busca a unidade alvo pelo ID único (essencial para diferenciar COPOMs)
+      let unidadeAlvo = unidadesCache.find(u => u.id === usuario.unidade_id);
 
       if (unidadeAlvo) {
         // Reconstrói o caminho até a raiz (Subunidade -> Unidade -> Comando)
@@ -830,7 +836,7 @@
     carregarPendentes();
     carregarUsuarios();
     carregarUnidades();
-    console.log('🚀 Admin v2.2');
+    console.log('🚀 Admin v2.3');
   </script>
 
 </body>

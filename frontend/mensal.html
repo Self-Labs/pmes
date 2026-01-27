@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala Mensal
-  Versão: 2.1
+  Versão: 2.2
 -->
 <html lang="pt-BR">
 <head>
@@ -33,7 +33,7 @@
 
         <a href="/perfil" id="navbarUser" class="navbar-user" style="text-decoration: none; color: inherit; margin-right: 8px;" title="Ir para Perfil"></a>
         <a href="/mensal" class="btn btn-active">📅 Mensal</a>
-        <a href="/iseo" class="btn btn-secondary">📋 ISEO</a>
+        <a href="/iseo" class="btn btn-secondary">🚓 ISEO</a>
         <a href="/admin" id="adminMenu" class="btn btn-secondary hidden">⚙️ Admin</a>
         <button onclick="logout()" class="btn btn-secondary">🚪 Sair</button>
       </div>
@@ -45,7 +45,7 @@
     <div style="max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 8px;">
       <div style="display: flex; gap: 16px; align-items: center;">
         <button id="btnEditar" class="btn btn-active">🖊️ Edição</button>
-        <button id="btnVisualizar" class="btn btn-secondary">👁️ Visualizar</button>
+        <button id="btnVisualizar" class="btn btn-secondary">🔍 Visualizar</button>
         <button onclick="salvarAgora()" class="btn btn-success">💾 Salvar</button>
         <button onclick="window.print()" class="btn btn-secondary">🖨️ Imprimir/PDF</button>
         <span id="statusSalvo" class="status-salvo salvo">✓ Salvo</span>
@@ -60,7 +60,7 @@
     <!-- Tabs -->
     <div style="display: flex; border-bottom: 1px solid #ddd; margin-bottom: 24px;">
       <button class="tab-btn active" data-tab="config">⚙️ Configurações</button>
-      <button class="tab-btn" data-tab="militares">👥 Militares</button>
+      <button class="tab-btn" data-tab="militares">👮‍♂️ Militares</button>
       <button class="tab-btn" data-tab="equipes">📋 Equipes</button>
       <button class="tab-btn" data-tab="observacoes">📝 Observações</button>
     </div>
@@ -155,7 +155,7 @@
 
     <!-- Tab: Militares -->
     <div id="tab-militares" class="tab-content card">
-      <h2 style="font-size: 18px; margin-bottom: 16px;">👥 Cadastro de Militares</h2>
+      <h2 style="font-size: 18px; margin-bottom: 16px;">👮‍♂️ Cadastro de Militares</h2>
 
       <div style="display: flex; gap: 8px; margin-bottom: 16px; padding: 12px; background: #f9fafb; border-radius: 8px; align-items: flex-end;">
         <div style="flex: 1;">
@@ -961,7 +961,7 @@
 
     // === Init ===
     // Removido o carregarDados() daqui pois ele é chamado no bloco async inicial
-    console.log('🚀 Escala Mensal v2.1');
+    console.log('🚀 Escala Mensal v2.2');
   </script>
 
 </body>
