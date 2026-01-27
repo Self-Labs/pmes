@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Estilos
-  Versão: 1.0.2
+  Versão: 1.0.3
 */
 
 /* Variáveis de Cores */
@@ -309,4 +309,57 @@ a.btn {
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .no-print { display: none !important; }
   #documento { box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
+}
+
+/* === Admin - Hierarquia e Unidades === */
+.unit-row-root {
+  background: #f8f9fa;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.unit-row-child {
+  border-bottom: 1px solid #eee;
+}
+
+.unit-sigla-root {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.unit-sigla-child {
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.unit-inactive {
+  color: #dc2626;
+  font-size: 10px;
+  margin-left: 5px;
+  font-weight: normal;
+}
+
+.badge-tipo {
+  padding: 3px 8px;
+  background: #eef2ff;
+  color: #4f46e5;
+  border: 1px solid #c7d2fe;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  opacity: 0.6;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover {
+  opacity: 1;
+  transform: scale(1.1);
 }

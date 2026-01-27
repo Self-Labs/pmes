@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Admin
-  Versão: 1.0.6
+  Versão: 1.0.7
 -->
 <html lang="pt-BR">
 <head>
@@ -107,10 +107,9 @@
         <table class="table">
           <thead>
             <tr>
-              <th>Sigla</th>
-              <th>Tipo</th>
-              <th>Pai</th>
-              <th style="width: 100px;">Ações</th>
+              <th>Estrutura Hierárquica</th>
+              <th style="width: 120px;">Tipo</th>
+              <th style="width: 100px; text-align: right;">Ações</th>
             </tr>
           </thead>
           <tbody id="listaUnidades"></tbody>
@@ -414,99 +413,95 @@
       }
     }
 
-    // Helper para agrupar unidades (Pais e Filhos)
-    function agruparUnidades() {
-      const pais = unidadesCache.filter(u => !u.parent_id);
-      const grupos = [];
+    // Nova Lógica Recursiva de Árvore
+    function montarArvore(lista) {
+      const mapa = {};
+      const raizes = [];
+      
+      // 1. Cria mapa de referências
+      lista.forEach(u => mapa[u.id] = { ...u, children: [] });
 
-      pais.forEach(pai => {
-        const filhas = unidadesCache.filter(u => u.parent_id === pai.id);
-        grupos.push({ pai, filhas });
+      // 2. Conecta pais e filhos
+      lista.forEach(u => {
+        if (u.parent_id && mapa[u.parent_id]) {
+          mapa[u.parent_id].children.push(mapa[u.id]);
+        } else {
+          raizes.push(mapa[u.id]);
+        }
       });
+      
+      // 3. Ordena recursivamente por Sigla
+      const ordenar = (nos) => {
+        nos.sort((a, b) => a.sigla.localeCompare(b.sigla));
+        nos.forEach(no => ordenar(no.children));
+      };
+      ordenar(raizes);
 
-      // Adiciona orfãs (caso existam unidades filhas sem pai carregado) ou raízes soltas
-      const processados = new Set(pais.map(p => p.id).concat(pais.flatMap(p => unidadesCache.filter(u => u.parent_id === p.id).map(u => u.id))));
-      const sobras = unidadesCache.filter(u => !processados.has(u.id));
-      if (sobras.length > 0) {
-        grupos.push({ pai: { id: 'outros', sigla: 'OUTROS / SEM PAI', tipo: 'OUTRO' }, filhas: sobras });
-      }
-
-      return grupos;
+      return raizes;
     }
 
     function renderUnidades() {
-      const grupos = agruparUnidades();
+      const arvore = montarArvore(unidadesCache);
       let html = '';
 
-      grupos.forEach(grupo => {
-        // Renderiza o Pai (Cabeçalho de Seção)
-        if (grupo.pai.id !== 'outros') {
-          html += criarLinhaUnidade(grupo.pai, true);
-        } else if (grupo.filhas.length > 0) {
-           html += `<tr style="background: #f3f4f6;"><td colspan="4" style="font-weight:bold; color:#666; text-align:center;">OUTROS</td></tr>`;
-        }
+      const renderLinha = (u, nivel) => {
+        const padding = nivel * 24; 
+        const isRaiz = nivel === 0;
+        
+        // Classes do CSS (v1.0.3)
+        const rowClass = isRaiz ? 'unit-row-root' : 'unit-row-child';
+        const siglaClass = isRaiz ? 'unit-sigla-root' : 'unit-sigla-child';
+        
+        // Ícone hierárquico
+        let icone = '';
+        if (nivel > 0) icone = `<span style="color:#9ca3af; margin-right:4px;">↳</span>`;
+        else if (u.children.length > 0) icone = `<span style="margin-right:4px;">🏢</span>`;
 
-        // Renderiza as Filhas
-        grupo.filhas.forEach(filha => {
-          html += criarLinhaUnidade(filha, false);
-        });
-      });
+        // Badge de Status (Classe CSS)
+        const inativoTag = !u.ativo ? '<span class="unit-inactive">(Inativo)</span>' : '';
 
+        // O padding-left continua inline pois é cálculo matemático dinâmico
+        let row = `
+          <tr class="${rowClass}">
+            <td class="${siglaClass}" style="padding-left: ${padding + 12}px;">
+              ${icone} ${u.sigla} ${inativoTag}
+            </td>
+            <td><span class="badge-tipo">${u.tipo}</span></td>
+            <td class="text-right">
+              <button onclick="abrirEditarUnidade('${u.id}')" class="btn-icon" title="Editar">✏️</button>
+              <button onclick="excluirUnidade('${u.id}', '${u.sigla}')" class="btn-icon" title="Excluir">🗑️</button>
+            </td>
+          </tr>
+        `;
+        
+        u.children.forEach(filho => { row += renderLinha(filho, nivel + 1); });
+        return row;
+      };
+
+      arvore.forEach(raiz => { html += renderLinha(raiz, 0); });
       document.getElementById('listaUnidades').innerHTML = html;
-    }
-
-    function criarLinhaUnidade(u, isPai) {
-      const styleRow = isPai ? 'background: #e5e7eb;' : '';
-      const styleSigla = isPai ? 'font-weight: 800; font-size: 14px;' : 'padding-left: 32px; font-weight: 500;';
-      
-      const statusBadge = u.ativo 
-        ? '<span style="color:green; font-size:10px;">●</span>' 
-        : '<span style="color:red; font-size:10px;">● Inativa</span>';
-
-      return `
-        <tr style="${styleRow}">
-          <td style="${styleSigla}">${u.sigla} ${statusBadge}</td>
-          <td><span style="padding: 2px 6px; background: #fff; border: 1px solid #ccc; border-radius: 4px; font-size: 10px;">${u.tipo}</span></td>
-          <td style="font-size: 11px; color: #666;">${isPai ? '-' : 'Subordinada'}</td>
-          <td>
-            <button onclick="abrirEditarUnidade('${u.id}')" class="btn btn-secondary" style="padding: 2px 6px; font-size: 11px;">✏️</button>
-            <button onclick="excluirUnidade('${u.id}', '${u.sigla}')" class="btn btn-danger" style="padding: 2px 6px; font-size: 11px;">🗑️</button>
-          </td>
-        </tr>
-      `;
     }
 
     function renderSelectParent() {
       const select = document.getElementById('novoParent');
-      select.innerHTML = '<option value="">Nenhuma (raiz)</option>' + gerarOpcoesAgrupadas();
+      select.innerHTML = '<option value="">Nenhuma (raiz)</option>' + gerarOpcoesRecursivas();
     }
     
-    function gerarOpcoesAgrupadas(ignorarId = null) {
-      const grupos = agruparUnidades();
+    function gerarOpcoesRecursivas(ignorarId = null) {
+      const arvore = montarArvore(unidadesCache);
       let html = '';
 
-      grupos.forEach(grupo => {
-        if (grupo.pai.id === 'outros') return; // Pula virtuais
-        if (grupo.pai.id === ignorarId) return; // Não lista a si mesmo
+      const renderOpt = (u, nivel) => {
+        if (u.id === ignorarId) return '';
+        
+        const prefixo = '&nbsp;&nbsp;'.repeat(nivel) + (nivel > 0 ? '↳ ' : '');
+        let opt = `<option value="${u.id}">${prefixo}${u.sigla}</option>`;
+        
+        u.children.forEach(filho => { opt += renderOpt(filho, nivel + 1); });
+        return opt;
+      };
 
-        // Adiciona o Pai como opção (se for raiz real)
-        html += `<option value="${grupo.pai.id}" style="font-weight: bold;">${grupo.pai.sigla}</option>`;
-
-        // Cria grupo para as filhas (opcional, ou apenas lista abaixo)
-        // Aqui vou usar optgroup para ficar visualmente separado como pediu
-        if (grupo.filhas.length > 0) {
-           // html += `<optgroup label="↳ Subunidades de ${grupo.pai.sigla}">`;
-           // Na verdade, CPOR é pai, BPM é filho. BPM pode ser pai? No seu modelo atual, só 1 nível.
-           // Vamos listar as filhas com identação visual
-           grupo.filhas.forEach(f => {
-             if (f.id !== ignorarId) {
-               html += `<option value="${f.id}">&nbsp;&nbsp;&nbsp;↳ ${f.sigla}</option>`;
-             }
-           });
-           // html += `</optgroup>`;
-        }
-      });
-      
+      arvore.forEach(raiz => { html += renderOpt(raiz, 0); });
       return html;
     }
 
@@ -633,7 +628,7 @@
 
       // Popula select de parent (excluindo a própria unidade)
       const selectParent = document.getElementById('editUnidadeParent');
-      selectParent.innerHTML = '<option value="">Nenhuma (raiz)</option>' + gerarOpcoesAgrupadas(id);
+      selectParent.innerHTML = '<option value="">Nenhuma (raiz)</option>' + gerarOpcoesRecursivas(id);
       
       if (unidade.parent_id) {
         selectParent.value = unidade.parent_id;
@@ -738,7 +733,7 @@
     carregarPendentes();
     carregarUsuarios();
     carregarUnidades();
-    console.log('🚀 Admin v1.0.6');
+    console.log('🚀 Admin v1.0.7');
   </script>
 
 </body>
