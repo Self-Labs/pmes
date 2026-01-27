@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala ISEO
-  Versão: 2.2
+  Versão: 2.3
 -->
 <html lang="pt-BR">
 <head>
@@ -55,7 +55,7 @@
   </div>
 
   <!-- MODO EDIÇÃO -->
-  <div id="modoEdicao" class="no-print" style="max-width: 800px; margin: 24px auto; padding: 0 16px;">
+  <div id="modoEdicao" class="no-print" style="max-width: 1000px; margin: 24px auto; padding: 0 16px;">
 
     <!-- Tabs -->
     <div style="display: flex; border-bottom: 1px solid #ddd; margin-bottom: 24px;">
@@ -128,7 +128,7 @@
           <label style="font-size: 12px; color: #666;">Dia da Semana</label>
           <input type="text" id="diaSemana" class="form-input" readonly style="background: #f3f4f6;">
         </div>
-        <div style="grid-column: span 2;">
+        <div>
           <label style="font-size: 12px; color: #666;">Nome da Operação</label>
           <input type="text" id="nomeOperacao" class="form-input" placeholder="Ex: OPERAÇÃO NATALINA">
         </div>
@@ -138,11 +138,19 @@
         </div>
         <div>
           <label style="font-size: 12px; color: #666;">Horário da Escala</label>
-          <input type="text" id="horarioEscala" class="form-input" placeholder="Ex: 17h00min às 23h00min">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="time" id="horarioInicio" class="form-input" style="flex: 1;">
+            <span>às</span>
+            <input type="time" id="horarioFim" class="form-input" style="flex: 1;">
+          </div>
         </div>
-        <div style="grid-column: span 2;">
+        <div>
           <label style="font-size: 12px; color: #666;">Horário de Apresentação</label>
-          <input type="text" id="horarioApresentacao" class="form-input" placeholder="Ex: 16h30min no 9º BPM">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="time" id="horarioApresentacao" class="form-input" style="flex: 1;">
+            <span>no</span>
+            <input type="text" id="localApresentacao" class="form-input" placeholder="Ex: 9º BPM" style="flex: 2;">
+          </div>
         </div>
       </div>
 
@@ -180,9 +188,10 @@
           <select id="novoQuadro" class="form-select">
             <option value="">-</option>
             <option>QOCPM</option>
-            <option>QOAEM</option>
-            <option>QPCPM</option>
-            <option>QPRAEM</option>
+            <option>QOAPM</option>
+            <option>QPMP-C</option>
+            <option>QPMP-S</option>
+            <option>QPMP-M</option>
           </select>
         </div>
         <div style="flex: 2; min-width: 150px;">
@@ -564,7 +573,7 @@
     function renderObservacoes() {
       document.getElementById('observacoesContainer').innerHTML = DB.observacoes.map((obs, i) => `
         <div style="display: flex; gap: 8px; align-items: flex-start;">
-          <span style="color: #999; margin-top: 8px;">➢</span>
+          <span style="color: #666; font-weight: bold; margin-top: 8px; min-width: 50px;">Obs ${i + 1}:</span>
           <textarea class="form-input obs-input" data-index="${i}" rows="2" style="flex: 1;">${obs}</textarea>
           <button onclick="removerObservacao(${i})" class="btn-icon" title="Remover">🗑️</button>
         </div>
@@ -615,8 +624,10 @@
         diaSemana: document.getElementById('diaSemana').value,
         nomeOperacao: document.getElementById('nomeOperacao').value,
         rubricaISEO: document.getElementById('rubricaISEO').value,
-        horarioEscala: document.getElementById('horarioEscala').value,
+        horarioInicio: document.getElementById('horarioInicio').value,
+        horarioFim: document.getElementById('horarioFim').value,
         horarioApresentacao: document.getElementById('horarioApresentacao').value,
+        localApresentacao: document.getElementById('localApresentacao').value,
       };
 
       DB.setor = document.getElementById('setorObs').value;
@@ -712,8 +723,14 @@
       const dataFormatada = d.dataEscala ? d.dataEscala.split('-').reverse().join('/') : '';
       document.getElementById('viewDia').textContent = dataFormatada;
       document.getElementById('viewDiaSemana').textContent = d.diaSemana || '';
-      document.getElementById('viewHorario').textContent = d.horarioEscala || '';
-      document.getElementById('viewApresentacao').textContent = d.horarioApresentacao || '';
+      
+      // Formatar horários
+      const formatarHora = (h) => h ? h.replace(':', 'h') + 'min' : '';
+      const horarioEscala = d.horarioInicio && d.horarioFim ? `${formatarHora(d.horarioInicio)} às ${formatarHora(d.horarioFim)}` : '';
+      const horarioApres = d.horarioApresentacao ? `${formatarHora(d.horarioApresentacao)}${d.localApresentacao ? ' no ' + d.localApresentacao : ''}` : '';
+      
+      document.getElementById('viewHorario').textContent = horarioEscala;
+      document.getElementById('viewApresentacao').textContent = horarioApres;
 
       // Tabela Militares
       let html = `
@@ -748,11 +765,10 @@
       // Observações
       let obsHtml = '';
       if (DB.setor) {
-        obsHtml += `<p style="font-weight: bold; margin-bottom: 8px;">${DB.setor}</p>`;
+        obsHtml += `<p style="font-weight: bold; margin-bottom: 8px;">Setor: ${DB.setor}</p>`;
       }
-      obsHtml += '<p style="font-weight: bold;">OBSERVAÇÕES:</p>';
-      DB.observacoes.filter(o => o.trim()).forEach(o => {
-        obsHtml += `<p style="margin-left: 16px;">➢ ${o}</p>`;
+      DB.observacoes.filter(o => o.trim()).forEach((o, i) => {
+        obsHtml += `<p style="margin-bottom: 4px;"><strong>Obs ${i + 1}:</strong> ${o}</p>`;
       });
       document.getElementById('observacoesView').innerHTML = obsHtml;
 
@@ -786,7 +802,7 @@
 
     // === Init ===
     // Removido o carregarDados() daqui pois é chamado no bloco async
-    console.log('🚀 Escala ISEO v2.2');
+    console.log('🚀 Escala ISEO v2.3');
   </script>
 
 </body>
