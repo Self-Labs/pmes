@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Estilos
-  Versão: 1.6
+  Versão: 1.7
 */
 
 /* Variáveis de Cores */
@@ -339,37 +339,71 @@ a.btn {
   font-weight: normal;
 }
 
-.badge-tipo {
-  padding: 3px 8px;
-  background: #eef2ff;
-  color: #4f46e5;
-  border: 1px solid #c7d2fe;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
+/* === Badges de Tipo (Admin) === */
+.badge {
   display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px; /* Retangular arredondado */
+  font-size: 11px;
+  font-weight: bold;
+  text-align: center;
+  min-width: 60px;
+  text-transform: uppercase;
 }
 
+/* Cores específicas para os Tipos */
+.badge-primary {
+  background-color: #e0f2fe;
+  color: #0369a1; /* Azul claro (CPOR/CPOE) */
+  border: 1px solid #bae6fd;
+}
+
+.badge-success {
+  background-color: #dcfce7;
+  color: #15803d; /* Verde (BPM) */
+  border: 1px solid #bbf7d0;
+}
+
+.badge-warning {
+  background-color: #fef9c3;
+  color: #a16207; /* Amarelo (CIA) */
+  border: 1px solid #fde047;
+}
+.badge-danger {
+  background-color: #fee2e2;
+  color: #b91c1c; /* Vermelho (COPOM) */
+  border: 1px solid #fecaca;
+}
+
+.badge-secondary {
+  background-color: #f3f4f6;
+  color: #4b5563; /* Cinza (Outros) */
+  border: 1px solid #e5e7eb;
+}
+
+/* Botões Ícone (Clean) */
 .btn-icon {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 14px;
-  padding: 4px;
-  opacity: 0.6;
+  font-size: 16px; /* Aumentei um pouco para legibilidade */
+  padding: 4px 6px;
+  opacity: 0.7;
   transition: all 0.2s;
+  border-radius: 4px;
 }
 
 .btn-icon:hover {
   opacity: 1;
-  transform: scale(1.1);
+  background-color: rgba(0,0,0,0.05); /* Leve fundo ao passar o mouse */
+  transform: scale(1.05);
 }
 
 /* Feedback visual de última edição */
 .audit-info {
   font-size: 11px;
-  color: #6b7280;
-  margin-left: 12px;
+  color: rgba(255, 255, 255, 0.9); /* Branco com leve transparência para barra azul */
   font-style: italic;
-  display: inline-block;
+  display: block; /* Garante que fique em linha nova se necessário, ou use inline-block */
+  margin-top: 4px;
 }

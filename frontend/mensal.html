@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala Mensal
-  Versão: 1.9
+  Versão: 2.0
 -->
 <html lang="pt-BR">
 <head>
@@ -27,7 +27,7 @@
         <span class="navbar-version">v3.8</span>
       </div>
       <div class="navbar-menu">
-        <select id="adminUnitSelect" class="form-select hidden" style="width: 200px; padding: 4px; font-size: 12px; margin-right: 12px;">
+        <select id="adminUnitSelect" class="form-select hidden" style="width: auto; max-width: 350px; padding: 4px; font-size: 12px; margin-right: 12px;">
           <option value="">Carregando...</option>
         </select>
 
@@ -50,7 +50,7 @@
         <button onclick="window.print()" class="btn btn-secondary">🖨️ Imprimir/PDF</button>
         <span id="statusSalvo" class="status-salvo salvo">✓ Salvo</span>
       </div>
-      <span id="auditTrail" class="audit-info" style="color: rgba(255,255,255,0.8); font-size: 11px;"></span>
+      <span id="auditTrail" class="audit-info"></span>
     </div>
   </div>
 
@@ -299,9 +299,22 @@
 
           const unidades = await listarTodasUnidades();
 
-          select.innerHTML = unidades
-            .sort((a, b) => a.sigla.localeCompare(b.sigla))
-            .map(u => `<option value="${u.id}">${u.sigla}</option>`)
+          // Lógica de Caminho Completo (Breadcrumb)
+          const mapUnidades = new Map(unidades.map(u => [u.id, u]));
+
+          const getNomeCompleto = (u) => {
+            if (!u.parent_id) return u.sigla;
+            const pai = mapUnidades.get(u.parent_id);
+            return pai ? `${getNomeCompleto(pai)} / ${u.sigla}` : u.sigla;
+          };
+
+          const listaOrdenada = unidades.map(u => ({
+            id: u.id,
+            nome: getNomeCompleto(u)
+          })).sort((a, b) => a.nome.localeCompare(b.nome));
+
+          select.innerHTML = listaOrdenada
+            .map(u => `<option value="${u.id}">${u.nome}</option>`)
             .join('');
 
           // Se Admin sem unidade (root), seleciona a primeira da lista
@@ -672,7 +685,7 @@
         <div style="display: flex; gap: 8px; align-items: flex-start;">
           <span style="color: #999; margin-top: 8px;">➢</span>
           <textarea class="form-input obs-input" data-index="${i}" rows="2" style="flex: 1;">${obs}</textarea>
-          <button onclick="removerObservacao(${i})" class="btn btn-danger" style="padding: 8px;">🗑️</button>
+          <button onclick="removerObservacao(${i})" class="btn-icon" title="Remover">🗑️</button>
         </div>
       `).join('');
     }
@@ -944,7 +957,7 @@
 
     // === Init ===
     // Removido o carregarDados() daqui pois ele é chamado no bloco async inicial
-    console.log('🚀 Escala Mensal v1.9');
+    console.log('🚀 Escala Mensal v2.0');
   </script>
 
 </body>

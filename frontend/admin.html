@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Admin
-  Versão: 2.1
+  Versão: 2.2
 -->
 <html lang="pt-BR">
 <head>
@@ -474,11 +474,11 @@
       const renderLinha = (u, nivel) => {
         const padding = nivel * 24; 
         const isRaiz = nivel === 0;
-        
+
         // Classes do CSS
         const rowClass = isRaiz ? 'unit-row-root' : 'unit-row-child';
         const siglaClass = isRaiz ? 'unit-sigla-root' : 'unit-sigla-child';
-        
+
         // Ícone hierárquico
         let icone = '';
         if (nivel > 0) icone = `<span style="color:#9ca3af; margin-right:4px;">↳</span>`;
@@ -487,13 +487,20 @@
         // Badge de Status (Classe CSS)
         const inativoTag = !u.ativo ? '<span class="unit-inactive">(Inativo)</span>' : '';
 
+        // Cor do Badge por Tipo
+        let badgeClass = 'badge-secondary';
+        if (u.tipo === 'CPOR' || u.tipo === 'CPOE') badgeClass = 'badge-primary';
+        else if (u.tipo === 'BPM') badgeClass = 'badge-success';
+        else if (u.tipo === 'CIA' || u.tipo === 'CIA_IND') badgeClass = 'badge-warning';
+        else if (u.tipo === 'COPOM') badgeClass = 'badge-danger';
+
         // O padding-left continua inline pois é cálculo matemático dinâmico
         let row = `
           <tr class="${rowClass}">
             <td class="${siglaClass}" style="padding-left: ${padding + 12}px;">
               ${icone} ${u.sigla} ${inativoTag}
             </td>
-            <td><span class="badge-tipo">${u.tipo}</span></td>
+            <td><span class="badge ${badgeClass}">${u.tipo.replace('_', ' ')}</span></td>
             <td class="text-right">
               <button onclick="abrirEditarUnidade('${u.id}')" class="btn-icon" title="Editar">✏️</button>
               <button onclick="excluirUnidade('${u.id}', '${u.sigla}')" class="btn-icon" title="Excluir">🗑️</button>
@@ -823,7 +830,7 @@
     carregarPendentes();
     carregarUsuarios();
     carregarUnidades();
-    console.log('🚀 Admin v2.1');
+    console.log('🚀 Admin v2.2');
   </script>
 
 </body>
