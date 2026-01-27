@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Admin
-  Versão: 2.3
+  Versão: 2.4
 -->
 <html lang="pt-BR">
 <head>
@@ -833,10 +833,14 @@
     }
 
     // === Init ===
-    carregarPendentes();
-    carregarUsuarios();
-    carregarUnidades();
-    console.log('🚀 Admin v2.3');
+    async function inicializar() {
+      await carregarUnidades();
+      carregarPendentes();
+      carregarUsuarios();
+    }
+
+    inicializar();
+    console.log('🚀 Admin v2.4');
   </script>
 
 </body>
