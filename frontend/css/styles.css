@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Estilos
-  Versão: 1.5
+  Versão: 1.6
 */
 
 /* Variáveis de Cores */
@@ -363,4 +363,13 @@ a.btn {
 .btn-icon:hover {
   opacity: 1;
   transform: scale(1.1);
+}
+
+/* Feedback visual de última edição */
+.audit-info {
+  font-size: 11px;
+  color: #6b7280;
+  margin-left: 12px;
+  font-style: italic;
+  display: inline-block;
 }

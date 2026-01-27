@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala ISEO
-  Versão: 1.6
+  Versão: 1.7
 -->
 <html lang="pt-BR">
 <head>
@@ -24,7 +24,7 @@
     <div class="navbar-content" style="max-width: 1000px;">
       <div class="navbar-brand">
         📋 Escala ISEO
-        <span class="navbar-version">v3.6</span>
+        <span class="navbar-version">v3.7</span>
       </div>
       <div class="navbar-menu">
         <select id="adminUnitSelect" class="form-select hidden" style="width: 150px; padding: 4px; font-size: 12px; margin-right: 10px;">
@@ -48,6 +48,7 @@
       <button onclick="salvarAgora()" class="btn btn-success">💾 Salvar</button>
       <button onclick="window.print()" class="btn btn-secondary">🖨️ Imprimir/PDF</button>
       <span id="statusSalvo" class="status-salvo salvo">✓ Salvo</span>
+      <span id="auditTrail" class="audit-info"></span>
     </div>
   </div>
 
@@ -374,7 +375,16 @@
 
       try {
         coletarTudo();
-        // Passa currentUnidadeId
+
+        // Audit Trail
+        const user = await buscarMeuPerfil();
+        DB.config.ultima_alteracao = new Date().toLocaleString('pt-BR');
+        DB.config.alterado_por = user.nome;
+
+        // Atualiza visualmente na hora
+        const auditEl = document.getElementById('auditTrail');
+        if (auditEl) auditEl.textContent = `Última edição: ${DB.config.ultima_alteracao} por ${DB.config.alterado_por}`;
+
         await salvarEscalaISEO({
           config: DB.config,
           dados: DB.dados,
@@ -382,6 +392,7 @@
           observacoes: DB.observacoes,
           setor: DB.setor
         }, currentUnidadeId);
+
         dadosAlterados = false;
         atualizarStatus('salvo');
       } catch (err) {
@@ -521,9 +532,9 @@
           <td>${m.rg}</td>
           <td>${m.nf || '-'}</td>
           <td style="text-align: center;">
-            <button onclick="moverMilitar(${m.id}, -1)" class="btn btn-secondary" style="padding: 2px 6px; font-size: 11px;">⬆️</button>
-            <button onclick="moverMilitar(${m.id}, 1)" class="btn btn-secondary" style="padding: 2px 6px; font-size: 11px;">⬇️</button>
-            <button onclick="removerMilitar(${m.id})" class="btn btn-danger" style="padding: 2px 6px; font-size: 11px;">🗑️</button>
+            <button onclick="moverMilitar(${m.id}, -1)" class="btn-icon" title="Mover para cima">⬆️</button>
+            <button onclick="moverMilitar(${m.id}, 1)" class="btn-icon" title="Mover para baixo">⬇️</button>
+            <button onclick="removerMilitar(${m.id})" class="btn-icon" title="Remover">🗑️</button>
           </td>
         </tr>
       `).join('');
@@ -620,6 +631,12 @@
       document.getElementById('setorObs').value = DB.setor || '';
       renderMilitares();
       renderObservacoes();
+
+      // Exibe auditoria se existir
+      if (DB.config && DB.config.ultima_alteracao) {
+        const auditEl = document.getElementById('auditTrail');
+        if (auditEl) auditEl.textContent = `Última edição: ${DB.config.ultima_alteracao} por ${DB.config.alterado_por || 'Desconhecido'}`;
+      }
     }
 
     // === Carregar Dados do Servidor ===
@@ -749,7 +766,7 @@
 
     // === Init ===
     // Removido o carregarDados() daqui pois é chamado no bloco async
-    console.log('🚀 Escala ISEO v1.6');
+    console.log('🚀 Escala ISEO v1.7');
   </script>
 
 </body>

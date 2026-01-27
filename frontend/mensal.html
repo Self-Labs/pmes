@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala Mensal
-  Versão: 1.7
+  Versão: 1.8
 -->
 <html lang="pt-BR">
 <head>
@@ -24,7 +24,7 @@
     <div class="navbar-content" style="max-width: 1400px;">
       <div class="navbar-brand">
         📋 Escala Mensal
-        <span class="navbar-version">v3.6</span>
+        <span class="navbar-version">v3.7</span>
       </div>
       <div class="navbar-menu">
         <select id="adminUnitSelect" class="form-select hidden" style="width: 200px; padding: 4px; font-size: 12px; margin-right: 12px;">
@@ -48,6 +48,7 @@
       <button onclick="salvarAgora()" class="btn btn-success">💾 Salvar</button>
       <button onclick="window.print()" class="btn btn-secondary">🖨️ Imprimir/PDF</button>
       <span id="statusSalvo" class="status-salvo salvo">✓ Salvo</span>
+      <span id="auditTrail" class="audit-info"></span>
     </div>
   </div>
 
@@ -361,6 +362,16 @@
 
       try {
         coletarConfig();
+
+        // Audit Trail: Captura quem está salvando e a hora
+        const user = await buscarMeuPerfil();
+        DB.config.ultima_alteracao = new Date().toLocaleString('pt-BR');
+        DB.config.alterado_por = user.nome;
+
+        // Atualiza visualmente na hora
+        const auditEl = document.getElementById('auditTrail');
+        if (auditEl) auditEl.textContent = `Última edição: ${DB.config.ultima_alteracao} por ${DB.config.alterado_por}`;
+
         // Passa currentUnidadeId para o salvamento
         await salvarEscalaMensal({
           config: DB.config,
@@ -572,8 +583,8 @@
           <td style="font-weight: 600;">${m.nome}</td>
           <td>${m.rg}</td>
           <td style="text-align: center;">
-            <button onclick="editarMilitar(${m.id})" class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px; margin-right: 4px;" title="Editar">✏️</button>
-            <button onclick="removerMilitar(${m.id})" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" title="Remover">🗑️</button>
+            <button onclick="editarMilitar(${m.id})" class="btn-icon" title="Editar">✏️</button>
+            <button onclick="removerMilitar(${m.id})" class="btn-icon" title="Remover">🗑️</button>
           </td>
         </tr>
       `).join('');
@@ -773,6 +784,12 @@
       renderColunas();
       renderEquipes();
       renderObservacoes();
+
+      // Exibe auditoria se existir
+      if (DB.config && DB.config.ultima_alteracao) {
+        const auditEl = document.getElementById('auditTrail');
+        if (auditEl) auditEl.textContent = `Última edição: ${DB.config.ultima_alteracao} por ${DB.config.alterado_por || 'Desconhecido'}`;
+      }
       
       setTimeout(() => { isLoading = false; }, 500);
     }
@@ -925,7 +942,7 @@
 
     // === Init ===
     // Removido o carregarDados() daqui pois ele é chamado no bloco async inicial
-    console.log('🚀 Escala Mensal v1.7');
+    console.log('🚀 Escala Mensal v1.8');
   </script>
 
 </body>

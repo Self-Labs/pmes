@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Admin
-  Versão: 1.8
+  Versão: 1.9
 -->
 <html lang="pt-BR">
 <head>
@@ -18,7 +18,7 @@
     <div class="navbar-content" style="max-width: 1200px;">
       <div class="navbar-brand">
         ⚙️ Administração
-        <span class="navbar-version">v3.6</span>
+        <span class="navbar-version">v3.7</span>
       </div>
       <div class="navbar-menu">
         <a href="/perfil" id="navbarUser" class="navbar-user" style="text-decoration: none; color: inherit; margin-right: 8px;" title="Ir para Perfil"></a>
@@ -249,17 +249,18 @@
       </div>
 
       <div class="mb-4">
-        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Comando</label>
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Unidade Principal (BPM/Independente)</label>
         <select id="newUserComando" class="form-select" onchange="carregarSubunidadesNew()">
-          <option value="">Selecione o comando</option>
+          <option value="">Selecione...</option>
         </select>
       </div>
-
+      
       <div class="mb-4">
-        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Unidade</label>
+        <label style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px;">Subunidade (Cia/Pelotão) - Opcional</label>
         <select id="newUserUnidade" class="form-select">
-          <option value="">Selecione a unidade</option>
+          <option value="">Selecione a unidade principal primeiro</option>
         </select>
+        <p style="font-size: 11px; color: #666; margin-top: 2px;">* Se vazio, o usuário pertencerá à Unidade Principal.</p>
       </div>
 
       <div class="mb-4">
@@ -355,28 +356,37 @@
       try {
         const usuarios = await listarUsuarios();
         usuariosCache = usuarios;
-        document.getElementById('listaUsuarios').innerHTML = usuarios.map(u => `
-          <tr>
-            <td style="font-weight: 600;">${u.nome}</td>
-            <td>${u.email}</td>
-            <td>${u.unidade_sigla || '-'}</td>
-            <td>
-              <select onchange="mudarRole('${u.id}', this.value)" class="form-select" style="width: auto; padding: 4px 8px; font-size: 12px;">
-                <option value="editor" ${u.role === 'editor' ? 'selected' : ''}>Editor</option>
-                <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
-              </select>
-            </td>
-            <td>
-              <span style="padding: 2px 8px; border-radius: 4px; font-size: 12px; ${u.ativo ? 'background: #d4edda; color: #155724;' : 'background: #f8d7da; color: #721c24;'}">
-                ${u.ativo ? 'Ativo' : 'Pendente'}
-              </span>
-            </td>
-            <td>
-              <button onclick="abrirEditarUsuario('${u.id}')" class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">✏️</button>
-              <button onclick="excluirUsuario('${u.id}', '${u.nome}')" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;">🗑️</button>
-            </td>
-          </tr>
-        `).join('');
+        document.getElementById('listaUsuarios').innerHTML = usuarios.map(u => {
+        // Lógica de Hierarquia Visual
+        let nomeUnidade = u.unidade_sigla || '-';
+        const unidade = unidadesCache.find(x => x.sigla === u.unidade_sigla); // Tenta achar pelo cache
+        if (unidade && unidade.parent_id) {
+           const parent = unidadesCache.find(x => x.id === unidade.parent_id);
+           if (parent) nomeUnidade = `${parent.sigla} / ${unidade.sigla}`;
+        }
+
+        return `
+        <tr>
+          <td style="font-weight: 600;">${u.nome}</td>
+          <td>${u.email}</td>
+          <td style="font-size: 13px; color: #4b5563;">${nomeUnidade}</td>
+          <td>
+            <select onchange="mudarRole('${u.id}', this.value)" class="form-select" style="width: auto; padding: 4px 8px; font-size: 12px;">
+              <option value="editor" ${u.role === 'editor' ? 'selected' : ''}>Editor</option>
+              <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+            </select>
+          </td>
+          <td>
+            <span style="padding: 2px 8px; border-radius: 4px; font-size: 12px; ${u.ativo ? 'background: #d4edda; color: #155724;' : 'background: #f8d7da; color: #721c24;'}">
+              ${u.ativo ? 'Ativo' : 'Pendente'}
+            </span>
+          </td>
+          <td>
+            <button onclick="abrirEditarUsuario('${u.id}')" class="btn-icon" title="Editar">✏️</button>
+            <button onclick="excluirUsuario('${u.id}', '${u.nome}')" class="btn-icon" title="Excluir">🗑️</button>
+          </td>
+        </tr>
+      `}).join('');
       } catch (err) {
         console.error('Erro ao carregar usuários:', err);
       }
@@ -669,11 +679,13 @@
       document.getElementById('newUserRole').value = 'editor';
       document.getElementById('newUserAtivo').value = 'true';
 
-      // Popula comandos
+      // Popula comandos (Unidades Raiz)
       const selectComando = document.getElementById('newUserComando');
-      selectComando.innerHTML = '<option value="">Selecione o comando</option>';
-      const comandos = unidadesCache.filter(u => u.tipo === 'CPOR' || u.tipo === 'CPOE');
-      comandos.forEach(u => {
+      selectComando.innerHTML = '<option value="">Selecione...</option>';
+
+      const principais = unidadesCache.filter(u => !u.parent_id);
+      principais.sort((a,b) => a.sigla.localeCompare(b.sigla));
+      principais.forEach(u => {
         const opt = document.createElement('option');
         opt.value = u.id;
         opt.textContent = u.sigla;
@@ -733,7 +745,7 @@
     carregarPendentes();
     carregarUsuarios();
     carregarUnidades();
-    console.log('🚀 Admin v1.8');
+    console.log('🚀 Admin v1.9');
   </script>
 
 </body>
