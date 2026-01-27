@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Escalas Routes
-  Versão: 1.0.0
+  Versão: 1.0.1
 */
 
 const express = require('express');
@@ -16,11 +16,18 @@ const router = express.Router();
 // GET /escalas/mensal - Busca escala da unidade
 router.get('/mensal', authMiddleware, async (req, res) => {
   try {
-    const { unidade_id } = req.user;
+    // Se for Admin e passar ?unidade_id=X, usa esse ID. Senão, usa o do token.
+    let targetUnidadeId = req.user.unidade_id;
+    if (req.user.role === 'admin' && req.query.unidade_id) {
+      targetUnidadeId = req.query.unidade_id;
+    }
+
+    // Se admin sem unidade tentar acessar sem especificar, retorna null (ou erro)
+    if (!targetUnidadeId) return res.json(null);
 
     const result = await db.query(
       'SELECT * FROM escalas_mensal WHERE unidade_id = $1',
-      [unidade_id]
+      [targetUnidadeId]
     );
 
     if (result.rows.length === 0) {
@@ -37,7 +44,17 @@ router.get('/mensal', authMiddleware, async (req, res) => {
 // POST /escalas/mensal - Cria ou atualiza escala
 router.post('/mensal', authMiddleware, async (req, res) => {
   try {
-    const { unidade_id } = req.user;
+    // LÓGICA CORRIGIDA:
+    // Se for Admin, aceita unidade_id do corpo. Se não, força do token.
+    let targetUnidadeId = req.user.unidade_id;
+    if (req.user.role === 'admin' && req.body.unidade_id) {
+      targetUnidadeId = req.body.unidade_id;
+    }
+
+    if (!targetUnidadeId) {
+      return res.status(400).json({ error: 'Operação falhou: Unidade não identificada.' });
+    }
+
     const { config, militares, colunas, equipes, observacoes } = req.body;
 
     const result = await db.query(
@@ -52,7 +69,7 @@ router.post('/mensal', authMiddleware, async (req, res) => {
          observacoes = $6,
          updated_at = CURRENT_TIMESTAMP
        RETURNING *`,
-      [unidade_id,
+      [targetUnidadeId, // Usa o ID resolvido acima
        JSON.stringify(config || {}), 
        JSON.stringify(militares || []), 
        JSON.stringify(colunas || []), 
@@ -74,11 +91,16 @@ router.post('/mensal', authMiddleware, async (req, res) => {
 // GET /escalas/iseo - Busca escala da unidade
 router.get('/iseo', authMiddleware, async (req, res) => {
   try {
-    const { unidade_id } = req.user;
+    let targetUnidadeId = req.user.unidade_id;
+    if (req.user.role === 'admin' && req.query.unidade_id) {
+      targetUnidadeId = req.query.unidade_id;
+    }
+
+    if (!targetUnidadeId) return res.json(null);
 
     const result = await db.query(
       'SELECT * FROM escalas_iseo WHERE unidade_id = $1',
-      [unidade_id]
+      [targetUnidadeId]
     );
 
     if (result.rows.length === 0) {
@@ -95,7 +117,16 @@ router.get('/iseo', authMiddleware, async (req, res) => {
 // POST /escalas/iseo - Cria ou atualiza escala
 router.post('/iseo', authMiddleware, async (req, res) => {
   try {
-    const { unidade_id } = req.user;
+    // LÓGICA CORRIGIDA:
+    let targetUnidadeId = req.user.unidade_id;
+    if (req.user.role === 'admin' && req.body.unidade_id) {
+      targetUnidadeId = req.body.unidade_id;
+    }
+
+    if (!targetUnidadeId) {
+      return res.status(400).json({ error: 'Operação falhou: Unidade não identificada.' });
+    }
+
     const { config, dados, militares, observacoes, setor } = req.body;
 
     const result = await db.query(
@@ -110,7 +141,7 @@ router.post('/iseo', authMiddleware, async (req, res) => {
          setor = $6,
          updated_at = CURRENT_TIMESTAMP
        RETURNING *`,
-      [unidade_id,
+      [targetUnidadeId,
        JSON.stringify(config || {}),
        JSON.stringify(dados || {}),
        JSON.stringify(militares || []),
