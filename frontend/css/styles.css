@@ -439,7 +439,7 @@ a.btn {
 }
 
 /* Layout Centralizado com Fundo Azul */
-.page-centered {
+body.page-centered {
   display: flex;
   align-items: center;
   justify-content: center;
