@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala ISEO
-  Versão: 2.9
+  Versão: 2.10
 -->
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Escala ISEO - Sistema de Escalas</title>
-  <link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/styles.css">
   <style>
     @media print {
@@ -254,60 +254,66 @@
 
   <!-- MODO VISUALIZAÇÃO -->
   <div id="modoVisualizacao" class="hidden">
-    <div id="documento" style="background: white; max-width: 210mm; margin: 24px auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 16px;">
+    <table id="documento" class="print-wrapper" style="background: white; max-width: 210mm; margin: 24px auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
 
-      <!-- Cabeçalho -->
-      <header style="margin-bottom: 16px;">
-        <div style="display: flex; justify-content: center; align-items: center; gap: 48px;">
-          <div id="brasaoEsqView"></div>
-          <div style="text-align: center; line-height: 1.4;" id="headerTexto"></div>
-          <div id="brasaoDirView"></div>
-        </div>
-      </header>
+      <thead class="print-header">
+        <tr><td class="print-header-content" style="padding: 16px 16px 8px;">
+          <div style="display: flex; justify-content: center; align-items: center; gap: 48px;">
+            <div id="brasaoEsqView"></div>
+            <div style="text-align: center; line-height: 1.4;" id="headerTexto"></div>
+            <div id="brasaoDirView"></div>
+          </div>
+        </td></tr>
+      </thead>
 
-      <!-- Título Operação -->
-      <div style="text-align: center; margin-bottom: 16px;">
-        <h2 id="tituloOperacao" style="font-size: 16px; font-weight: bold; text-transform: uppercase;"></h2>
-        <p id="subtituloISEO" style="font-size: 14px; font-weight: bold;"></p>
-      </div>
+      <tfoot class="print-footer">
+        <tr><td class="print-footer-content" style="padding: 12px 16px; text-align: center; font-size: 11px;">
+          <p style="font-style: italic; font-weight: bold;" id="footerLemaTexto"></p>
+          <p id="footerLinha1Texto"></p>
+          <p id="footerLinha2Texto"></p>
+          <p id="footerLinha3Texto"></p>
+        </td></tr>
+      </tfoot>
 
-      <!-- Info Escala -->
-      <div style="margin-bottom: 16px; font-size: 13px;">
-        <p><strong>DIA:</strong> <span id="viewDia"></span> (<span id="viewDiaSemana"></span>)</p>
-        <p><strong>HORÁRIO:</strong> <span id="viewHorario"></span></p>
-        <p><strong>APRESENTAÇÃO:</strong> <span id="viewApresentacao"></span></p>
-      </div>
+      <tbody class="print-body">
+        <tr><td style="padding: 8px 16px;">
+          <!-- Título Operação -->
+          <div style="text-align: center; margin-bottom: 16px;">
+            <h2 id="tituloOperacao" style="font-size: 16px; font-weight: bold; text-transform: uppercase;"></h2>
+            <p id="subtituloISEO" style="font-size: 14px; font-weight: bold;"></p>
+          </div>
 
-      <!-- Tabela Militares -->
-      <table id="tabelaMilitares" class="print-table" style="margin-bottom: 16px; table-layout: auto; width: 100%; font-size: 14px;"></table>
+          <!-- Info Escala -->
+          <div style="margin-bottom: 16px; font-size: 13px;">
+            <p><strong>DIA:</strong> <span id="viewDia"></span> (<span id="viewDiaSemana"></span>)</p>
+            <p><strong>HORÁRIO:</strong> <span id="viewHorario"></span></p>
+            <p><strong>APRESENTAÇÃO:</strong> <span id="viewApresentacao"></span></p>
+          </div>
 
-      <!-- Observações -->
-      <div id="observacoesView" style="font-size: 12px; margin-bottom: 24px;"></div>
+          <!-- Tabela Militares -->
+          <table id="tabelaMilitares" class="print-table" style="margin-bottom: 16px; table-layout: auto; width: 100%; font-size: 14px;"></table>
 
-      <!-- Assinatura -->
-      <div style="text-align: center; margin-top: 48px; margin-bottom: 24px;">
-        <div style="display: inline-block; border-top: 1px solid black; padding-top: 8px; min-width: 300px;">
-          <p style="font-size: 14px; font-weight: bold;" id="assinaturaTexto"></p>
-          <p style="font-size: 12px;" id="assinaturaCargoTexto"></p>
-        </div>
-      </div>
+          <!-- Observações -->
+          <div id="observacoesView" style="font-size: 14px; margin-bottom: 24px;"></div>
 
-      <!-- Rodapé -->
-      <footer style="text-align: center; font-size: 11px; border-top: 1px solid #ccc; padding-top: 12px;">
-        <p style="font-style: italic; font-weight: bold;" id="footerLemaTexto"></p>
-        <p id="footerLinha1Texto"></p>
-        <p id="footerLinha2Texto"></p>
-        <p id="footerLinha3Texto"></p>
-      </footer>
+          <!-- Assinatura -->
+          <div style="text-align: center; margin-top: 48px; margin-bottom: 24px;">
+            <div style="display: inline-block; border-top: 1px solid black; padding-top: 8px; min-width: 300px;">
+              <p style="font-size: 14px; font-weight: bold;" id="assinaturaTexto"></p>
+              <p style="font-size: 12px;" id="assinaturaCargoTexto"></p>
+            </div>
+          </div>
+        </td></tr>
+      </tbody>
 
-    </div>
+    </table>
   </div>
 
   <script src="/js/api.js"></script>
   <script src="/js/auth.js"></script>
   <script>
     // Verifica autenticação
-    if (!isLoggedIn()) window.location.href = '/login.html';
+    if (!isLoggedIn()) window.location.href = '/';
 
     let currentUnidadeId = null;
 

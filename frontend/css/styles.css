@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Estilos
-  Versão: 1.7
+  Versão: 1.8
 */
 
 /* Variáveis de Cores */
@@ -406,4 +406,36 @@ a.btn {
   font-style: italic;
   display: block; /* Garante que fique em linha nova se necessário, ou use inline-block */
   margin-top: 4px;
+}
+
+/* === Impressão com Cabeçalho/Rodapé Fixo === */
+.print-wrapper {
+  display: table;
+  width: 100%;
+}
+
+.print-header {
+  display: table-header-group;
+}
+
+.print-footer {
+  display: table-footer-group;
+}
+
+.print-body {
+  display: table-row-group;
+}
+
+.print-header-content,
+.print-footer-content {
+  padding: 8px 0;
+}
+
+@media print {
+  .print-header { display: table-header-group; }
+  .print-footer { display: table-footer-group; }
+  .print-body { display: table-row-group; }
+  
+  .print-header-content { padding-bottom: 12px; border-bottom: 1px solid #ccc; }
+  .print-footer-content { padding-top: 12px; border-top: 1px solid #ccc; }
 }

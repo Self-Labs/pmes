@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Schema
-  Versão: 1.2
+  Versão: 1.3
 */
 
 -- Extensão para UUID
@@ -30,6 +30,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
     role VARCHAR(10) NOT NULL DEFAULT 'editor' CHECK (role IN ('admin', 'editor')),
     unidade_id UUID REFERENCES unidades(id),
     ativo BOOLEAN DEFAULT false,
+    reset_token VARCHAR(64),
+    reset_token_expires TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

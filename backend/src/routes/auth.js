@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Auth Routes
-  Versão: 1.0
+  Versão: 1.1
 */
 
 const express = require('express');
@@ -97,9 +97,20 @@ router.post('/cadastro', async (req, res) => {
 
     const novoUsuario = result.rows[0];
 
-    // Busca sigla da unidade para o email
-    const unidadeResult = await db.query('SELECT sigla FROM unidades WHERE id = $1', [unidade_id]);
-    const unidadeSigla = unidadeResult.rows[0]?.sigla || null;
+    // Busca hierarquia completa da unidade para o email
+    const unidadesResult = await db.query('SELECT id, sigla, parent_id FROM unidades');
+    const unidades = unidadesResult.rows;
+    const mapa = new Map(unidades.map(u => [u.id, u]));
+    
+    const getCaminho = (id) => {
+      const u = mapa.get(id);
+      if (!u) return [];
+      if (!u.parent_id) return [u.sigla];
+      return [...getCaminho(u.parent_id), u.sigla];
+    };
+    
+    const caminho = getCaminho(unidade_id);
+    const unidadeSigla = caminho.length > 0 ? caminho.join(' / ') : null;
 
     // Envia email para o admin
     enviarEmailNovoUsuario(novoUsuario, unidadeSigla);
@@ -110,6 +121,88 @@ router.post('/cadastro', async (req, res) => {
     });
   } catch (err) {
     console.error('Erro no cadastro:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// POST /auth/esqueci-senha
+router.post('/esqueci-senha', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email obrigatório' });
+    }
+
+    const result = await db.query(
+      'SELECT id, nome FROM usuarios WHERE email = $1',
+      [email.toLowerCase()]
+    );
+
+    // Sempre retorna sucesso (segurança - não revelar se email existe)
+    if (result.rows.length === 0) {
+      return res.json({ message: 'Se o email existir, você receberá instruções de recuperação.' });
+    }
+
+    const usuario = result.rows[0];
+
+    // Gera token de 64 caracteres
+    const crypto = require('crypto');
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 3600000); // 1 hora
+
+    // Salva token no banco
+    await db.query(
+      'UPDATE usuarios SET reset_token = $1, reset_token_expires = $2 WHERE id = $3',
+      [token, expires, usuario.id]
+    );
+
+    // Envia email
+    const { enviarEmailRecuperacaoSenha } = require('../config/email');
+    await enviarEmailRecuperacaoSenha(email, usuario.nome, token);
+
+    res.json({ message: 'Se o email existir, você receberá instruções de recuperação.' });
+  } catch (err) {
+    console.error('Erro ao solicitar recuperação:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// POST /auth/resetar-senha
+router.post('/resetar-senha', async (req, res) => {
+  try {
+    const { token, senha } = req.body;
+
+    if (!token || !senha) {
+      return res.status(400).json({ error: 'Token e nova senha são obrigatórios' });
+    }
+
+    if (senha.length < 6) {
+      return res.status(400).json({ error: 'Senha deve ter no mínimo 6 caracteres' });
+    }
+
+    // Busca usuário pelo token válido
+    const result = await db.query(
+      'SELECT id FROM usuarios WHERE reset_token = $1 AND reset_token_expires > NOW()',
+      [token]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: 'Token inválido ou expirado' });
+    }
+
+    const usuario = result.rows[0];
+    const senhaHash = await bcrypt.hash(senha, 10);
+
+    // Atualiza senha e limpa token
+    await db.query(
+      'UPDATE usuarios SET senha = $1, reset_token = NULL, reset_token_expires = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+      [senhaHash, usuario.id]
+    );
+
+    res.json({ message: 'Senha alterada com sucesso!' });
+  } catch (err) {
+    console.error('Erro ao resetar senha:', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });

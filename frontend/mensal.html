@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala Mensal
-  Versão: 2.3
+  Versão: 2.4
 -->
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Escala Mensal - Sistema de Escalas</title>
-  <link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/styles.css">
   <style>
     @media print {
@@ -242,44 +242,51 @@
 
   <!-- MODO VISUALIZAÇÃO -->
   <div id="modoVisualizacao" class="hidden">
-    <div id="documento" style="background: white; max-width: 1400px; margin: 24px auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <table id="documento" class="print-wrapper" style="background: white; max-width: 1400px; margin: 24px auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
 
-      <header style="padding: 4px 16px;">
-        <div style="display: flex; justify-content: center; align-items: center; gap: 112px; padding: 8px 16px;">
-          <div id="brasaoEsqView"></div>
-          <div style="text-align: center; line-height: 1.3;" id="headerTexto"></div>
-          <div id="brasaoDirView"></div>
-        </div>
-      </header>
-
-      <main style="padding: 8px 16px;">
-        <table id="tabelaFinal"></table>
-        <table id="calendarioFinal"></table>
-      </main>
-
-      <footer style="padding: 8px 16px 12px;">
-        <div style="font-size: 12px;" id="observacoesTexto"></div>
-        <div style="text-align: center; padding: 12px 0;">
-          <div style="display: inline-block; border-top: 1px solid black; padding-top: 4px; padding-left: 32px; padding-right: 32px;">
-            <p style="font-size: 14px; font-weight: bold;" id="assinaturaTexto"></p>
-            <p style="font-size: 12px;" id="assinaturaInfoTexto"></p>
+      <thead class="print-header">
+        <tr><td class="print-header-content" style="padding: 4px 16px;">
+          <div style="display: flex; justify-content: center; align-items: center; gap: 112px; padding: 8px 16px;">
+            <div id="brasaoEsqView"></div>
+            <div style="text-align: center; line-height: 1.3;" id="headerTexto"></div>
+            <div id="brasaoDirView"></div>
           </div>
-        </div>
-        <div style="text-align: center; font-size: 12px; border-top: 1px solid #ddd; padding-top: 8px;">
-          <p style="font-style: italic; font-weight: bold;" id="footerLemaTexto"></p>
-          <p style="margin-top: 4px;" id="footerEnderecoTexto1"></p>
-          <p style="margin-top: 4px;" id="footerEnderecoTexto2"></p>
-        </div>
-      </footer>
+        </td></tr>
+      </thead>
 
-    </div>
+      <tfoot class="print-footer">
+        <tr><td class="print-footer-content" style="padding: 8px 16px 12px;">
+          <div style="text-align: center; font-size: 12px; border-top: 1px solid #ddd; padding-top: 8px;">
+            <p style="font-style: italic; font-weight: bold;" id="footerLemaTexto"></p>
+            <p style="margin-top: 4px;" id="footerEnderecoTexto1"></p>
+            <p style="margin-top: 4px;" id="footerEnderecoTexto2"></p>
+          </div>
+        </td></tr>
+      </tfoot>
+
+      <tbody class="print-body">
+        <tr><td style="padding: 8px 16px;">
+          <table id="tabelaFinal"></table>
+          <table id="calendarioFinal"></table>
+          
+          <div style="font-size: 12px; margin-top: 12px;" id="observacoesTexto"></div>
+          <div style="text-align: center; padding: 12px 0;">
+            <div style="display: inline-block; border-top: 1px solid black; padding-top: 4px; padding-left: 32px; padding-right: 32px;">
+              <p style="font-size: 14px; font-weight: bold;" id="assinaturaTexto"></p>
+              <p style="font-size: 12px;" id="assinaturaInfoTexto"></p>
+            </div>
+          </div>
+        </td></tr>
+      </tbody>
+
+    </table>
   </div>
 
   <script src="/js/api.js"></script>
   <script src="/js/auth.js"></script>
   <script>
     // Verifica autenticação inicial
-    if (!isLoggedIn()) window.location.href = '/login.html';
+    if (!isLoggedIn()) window.location.href = '/';
 
     let currentUnidadeId = null;
 
