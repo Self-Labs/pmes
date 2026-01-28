@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Resetar Senha
-  Versão: 1.0
+  Versão: 1.1
 -->
 <html lang="pt-BR">
 <head>
@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/styles.css">
 </head>
-<body style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);">
+<body class="page-centered">
 
   <div class="card" style="width: 100%; max-width: 400px; margin: 20px;">
     <div style="text-align: center; margin-bottom: 24px;">
@@ -37,7 +37,7 @@
     </form>
 
     <div style="text-align: center; margin-top: 16px;">
-      <a href="/login" style="color: var(--pm-blue); font-size: 14px;">← Voltar para o login</a>
+      <a href="/" style="color: var(--pm-blue); font-size: 14px;">← Voltar para o login</a>
     </div>
 
     <p class="footer mt-6">© 2026 Self-Labs. Todos os direitos reservados.</p>
@@ -92,7 +92,7 @@
         document.getElementById('resetarForm').style.display = 'none';
 
         setTimeout(() => {
-          window.location.href = '/login';
+          window.location.href = '/';
         }, 2000);
       } catch (err) {
         alertBox.className = 'alert alert-error';

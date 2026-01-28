@@ -10,6 +10,9 @@ WORKDIR /usr/share/nginx/html
 # Copia apenas os HTMLs da raiz
 COPY *.html ./
 
+# Copia o favicon
+COPY favicon.ico ./
+
 # Copia apenas as pastas de recursos (CSS e JS)
 COPY css/ ./css/
 COPY js/ ./js/

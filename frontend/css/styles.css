@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Estilos
-  Versão: 1.8
+  Versão: 1.9
 */
 
 /* Variáveis de Cores */
@@ -285,7 +285,6 @@ a.btn {
 .bg-pm-green { background-color: #d4edda !important; }
 
 @media print {
-  /* @page movido para o HTML específico */
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .no-print { display: none !important; }
   #documento { box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
@@ -306,13 +305,12 @@ a.btn {
 }
 
 @media print {
-  /* @page movido para o HTML específico */
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .no-print { display: none !important; }
   #documento { box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
 }
 
-/* === Admin - Hierarquia e Unidades === */
+/* Admin - Hierarquia e Unidades */
 .unit-row-root {
   background: #f8f9fa;
   border-bottom: 2px solid #e5e7eb;
@@ -339,7 +337,7 @@ a.btn {
   font-weight: normal;
 }
 
-/* === Badges de Tipo (Admin) === */
+/* Badges de Tipo (Admin) */
 .badge {
   display: inline-block;
   padding: 4px 8px;
@@ -408,7 +406,7 @@ a.btn {
   margin-top: 4px;
 }
 
-/* === Impressão com Cabeçalho/Rodapé Fixo === */
+/* Impressão com Cabeçalho/Rodapé Fixo */
 .print-wrapper {
   display: table;
   width: 100%;
@@ -438,4 +436,13 @@ a.btn {
   
   .print-header-content { padding-bottom: 12px; border-bottom: 1px solid #ccc; }
   .print-footer-content { padding-top: 12px; border-top: 1px solid #ccc; }
+}
+
+/* Layout Centralizado com Fundo Azul */
+.page-centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
 }
