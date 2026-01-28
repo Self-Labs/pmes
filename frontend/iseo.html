@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala ISEO
-  Versão: 2.3
+  Versão: 2.4
 -->
 <html lang="pt-BR">
 <head>
@@ -219,7 +219,7 @@
               <th>Nome</th>
               <th>RG</th>
               <th>NF</th>
-              <th style="width: 120px;">Ações</th>
+              <th style="text-align: center;">Ações</th>
             </tr>
           </thead>
           <tbody id="listaMilitares"></tbody>
@@ -655,8 +655,10 @@
         document.getElementById('diaSemana').value = DB.dados.diaSemana || '';
         document.getElementById('nomeOperacao').value = DB.dados.nomeOperacao || '';
         document.getElementById('rubricaISEO').value = DB.dados.rubricaISEO || '';
-        document.getElementById('horarioEscala').value = DB.dados.horarioEscala || '';
+        document.getElementById('horarioInicio').value = DB.dados.horarioInicio || '';
+        document.getElementById('horarioFim').value = DB.dados.horarioFim || '';
         document.getElementById('horarioApresentacao').value = DB.dados.horarioApresentacao || '';
+        document.getElementById('localApresentacao').value = DB.dados.localApresentacao || '';
       }
 
       document.getElementById('setorObs').value = DB.setor || '';
@@ -735,12 +737,11 @@
       // Tabela Militares
       let html = `
         <thead>
-          <tr style="background: #FFD966;">
-            <th style="width: 40px; text-align: center;">Nº</th>
-            <th style="text-align: center;">POSTO/GRAD</th>
-            <th style="text-align: center;">NOME DE GUERRA</th>
-            <th style="text-align: center;">RG</th>
-            <th style="text-align: center;">NF</th>
+          <tr style="background: #e5e7eb;">
+            <th style="width: 30px; text-align: center;">Nº</th>
+            <th style="text-align: center;">MILITAR ESTADUAL</th>
+            <th style="text-align: center; white-space: nowrap;">RG</th>
+            <th style="text-align: center; white-space: nowrap;">NF</th>
           </tr>
         </thead>
         <tbody>
@@ -750,11 +751,10 @@
         const postoQuadro = m.quadro ? `${m.posto} ${m.quadro}` : m.posto;
         html += `
           <tr>
-            <td style="text-align: center;">${String(i + 1).padStart(2, '0')}</td>
-            <td style="text-align: center;">${postoQuadro}</td>
-            <td style="font-weight: bold;">${m.nome}</td>
-            <td style="text-align: center;">${m.rg}</td>
-            <td style="text-align: center;">${m.nf || '-'}</td>
+            <td style="text-align: center; font-weight: bold;">${String(i + 1).padStart(2, '0')}</td>
+            <td style="font-weight: bold;">${postoQuadro} ${m.nome}</td>
+            <td style="text-align: center; white-space: nowrap;">${m.rg}</td>
+            <td style="text-align: center; white-space: nowrap;">${m.nf || '-'}</td>
           </tr>
         `;
       });
@@ -802,7 +802,7 @@
 
     // === Init ===
     // Removido o carregarDados() daqui pois é chamado no bloco async
-    console.log('🚀 Escala ISEO v2.3');
+    console.log('🚀 Escala ISEO v2.4');
   </script>
 
 </body>
