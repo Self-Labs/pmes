@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Usuarios Routes
-  Versão: 1.5
+  Versão: 1.6
 */
 
 const express = require('express');
@@ -13,13 +13,13 @@ const router = express.Router();
 // GET /usuarios - Lista usuários (admin)
 router.get('/', authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const result = await db.query(
-      `SELECT u.id, u.nome, u.email, u.role, u.unidade_id, un.sigla as unidade_sigla
-       FROM usuarios u
-       LEFT JOIN unidades un ON u.unidade_id = un.id
-       WHERE u.id = $1`,
-      [id]
-    );
+    const result = await db.query(`
+      SELECT u.id, u.nome, u.email, u.role, u.ativo, u.created_at,
+             u.unidade_id, un.sigla as unidade_sigla
+      FROM usuarios u
+      LEFT JOIN unidades un ON u.unidade_id = un.id
+      ORDER BY u.created_at DESC
+    `);
     res.json(result.rows);
   } catch (err) {
     console.error('Erro ao listar usuários:', err);
@@ -152,7 +152,7 @@ router.get('/me', authMiddleware, async (req, res) => {
     const { id } = req.user;
 
     const result = await db.query(
-      `SELECT u.id, u.nome, u.email, u.role, un.sigla as unidade_sigla
+      `SELECT u.id, u.nome, u.email, u.role, u.unidade_id, un.sigla as unidade_sigla
        FROM usuarios u
        LEFT JOIN unidades un ON u.unidade_id = un.id
        WHERE u.id = $1`,

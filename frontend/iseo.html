@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala ISEO
-  Versão: 2.4
+  Versão: 2.5
 -->
 <html lang="pt-BR">
 <head>
@@ -195,8 +195,12 @@
           </select>
         </div>
         <div style="flex: 2; min-width: 150px;">
+          <label style="font-size: 12px; color: #666;">Nome Completo</label>
+          <input type="text" id="novoNome" class="form-input" placeholder="Ex: GUSTAVO CATEIM COZAQUEVE">
+        </div>
+        <div style="flex: 1; min-width: 100px;">
           <label style="font-size: 12px; color: #666;">Nome de Guerra</label>
-          <input type="text" id="novoNome" class="form-input" placeholder="Nome">
+          <input type="text" id="novoNomeGuerra" class="form-input" placeholder="Ex: COZAQUEVE">
         </div>
         <div style="flex: 1; min-width: 100px;">
           <label style="font-size: 12px; color: #666;">RG</label>
@@ -516,12 +520,13 @@
       }
       const quadro = document.getElementById('novoQuadro').value;
       const nome = document.getElementById('novoNome').value.trim().toUpperCase();
+      const nomeGuerra = document.getElementById('novoNomeGuerra').value.trim().toUpperCase();
       const rg = document.getElementById('novoRG').value.trim();
       const nf = document.getElementById('novoNF').value.trim();
 
       if (!posto || !nome || !rg) { alert('Preencha Posto, Nome e RG!'); return; }
 
-      DB.militares.push({ id: Date.now(), posto, quadro, nome, rg, nf });
+      DB.militares.push({ id: Date.now(), posto, quadro, nome, nomeGuerra, rg, nf });
       renderMilitares();
       marcarAlterado();
 
@@ -531,6 +536,7 @@
       document.getElementById('novoPostoManual').classList.add('hidden');
       document.getElementById('novoQuadro').value = '';
       document.getElementById('novoNome').value = '';
+      document.getElementById('novoNomeGuerra').value = '';
       document.getElementById('novoRG').value = '';
       document.getElementById('novoNF').value = '';
     }
@@ -557,7 +563,7 @@
           <td style="text-align: center; color: #999;">${i + 1}</td>
           <td>${m.posto}</td>
           <td>${m.quadro || '-'}</td>
-          <td style="font-weight: 600;">${m.nome}</td>
+          <td>${m.nome} ${m.nomeGuerra ? `(<strong>${m.nomeGuerra}</strong>)` : ''}</td>
           <td>${m.rg}</td>
           <td>${m.nf || '-'}</td>
           <td style="text-align: center;">
@@ -689,7 +695,6 @@
         console.log('Nenhuma escala ISEO salva ainda');
       }
       carregarDadosUI();
-      
       setTimeout(() => { isLoading = false; }, 500);
     }
 
@@ -725,20 +730,26 @@
       const dataFormatada = d.dataEscala ? d.dataEscala.split('-').reverse().join('/') : '';
       document.getElementById('viewDia').textContent = dataFormatada;
       document.getElementById('viewDiaSemana').textContent = d.diaSemana || '';
-      
+
       // Formatar horários
       const formatarHora = (h) => h ? h.replace(':', 'h') + 'min' : '';
       const horarioEscala = d.horarioInicio && d.horarioFim ? `${formatarHora(d.horarioInicio)} às ${formatarHora(d.horarioFim)}` : '';
       const horarioApres = d.horarioApresentacao ? `${formatarHora(d.horarioApresentacao)}${d.localApresentacao ? ' no ' + d.localApresentacao : ''}` : '';
-      
+
       document.getElementById('viewHorario').textContent = horarioEscala;
       document.getElementById('viewApresentacao').textContent = horarioApres;
 
       // Tabela Militares
       let html = `
+        <colgroup>
+          <col style="width: 30px;">
+          <col style="width: auto;">
+          <col style="width: 1%; white-space: nowrap;">
+          <col style="width: 1%; white-space: nowrap;">
+        </colgroup>
         <thead>
           <tr style="background: #e5e7eb;">
-            <th style="width: 30px; text-align: center;">Nº</th>
+            <th style="text-align: center;">Nº</th>
             <th style="text-align: center;">MILITAR ESTADUAL</th>
             <th style="text-align: center; white-space: nowrap;">RG</th>
             <th style="text-align: center; white-space: nowrap;">NF</th>
@@ -749,10 +760,15 @@
 
       DB.militares.forEach((m, i) => {
         const postoQuadro = m.quadro ? `${m.posto} ${m.quadro}` : m.posto;
+        // Destaca nome de guerra em negrito, ou nome completo se não tiver
+        let nomeExibir = m.nome;
+        if (m.nomeGuerra) {
+          nomeExibir = m.nome.replace(new RegExp(`(${m.nomeGuerra})`, 'i'), '<strong>$1</strong>');
+        }
         html += `
           <tr>
-            <td style="text-align: center; font-weight: bold;">${String(i + 1).padStart(2, '0')}</td>
-            <td style="font-weight: bold;">${postoQuadro} ${m.nome}</td>
+            <td style="text-align: center;">${String(i + 1).padStart(2, '0')}</td>
+            <td>${postoQuadro} ${nomeExibir}</td>
             <td style="text-align: center; white-space: nowrap;">${m.rg}</td>
             <td style="text-align: center; white-space: nowrap;">${m.nf || '-'}</td>
           </tr>
@@ -802,7 +818,7 @@
 
     // === Init ===
     // Removido o carregarDados() daqui pois é chamado no bloco async
-    console.log('🚀 Escala ISEO v2.4');
+    console.log('🚀 Escala ISEO v2.5');
   </script>
 
 </body>
