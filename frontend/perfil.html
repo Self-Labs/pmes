@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Perfil
-  Versão: 1.4
+  Versão: 1.5
 -->
 <html lang="pt-BR">
 <head>
@@ -109,7 +109,7 @@
             };
 
             const caminho = getCaminho(perfil.unidade_id);
-            if (caminho.length > 0) nomeUnidade = caminho.join(' > ');
+            if (caminho.length > 0) nomeUnidade = caminho.join(' / ');
           } catch (e) {
             console.log('Erro ao buscar hierarquia:', e);
           }

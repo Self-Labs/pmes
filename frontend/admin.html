@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Admin
-  Versão: 2.5
+  Versão: 2.6
 -->
 <html lang="pt-BR">
 <head>
@@ -374,12 +374,18 @@
         const usuarios = await listarUsuarios();
         usuariosCache = usuarios;
         document.getElementById('listaUsuarios').innerHTML = usuarios.map(u => {
-        // Lógica de Hierarquia Visual
+        // Lógica de Hierarquia Visual (busca por ID para evitar duplicatas como COPOM)
         let nomeUnidade = u.unidade_sigla || '-';
-        const unidade = unidadesCache.find(x => x.sigla === u.unidade_sigla); // Tenta achar pelo cache
-        if (unidade && unidade.parent_id) {
-           const parent = unidadesCache.find(x => x.id === unidade.parent_id);
-           if (parent) nomeUnidade = `${parent.sigla} / ${unidade.sigla}`;
+        const unidade = unidadesCache.find(x => x.id === u.unidade_id);
+        if (unidade) {
+           const getCaminho = (id) => {
+             const un = unidadesCache.find(x => x.id === id);
+             if (!un) return [];
+             if (!un.parent_id) return [un.sigla];
+             return [...getCaminho(un.parent_id), un.sigla];
+           };
+           const caminho = getCaminho(u.unidade_id);
+           if (caminho.length > 0) nomeUnidade = caminho.join(' / ');
         }
 
         return `
@@ -834,7 +840,7 @@
     }
 
     inicializar();
-    console.log('🚀 Admin v2.5');
+    console.log('🚀 Admin v2.6');
   </script>
 
 </body>
