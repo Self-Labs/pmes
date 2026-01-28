@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala ISEO
-  Versão: 2.6
+  Versão: 2.7
 -->
 <html lang="pt-BR">
 <head>
@@ -278,7 +278,7 @@
       </div>
 
       <!-- Tabela Militares -->
-      <table id="tabelaMilitares" class="print-table" style="margin-bottom: 16px;"></table>
+      <table id="tabelaMilitares" class="print-table" style="margin-bottom: 16px; table-layout: auto; width: 100%;"></table>
 
       <!-- Observações -->
       <div id="observacoesView" style="font-size: 12px; margin-bottom: 24px;"></div>
@@ -493,6 +493,14 @@
       const input = document.getElementById(lado === 'esq' ? 'brasaoEsqFile' : 'brasaoDirFile');
       const file = input.files[0];
       if (!file) return;
+
+      // Limite de 1MB por imagem
+      if (file.size > 1024 * 1024) {
+        alert('⚠️ Imagem muito grande! Máximo 1MB.\nUse uma imagem menor ou comprima antes de enviar.');
+        input.value = '';
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = e => {
         if (lado === 'esq') DB.config.brasaoEsq = e.target.result;
@@ -746,18 +754,12 @@
 
       // Tabela Militares
       let html = `
-        <colgroup>
-          <col style="width: 30px;">
-          <col style="width: auto;">
-          <col style="width: 1%; white-space: nowrap;">
-          <col style="width: 1%; white-space: nowrap;">
-        </colgroup>
         <thead>
           <tr style="background: #e5e7eb;">
-            <th style="text-align: center;">Nº</th>
+            <th style="text-align: center; width: 30px;">Nº</th>
             <th style="text-align: center;">MILITAR ESTADUAL</th>
-            <th style="text-align: center; white-space: nowrap;">RG</th>
-            <th style="text-align: center; white-space: nowrap;">NF</th>
+            <th style="text-align: center;">RG</th>
+            <th style="text-align: center;">NF</th>
           </tr>
         </thead>
         <tbody>
@@ -823,7 +825,7 @@
 
     // === Init ===
     // Removido o carregarDados() daqui pois é chamado no bloco async
-    console.log('🚀 Escala ISEO v2.6');
+    console.log('🚀 Escala ISEO v2.7');
   </script>
 
 </body>

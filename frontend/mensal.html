@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala Mensal
-  Versão: 2.2
+  Versão: 2.3
 -->
 <html lang="pt-BR">
 <head>
@@ -472,6 +472,14 @@
       const input = document.getElementById(lado === 'esq' ? 'brasaoEsqFile' : 'brasaoDirFile');
       const file = input.files[0];
       if (!file) return;
+
+      // Limite de 1MB por imagem
+      if (file.size > 1024 * 1024) {
+        alert('⚠️ Imagem muito grande! Máximo 1MB.\nUse uma imagem menor ou comprima antes de enviar.');
+        input.value = '';
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = e => {
         if (lado === 'esq') DB.config.brasaoEsq = e.target.result;
@@ -961,7 +969,7 @@
 
     // === Init ===
     // Removido o carregarDados() daqui pois ele é chamado no bloco async inicial
-    console.log('🚀 Escala Mensal v2.2');
+    console.log('🚀 Escala Mensal v2.3');
   </script>
 
 </body>

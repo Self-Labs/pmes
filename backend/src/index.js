@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - API Server
-  Versão: 1.0
+  Versão: 1.1
 */
 
 const express = require('express');
@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middlewares
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '5mb' }));
 
 // Rotas
 app.use('/auth', authRoutes);
