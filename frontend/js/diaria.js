@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - JavaScript Diária
-  Versão: 1.3
+  Versão: 1.4
 */
 
 let currentUnidadeId = null;
@@ -129,8 +129,6 @@ async function salvarAgora() {
   try {
     coletarTudo();
 
-    // REFATORADO: Usa a nova função do api.js
-    // Não precisa de JSON.stringify manual
     await salvarEscalaDiaria({
         unidade_id: currentUnidadeId,
         ...DB.config,
@@ -149,8 +147,6 @@ async function salvarAgora() {
   } catch (err) {
     atualizarStatus('erro');
     console.error('Erro ao salvar:', err);
-    // Removemos o alert para não interromper o fluxo do usuário em auto-save
-    // alert(err.message); 
   }
 }
 
@@ -158,11 +154,16 @@ async function salvarAgora() {
 async function carregarDados() {
   isLoading = true;
   try {
-    // REFATORADO: Usa a nova função do api.js
     const dados = await buscarEscalaDiaria(currentUnidadeId);
 
     if (dados) {
-      DB.data_servico = dados.data_servico || '';
+      // Formata a data (se existir) para YYYY-MM-DD
+      DB.data_servico = '';
+      if (dados.data_servico) {
+        // Pega a parte da data do ISO string (YYYY-MM-DD)
+        DB.data_servico = dados.data_servico.split('T')[0];
+      }
+
       DB.config = {
         mostrar_iseo: dados.mostrar_iseo,
         mostrar_audiencias: dados.mostrar_audiencias,
@@ -377,7 +378,7 @@ function renderEfetivo() {
       <td><input type="text" class="form-input ef-setor" value="${e.setor || ''}" placeholder="Centro"></td>
       <td><input type="text" class="form-input ef-horario" value="${e.horario || ''}" placeholder="07h-19h"></td>
       <td><input type="text" class="form-input ef-viatura" value="${e.viatura || ''}" placeholder="RP 5187"></td>
-      <td><textarea class="form-input ef-militares" rows="2" placeholder="Sd Fulano, 12.345-6">${e.militares || ''}</textarea></td>
+      <td><textarea class="form-input ef-militares" rows="2" placeholder="Sd Fulano RG 12.345-6">${e.militares || ''}</textarea></td>
       <td style="text-align:center;"><button onclick="removerEfetivo(${e.id})" class="btn-icon" title="Remover">🗑️</button></td>
     `;
 
@@ -600,4 +601,4 @@ observer.observe(document.getElementById('tbodyEfetivo'), observerConfig);
 observer.observe(document.getElementById('tbodyIseo'), observerConfig);
 observer.observe(document.getElementById('tbodyAudiencias'), observerConfig);
 
-console.log('🚀 Escala Diária v1.3');
+console.log('🚀 Escala Diária v1.4');

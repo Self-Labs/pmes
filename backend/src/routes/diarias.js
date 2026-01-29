@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Escalas Diárias
-  Versão: 1.4
+  Versão: 1.5
 */
 
 const express = require('express');
@@ -87,19 +87,10 @@ router.post('/', async (req, res) => {
   try {
     await client.query('BEGIN');
 
-    const { unidade_id } = req.body;
-
-    // Verificar acesso
-    const temAcesso = await verificarAcessoUnidade(
-      req.user.id, req.user.unidade_id, req.user.role, unidade_id
-    );
-    if (!temAcesso) {
-      await client.query('ROLLBACK');
-      return res.status(403).json({ error: 'Sem permissão para esta unidade' });
-    }
+    let { data_servico } = req.body;
 
     const {
-      data_servico,
+      unidade_id,
       mostrar_iseo, mostrar_audiencias, mostrar_totais, mostrar_rodape,
       cabecalho_linha1, cabecalho_linha2, cabecalho_linha3, cabecalho_linha4,
       lema, titulo_escala, subtitulo,
@@ -111,6 +102,15 @@ router.post('/', async (req, res) => {
       efetivo, audiencias
     } = req.body;
 
+    const temAcesso = await verificarAcessoUnidade(
+      req.user.id, req.user.unidade_id, req.user.role, unidade_id
+    );
+    if (!temAcesso) {
+      await client.query('ROLLBACK');
+      return res.status(403).json({ error: 'Sem permissão para esta unidade' });
+    }
+
+    // Trata string vazia para NULL (sem crashar variavel const)
     if (data_servico === '') data_servico = null;
 
     const usuario_id = req.user.id;
