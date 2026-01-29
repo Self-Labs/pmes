@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - API Client
-  Versão: 1.7
+  Versão: 1.8
 */
 
 const API_URL = '/api';
@@ -16,9 +16,9 @@ const setUsuario = (usuario) => localStorage.setItem('pmes_usuario', JSON.string
 const removeUsuario = () => localStorage.removeItem('pmes_usuario');
 
 // =============================================
-// Função de Compatibilidade para diaria.js
+// Fetch wrapper
 // =============================================
-async function fetchComToken(endpoint, options = {}) {
+async function api(endpoint, options = {}) {
   const token = getToken();
 
   const config = {
@@ -34,15 +34,7 @@ async function fetchComToken(endpoint, options = {}) {
     config.body = JSON.stringify(options.body);
   }
 
-  // Retorna o objeto Response cru (como o diaria.js espera)
-  return fetch(`${API_URL}${endpoint}`, config);
-}
-
-// =============================================
-// Fetch wrapper
-// =============================================
-async function api(endpoint, options = {}) {
-  const response = await fetchComToken(endpoint, options);
+  const response = await fetch(`${API_URL}${endpoint}`, config);
 
   // Ignora redirect se for login
   if (response.status === 401 && !endpoint.includes('/auth/login')) {
@@ -221,6 +213,21 @@ async function buscarEscalaISEO(unidadeId = null) {
 async function salvarEscalaISEO(dados, unidadeId = null) {
   if (unidadeId) dados.unidade_id = unidadeId;
   return api('/escalas/iseo', {
+    method: 'POST',
+    body: dados,
+  });
+}
+
+// =============================================
+// Escalas Diárias
+// =============================================
+
+async function buscarEscalaDiaria(unidadeId) {
+  return api(`/diarias?unidade_id=${unidadeId}`);
+}
+
+async function salvarEscalaDiaria(dados) {
+  return api('/diarias', {
     method: 'POST',
     body: dados,
   });

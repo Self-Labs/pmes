@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - JavaScript Diária
-  Versão: 1.1
+  Versão: 1.3
 */
 
 let currentUnidadeId = null;
@@ -19,7 +19,7 @@ const DB = {
 // === INICIALIZAÇÃO ===
 (async () => {
   try {
-    const user = await buscarMeuPerfil();
+    const user = await buscarMeuPerfil(); // Usa api.js
     document.getElementById('navbarUser').textContent = `${user.nome} (${user.role})`;
     
     currentUnidadeId = user.unidade_id;
@@ -31,7 +31,7 @@ const DB = {
       const select = document.getElementById('adminUnitSelect');
       select.classList.remove('hidden');
 
-      const unidades = await listarTodasUnidades();
+      const unidades = await listarTodasUnidades(); // Usa api.js
       const mapUnidades = new Map(unidades.map(u => [u.id, u]));
 
       const getNomeCompleto = (u) => {
@@ -129,21 +129,15 @@ async function salvarAgora() {
   try {
     coletarTudo();
 
-    const res = await fetchComToken('/diarias', {
-      method: 'POST',
-      body: JSON.stringify({
+    // REFATORADO: Usa a nova função do api.js
+    // Não precisa de JSON.stringify manual
+    await salvarEscalaDiaria({
         unidade_id: currentUnidadeId,
         ...DB.config,
         data_servico: DB.data_servico,
         efetivo: DB.efetivo,
         audiencias: DB.audiencias
-      })
     });
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Erro ao salvar');
-    }
 
     dadosAlterados = false;
     atualizarStatus('salvo');
@@ -155,7 +149,8 @@ async function salvarAgora() {
   } catch (err) {
     atualizarStatus('erro');
     console.error('Erro ao salvar:', err);
-    alert(err.message);
+    // Removemos o alert para não interromper o fluxo do usuário em auto-save
+    // alert(err.message); 
   }
 }
 
@@ -163,8 +158,8 @@ async function salvarAgora() {
 async function carregarDados() {
   isLoading = true;
   try {
-    const res = await fetchComToken(`/diarias?unidade_id=${currentUnidadeId}`);
-    const dados = await res.json();
+    // REFATORADO: Usa a nova função do api.js
+    const dados = await buscarEscalaDiaria(currentUnidadeId);
 
     if (dados) {
       DB.data_servico = dados.data_servico || '';
@@ -433,9 +428,10 @@ function renderAudiencias() {
   });
 }
 
-// === RENDERIZAR DOCUMENTO ===
+// === RENDERIZAR DOCUMENTO (Visualização) ===
 function renderizarDocumento() {
   const c = DB.config;
+  // Ajuste data para evitar timezone offset (pega meio dia)
   const data = DB.data_servico ? new Date(DB.data_servico + 'T12:00:00') : new Date();
   const dias = ['DOMINGO', 'SEGUNDA-FEIRA', 'TERÇA-FEIRA', 'QUARTA-FEIRA', 'QUINTA-FEIRA', 'SEXTA-FEIRA', 'SÁBADO'];
   const dataFormatada = data.toLocaleDateString('pt-BR');
@@ -604,4 +600,4 @@ observer.observe(document.getElementById('tbodyEfetivo'), observerConfig);
 observer.observe(document.getElementById('tbodyIseo'), observerConfig);
 observer.observe(document.getElementById('tbodyAudiencias'), observerConfig);
 
-console.log('🚀 Escala Diária v1.1');
+console.log('🚀 Escala Diária v1.3');
