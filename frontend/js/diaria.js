@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - JavaScript Diária
-  Versão: 1.5
+  Versão: 1.6
 */
 
 let currentUnidadeId = null;
@@ -347,12 +347,14 @@ function carregarBrasao(lado) {
 
 // === EFETIVO ===
 function adicionarLinhaEfetivo(tipo) {
-  DB.efetivo.push({ id: Date.now(), tipo, modalidade: '', setor: '', horario: '', viatura: '', militares: '' });
+  coletarEfetivo();
+  DB.efetivo.push({ id: Date.now(), tipo, modalidade: '', setor: '', horario: '', viatura: '', militares: '', rg: '' });
   renderEfetivo();
   marcarAlterado();
 }
 
 function removerEfetivo(id) {
+  coletarEfetivo();
   DB.efetivo = DB.efetivo.filter(e => e.id !== id);
   renderEfetivo();
   marcarAlterado();
@@ -364,12 +366,14 @@ function coletarEfetivo() {
     const hInicio = tr.querySelector('.ef-horario-inicio')?.value || '';
     const hFim = tr.querySelector('.ef-horario-fim')?.value || '';
     DB.efetivo.push({
+      id: parseInt(tr.dataset.id),
       tipo: tr.dataset.tipo,
       modalidade: tr.querySelector('.ef-modalidade')?.value || '',
       setor: tr.querySelector('.ef-setor')?.value || '',
       horario: hInicio && hFim ? `${hInicio}-${hFim}` : (hInicio || hFim || ''),
       viatura: tr.querySelector('.ef-viatura')?.value || '',
-      militares: tr.querySelector('.ef-militares')?.value || ''
+      militares: tr.querySelector('.ef-militares')?.value || '',
+      rg: tr.querySelector('.ef-rg')?.value || ''
     });
   });
 }
@@ -382,6 +386,7 @@ function renderEfetivo() {
 
   DB.efetivo.forEach(e => {
     const tr = document.createElement('tr');
+    tr.dataset.id = e.id;
     tr.dataset.tipo = e.tipo || 'EFETIVO';
     const [hInicio, hFim] = (e.horario || '').split('-');
     tr.innerHTML = `
@@ -389,7 +394,8 @@ function renderEfetivo() {
       <td><input type="text" class="form-input ef-setor" value="${e.setor || ''}" placeholder="Centro"></td>
       <td><input type="time" class="form-input ef-horario-inicio" value="${hInicio || ''}" style="width:48%;"> <input type="time" class="form-input ef-horario-fim" value="${hFim || ''}" style="width:48%;"></td>
       <td><input type="text" class="form-input ef-viatura" value="${e.viatura || ''}" placeholder="RP 5187"></td>
-      <td><textarea class="form-input ef-militares" rows="2" placeholder="Sd Fulano RG 12.345-6">${e.militares || ''}</textarea></td>
+      <td><textarea class="form-input ef-militares" rows="2" placeholder="Sd Fulano&#10;Sd Ciclano">${e.militares || ''}</textarea></td>
+      <td><textarea class="form-input ef-rg" rows="2" placeholder="12.345-6&#10;23.456-7">${e.rg || ''}</textarea></td>
       <td style="text-align:center;"><button onclick="removerEfetivo(${e.id})" class="btn-icon" title="Remover">🗑️</button></td>
     `;
 
@@ -400,12 +406,14 @@ function renderEfetivo() {
 
 // === AUDIÊNCIAS ===
 function adicionarLinhaAudiencia() {
+  coletarAudiencias();
   DB.audiencias.push({ id: Date.now(), militar: '', rg: '', horario: '', local: '' });
   renderAudiencias();
   marcarAlterado();
 }
 
 function removerAudiencia(id) {
+  coletarAudiencias();
   DB.audiencias = DB.audiencias.filter(a => a.id !== id);
   renderAudiencias();
   marcarAlterado();
@@ -415,6 +423,7 @@ function coletarAudiencias() {
   DB.audiencias = [];
   document.querySelectorAll('#tbodyAudiencias tr').forEach(tr => {
     DB.audiencias.push({
+      id: parseInt(tr.dataset.id),
       militar: tr.querySelector('.aud-militar')?.value || '',
       rg: tr.querySelector('.aud-rg')?.value || '',
       horario: tr.querySelector('.aud-horario')?.value || '',
@@ -429,6 +438,7 @@ function renderAudiencias() {
 
   DB.audiencias.forEach(a => {
     const tr = document.createElement('tr');
+    tr.dataset.id = a.id;
     tr.innerHTML = `
       <td><input type="text" class="form-input aud-militar" value="${a.militar || ''}" placeholder="Nome"></td>
       <td><input type="text" class="form-input aud-rg" value="${a.rg || ''}" placeholder="00.000-0" oninput="mascaraRG(this)"></td>
@@ -475,31 +485,111 @@ function renderizarDocumento() {
 
   // Tabela Efetivo
   const efetivoData = DB.efetivo.filter(e => e.tipo !== 'ISEO');
+  
+  // Expandir para linhas individuais
+  const linhasExpandidas = [];
+  efetivoData.forEach((e, idx) => {
+    const militares = (e.militares || '').split('\n').filter(m => m.trim());
+    const rgs = (e.rg || '').split('\n');
+    const qtd = militares.length || 1;
+    for (let i = 0; i < qtd; i++) {
+      linhasExpandidas.push({
+        efetivoIdx: idx,
+        modalidade: e.modalidade,
+        setor: e.setor,
+        horario: e.horario,
+        viatura: e.viatura,
+        militar: militares[i] || '',
+        rg: rgs[i] || '',
+        milIndex: i,
+        milTotal: qtd
+      });
+    }
+  });
+
+  // Calcular rowspans
+  const spanModalidade = calcularRowspans(linhasExpandidas, 'modalidade');
+  const spanSetor = calcularRowspans(linhasExpandidas, 'setor');
+  const spanHorario = calcularRowspans(linhasExpandidas, 'horario');
+
   let html = `
     <thead><tr style="background: #e5e7eb;">
-      <th colspan="5" style="text-align:center; font-weight:bold;">EMPENHO DO EFETIVO DIÁRIO</th>
+      <th colspan="6" style="text-align:center; font-weight:bold;">EMPENHO DO EFETIVO DIÁRIO</th>
     </tr>
     <tr style="background: #f3f4f6;">
-      <th>Modalidade</th><th>Setor</th><th>Horário</th><th>Viatura</th><th>Nome/RG</th>
+      <th>Modalidade</th><th>Setor</th><th>Horário</th><th>Viatura</th><th>Militares</th><th>RG</th>
     </tr></thead><tbody>
   `;
-  efetivoData.forEach(e => {
-    const mils = (e.militares || '').split('\n').join('<br>');
-    html += `<tr><td>${e.modalidade}</td><td>${e.setor}</td><td>${e.horario}</td><td>${e.viatura}</td><td>${mils}</td></tr>`;
+
+  linhasExpandidas.forEach((linha, i) => {
+    const bordaMil = linha.milIndex > 0 ? 'no-border-top' : '';
+    html += '<tr>';
+    if (spanModalidade[i] > 0) html += `<td rowspan="${spanModalidade[i]}" class="cell-vmiddle">${linha.modalidade}</td>`;
+    if (spanSetor[i] > 0) html += `<td rowspan="${spanSetor[i]}" class="cell-vmiddle">${linha.setor}</td>`;
+    if (spanHorario[i] > 0) html += `<td rowspan="${spanHorario[i]}" class="cell-vmiddle">${linha.horario}</td>`;
+    if (linha.milIndex === 0) html += `<td rowspan="${linha.milTotal}" class="cell-center">${linha.viatura}</td>`;
+    html += `<td class="${bordaMil}">${linha.militar}</td>`;
+    html += `<td class="${bordaMil}">${linha.rg}</td>`;
+    html += '</tr>';
   });
+
+  if (linhasExpandidas.length === 0) {
+    html += '<tr><td colspan="6" style="text-align:center;color:#999;">Nenhum efetivo cadastrado</td></tr>';
+  }
+
   html += '</tbody>';
   document.getElementById('viewTabelaEfetivo').innerHTML = html;
 
   // ISEO
   if (c.mostrar_iseo) {
     const iseoData = DB.efetivo.filter(e => e.tipo === 'ISEO');
-    let iseoHtml = `<table class="print-table print-table-diaria" style="margin-top:12px;">
-      <thead><tr style="background:#e5e7eb;"><th colspan="5" style="text-align:center;font-weight:bold;">ESCALA ESPECIAL - ISEO - OUTROS</th></tr>
-      <tr style="background:#f3f4f6;"><th>Evento</th><th>Local</th><th>Horário</th><th>Viatura</th><th>Nome/RG</th></tr></thead><tbody>`;
-    iseoData.forEach(e => {
-      const mils = (e.militares || '').split('\n').join('<br>');
-      iseoHtml += `<tr><td>${e.modalidade}</td><td>${e.setor}</td><td>${e.horario}</td><td>${e.viatura}</td><td>${mils}</td></tr>`;
+    
+    // Expandir para linhas individuais
+    const linhasIseo = [];
+    iseoData.forEach((e, idx) => {
+      const militares = (e.militares || '').split('\n').filter(m => m.trim());
+      const rgs = (e.rg || '').split('\n');
+      const qtd = militares.length || 1;
+      for (let i = 0; i < qtd; i++) {
+        linhasIseo.push({
+          efetivoIdx: idx,
+          modalidade: e.modalidade,
+          setor: e.setor,
+          horario: e.horario,
+          viatura: e.viatura,
+          militar: militares[i] || '',
+          rg: rgs[i] || '',
+          milIndex: i,
+          milTotal: qtd
+        });
+      }
     });
+
+    // Calcular rowspans
+    const spanModalidade = calcularRowspans(linhasIseo, 'modalidade');
+    const spanSetor = calcularRowspans(linhasIseo, 'setor');
+    const spanHorario = calcularRowspans(linhasIseo, 'horario');
+
+    let iseoHtml = `<table class="print-table print-table-diaria" style="margin-top:12px;">
+      <thead><tr style="background:#e5e7eb;"><th colspan="6" style="text-align:center;font-weight:bold;">ESCALA ESPECIAL - ISEO - OUTROS</th></tr>
+      <tr style="background:#f3f4f6;"><th>Evento</th><th>Local</th><th>Horário</th><th>Viatura</th><th>Militares</th><th>RG</th></tr></thead><tbody>`;
+
+    linhasIseo.forEach((linha, i) => {
+      const bordaMil = linha.milIndex > 0 ? 'no-border-top' : '';
+      iseoHtml += '<tr>';
+      if (spanModalidade[i] > 0) iseoHtml += `<td rowspan="${spanModalidade[i]}" class="cell-vmiddle">${linha.modalidade}</td>`;
+      if (spanSetor[i] > 0) iseoHtml += `<td rowspan="${spanSetor[i]}" class="cell-vmiddle">${linha.setor}</td>`;
+      if (spanHorario[i] > 0) iseoHtml += `<td rowspan="${spanHorario[i]}" class="cell-vmiddle">${linha.horario}</td>`;
+      if (linha.milIndex === 0) iseoHtml += `<td rowspan="${linha.milTotal}" class="cell-center">${linha.viatura}</td>`;
+      iseoHtml += `<td class="${bordaMil}">${linha.militar}</td>`;
+      iseoHtml += `<td class="${bordaMil}">${linha.rg}</td>`;
+      iseoHtml += '</tr>';
+    });
+
+    if (linhasIseo.length === 0) {
+      iseoHtml += '<tr><td colspan="6" style="text-align:center;color:#999;">Nenhum registro</td></tr>';
+    }
+
     iseoHtml += '</tbody></table>';
     document.getElementById('viewSecaoIseo').innerHTML = iseoHtml;
   } else {
@@ -578,6 +668,23 @@ function renderizarDocumento() {
   }
 }
 
+// Calcula rowspans para mesclagem de células
+function calcularRowspans(dados, campo) {
+  const spans = [];
+  let i = 0;
+  while (i < dados.length) {
+    let count = 1;
+    while (i + count < dados.length && dados[i + count][campo] === dados[i][campo]) {
+      count++;
+    }
+    for (let j = 0; j < count; j++) {
+      spans.push(j === 0 ? count : 0);
+    }
+    i += count;
+  }
+  return spans;
+}
+
 // === LISTENERS AUTO-SAVE ===
 document.querySelectorAll('#tab-config input, #tab-config textarea, #tab-config select').forEach(el => {
   el.addEventListener('input', marcarAlterado);
@@ -612,4 +719,4 @@ observer.observe(document.getElementById('tbodyEfetivo'), observerConfig);
 observer.observe(document.getElementById('tbodyIseo'), observerConfig);
 observer.observe(document.getElementById('tbodyAudiencias'), observerConfig);
 
-console.log('🚀 Escala Diária v1.5');
+console.log('🚀 Escala Diária v1.6');
