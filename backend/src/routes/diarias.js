@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Escalas Diárias
-  Versão: 1.3
+  Versão: 1.4
 */
 
 const express = require('express');
@@ -110,6 +110,8 @@ router.post('/', async (req, res) => {
       rodape_linha1, rodape_linha2, rodape_linha3,
       efetivo, audiencias
     } = req.body;
+
+    if (data_servico === '') data_servico = null;
 
     const usuario_id = req.user.id;
 

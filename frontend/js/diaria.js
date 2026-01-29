@@ -377,7 +377,7 @@ function renderEfetivo() {
       <td><input type="text" class="form-input ef-setor" value="${e.setor || ''}" placeholder="Centro"></td>
       <td><input type="text" class="form-input ef-horario" value="${e.horario || ''}" placeholder="07h-19h"></td>
       <td><input type="text" class="form-input ef-viatura" value="${e.viatura || ''}" placeholder="RP 5187"></td>
-      <td><textarea class="form-input ef-militares" rows="2" placeholder="Sd Campos, 25.822-2">${e.militares || ''}</textarea></td>
+      <td><textarea class="form-input ef-militares" rows="2" placeholder="Sd Fulano, 12.345-6">${e.militares || ''}</textarea></td>
       <td style="text-align:center;"><button onclick="removerEfetivo(${e.id})" class="btn-icon" title="Remover">🗑️</button></td>
     `;
 
