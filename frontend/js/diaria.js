@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - JavaScript Diária
-  Versão: 1.6
+  Versão: 1.7
 */
 
 let currentUnidadeId = null;
@@ -207,7 +207,8 @@ async function carregarDados() {
       // Audit trail
       if (dados.updated_at) {
         const dataAlt = new Date(dados.updated_at).toLocaleString('pt-BR');
-        document.getElementById('auditTrail').textContent = `Última edição: ${dataAlt}`;
+        const editor = dados.editado_por ? ` por ${dados.editado_por}` : '';
+        document.getElementById('auditTrail').textContent = `Última edição: ${dataAlt}${editor}`;
       }
     } else {
       // Valores padrão
@@ -719,4 +720,4 @@ observer.observe(document.getElementById('tbodyEfetivo'), observerConfig);
 observer.observe(document.getElementById('tbodyIseo'), observerConfig);
 observer.observe(document.getElementById('tbodyAudiencias'), observerConfig);
 
-console.log('🚀 Escala Diária v1.6');
+console.log('🚀 Escala Diária v1.7');

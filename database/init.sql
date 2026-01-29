@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Schema
-  Versão: 1.5
+  Versão: 1.6
 */
 
 -- Extensão para UUID
@@ -141,6 +141,7 @@ CREATE TABLE IF NOT EXISTS escalas_diarias_efetivo (
     horario VARCHAR(100),
     viatura VARCHAR(50),
     militares TEXT,
+    rg TEXT,
     
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

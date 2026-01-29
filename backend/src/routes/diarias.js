@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Escalas Diárias
-  Versão: 1.5
+  Versão: 1.6
 */
 
 const express = require('express');
@@ -47,7 +47,10 @@ router.get('/', async (req, res) => {
     }
 
     const escala = await db.query(
-      'SELECT * FROM escalas_diarias WHERE unidade_id = $1',
+      `SELECT ed.*, u.nome as editado_por 
+       FROM escalas_diarias ed 
+       LEFT JOIN usuarios u ON ed.usuario_id = u.id 
+       WHERE ed.unidade_id = $1`,
       [unidade_id]
     );
 
@@ -191,9 +194,9 @@ router.post('/', async (req, res) => {
       for (let i = 0; i < efetivo.length; i++) {
         const e = efetivo[i];
         await client.query(`
-          INSERT INTO escalas_diarias_efetivo (escala_id, tipo, ordem, modalidade, setor, horario, viatura, militares)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        `, [escalaId, e.tipo || 'EFETIVO', i, e.modalidade, e.setor, e.horario, e.viatura, e.militares]);
+          INSERT INTO escalas_diarias_efetivo (escala_id, tipo, ordem, modalidade, setor, horario, viatura, militares, rg)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        `, [escalaId, e.tipo || 'EFETIVO', i, e.modalidade, e.setor, e.horario, e.viatura, e.militares, e.rg || '']);
       }
     }
 
