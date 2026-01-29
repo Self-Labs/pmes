@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Schema
-  Versão: 1.3
+  Versão: 1.5
 */
 
 -- Extensão para UUID
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS escalas_mensal (
     colunas JSONB DEFAULT '[]',
     equipes JSONB DEFAULT '{}',
     observacoes JSONB DEFAULT '[]',
-    -- Campos de Auditoria adicionados
+    -- Campos de Auditoria
     ultima_alteracao TIMESTAMP,
     alterado_por VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -65,11 +65,100 @@ CREATE TABLE IF NOT EXISTS escalas_iseo (
     militares JSONB DEFAULT '[]',
     observacoes JSONB DEFAULT '[]',
     setor TEXT,
-    -- Campos de Auditoria adicionados
+    -- Campos de Auditoria
     ultima_alteracao TIMESTAMP,
     alterado_por VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =============================================
+-- TABELA: escalas_diarias (1 por unidade)
+-- =============================================
+CREATE TABLE IF NOT EXISTS escalas_diarias (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    usuario_id UUID NOT NULL REFERENCES usuarios(id),
+    unidade_id UUID UNIQUE NOT NULL REFERENCES unidades(id),
+    data_servico DATE,
+    
+    -- Configurações de seções visíveis
+    mostrar_iseo BOOLEAN DEFAULT false,
+    mostrar_audiencias BOOLEAN DEFAULT false,
+    mostrar_totais BOOLEAN DEFAULT false,
+    mostrar_rodape BOOLEAN DEFAULT true,
+    
+    -- Cabeçalho
+    cabecalho_linha1 VARCHAR(255) DEFAULT 'ESTADO DO ESPÍRITO SANTO',
+    cabecalho_linha2 VARCHAR(255) DEFAULT 'POLÍCIA MILITAR',
+    cabecalho_linha3 VARCHAR(255),
+    cabecalho_linha4 VARCHAR(255),
+    lema VARCHAR(255) DEFAULT 'Policial Militar, herói protetor da sociedade',
+    titulo_escala VARCHAR(255) DEFAULT 'ESCALA DIÁRIA',
+    subtitulo VARCHAR(255),
+    
+    -- Brasões (base64)
+    brasao_esquerdo TEXT,
+    brasao_direito TEXT,
+    
+    -- Textos das seções
+    observacoes TEXT,
+    planejamento TEXT,
+    outras_determinacoes TEXT,
+    
+    -- Totais
+    total_rh INTEGER DEFAULT 0,
+    total_rm INTEGER DEFAULT 0,
+    total_atestados INTEGER DEFAULT 0,
+    total_operacoes INTEGER DEFAULT 0,
+    
+    -- Assinatura
+    assinatura_nome VARCHAR(255),
+    assinatura_posto VARCHAR(255),
+    assinatura_funcao VARCHAR(255),
+    assinatura_cidade VARCHAR(255),
+    
+    -- Rodapé
+    rodape_linha1 VARCHAR(255),
+    rodape_linha2 VARCHAR(255),
+    rodape_linha3 VARCHAR(255),
+    
+    -- Metadados
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =============================================
+-- TABELA: escalas_diarias_efetivo
+-- =============================================
+CREATE TABLE IF NOT EXISTS escalas_diarias_efetivo (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    escala_id UUID NOT NULL REFERENCES escalas_diarias(id) ON DELETE CASCADE,
+    tipo VARCHAR(20) NOT NULL DEFAULT 'EFETIVO',
+    ordem INTEGER DEFAULT 0,
+    
+    modalidade VARCHAR(100),
+    setor VARCHAR(255),
+    horario VARCHAR(100),
+    viatura VARCHAR(50),
+    militares TEXT,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =============================================
+-- TABELA: escalas_diarias_audiencias
+-- =============================================
+CREATE TABLE IF NOT EXISTS escalas_diarias_audiencias (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    escala_id UUID NOT NULL REFERENCES escalas_diarias(id) ON DELETE CASCADE,
+    ordem INTEGER DEFAULT 0,
+    
+    militar VARCHAR(100),
+    rg VARCHAR(20),
+    horario VARCHAR(50),
+    local VARCHAR(255),
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- =============================================
@@ -79,6 +168,9 @@ CREATE INDEX IF NOT EXISTS idx_unidades_parent ON unidades(parent_id);
 CREATE INDEX IF NOT EXISTS idx_unidades_tipo ON unidades(tipo);
 CREATE INDEX IF NOT EXISTS idx_usuarios_unidade ON usuarios(unidade_id);
 CREATE INDEX IF NOT EXISTS idx_usuarios_email ON usuarios(email);
+CREATE INDEX IF NOT EXISTS idx_escalas_diarias_unidade ON escalas_diarias(unidade_id);
+CREATE INDEX IF NOT EXISTS idx_escalas_diarias_efetivo_escala ON escalas_diarias_efetivo(escala_id);
+CREATE INDEX IF NOT EXISTS idx_escalas_diarias_audiencias_escala ON escalas_diarias_audiencias(escala_id);
 
 -- =============================================
 -- DADOS INICIAIS: Comandos Regionais

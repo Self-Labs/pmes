@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - API Server
-  Versão: 1.1
+  Versão: 1.2
 */
 
 const express = require('express');
@@ -10,6 +10,7 @@ const authRoutes = require('./routes/auth');
 const usuariosRoutes = require('./routes/usuarios');
 const unidadesRoutes = require('./routes/unidades');
 const escalasRoutes = require('./routes/escalas');
+const diariasRoutes = require('./routes/diarias');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,6 +24,7 @@ app.use('/auth', authRoutes);
 app.use('/usuarios', usuariosRoutes);
 app.use('/unidades', unidadesRoutes);
 app.use('/escalas', escalasRoutes);
+app.use('/diarias', diariasRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

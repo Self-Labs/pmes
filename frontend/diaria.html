@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<!--
+  Sistema de Escalas - Escala Diária
+  Versão: 1.1
+-->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escala Diária - Sistema de Escalas</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    @media print {
+      @page { size: A4 portrait; margin: 10mm; }
+    }
+  </style>
+</head>
+
+<body class="auth-loading">
+
+  <!-- NAVBAR -->
+  <nav class="navbar no-print">
+    <div class="navbar-content" style="max-width: 1000px;">
+      <div class="navbar-brand">
+        📋 Escala Diária
+        <span class="navbar-version">v1.1</span>
+      </div>
+      <div class="navbar-menu">
+        <select id="adminUnitSelect" class="form-select hidden" style="width: auto; max-width: 350px; padding: 4px; font-size: 12px; margin-right: 10px;">
+          <option value="">Carregando...</option>
+        </select>
+        
+        <a href="/perfil" id="navbarUser" class="navbar-user" style="text-decoration: none; color: inherit; margin-right: 8px;" title="Ir para Perfil"></a>
+        <a href="/diaria" class="btn btn-active">📆 Diária</a>
+        <a href="/mensal" class="btn btn-secondary">📅 Mensal</a>
+        <a href="/iseo" class="btn btn-secondary">🚓 ISEO</a>
+        <a href="/admin" id="adminMenu" class="btn btn-secondary hidden">⚙️ Admin</a>
+        <button onclick="logout()" class="btn btn-secondary">🚪 Sair</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- BARRA DE CONTROLE -->
+  <div class="no-print" style="background: var(--pm-blue); padding: 12px;">
+    <div style="max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+      <div style="display: flex; gap: 16px; align-items: center;">
+        <button id="btnEditar" class="btn btn-active">🖊️ Edição</button>
+        <button id="btnVisualizar" class="btn btn-secondary">🔍 Visualizar</button>
+        <button onclick="salvarAgora()" class="btn btn-success">💾 Salvar</button>
+        <button onclick="window.print()" class="btn btn-secondary">🖨️ Imprimir/PDF</button>
+        <span id="statusSalvo" class="status-salvo salvo">✓ Salvo</span>
+      </div>
+      <span id="auditTrail" class="audit-info"></span>
+    </div>
+  </div>
+
+  <!-- MODO EDIÇÃO -->
+  <div id="modoEdicao" class="no-print" style="max-width: 1000px; margin: 24px auto; padding: 0 16px;">
+
+    <!-- Tabs -->
+    <div style="display: flex; border-bottom: 1px solid #ddd; margin-bottom: 24px;">
+      <button class="tab-btn active" data-tab="config">⚙️ Configurações</button>
+      <button class="tab-btn" data-tab="efetivo">👮 Efetivo</button>
+      <button class="tab-btn" data-tab="observacoes">📝 Observações</button>
+      <button class="tab-btn" data-tab="assinatura">✍️ Assinatura</button>
+    </div>
+
+    <!-- Tab: Configurações -->
+    <div id="tab-config" class="tab-content active card">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">⚙️ Configurações Gerais</h2>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <!-- Data do Serviço -->
+        <div>
+          <label style="font-size: 12px; color: #666;">📅 Data do Serviço</label>
+          <input type="date" id="dataServico" class="form-input">
+        </div>
+
+        <!-- Seções Visíveis -->
+        <div>
+          <label style="font-size: 12px; color: #666;">Seções Visíveis</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px;">
+            <label><input type="checkbox" id="chkIseo"> ISEO/Especial</label>
+            <label><input type="checkbox" id="chkAudiencias"> Audiências</label>
+            <label><input type="checkbox" id="chkTotais"> Totais</label>
+            <label><input type="checkbox" id="chkRodape" checked> Rodapé</label>
+          </div>
+        </div>
+
+        <!-- Brasões -->
+        <div style="grid-column: span 2;">
+          <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">🏛️ Brasões</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label style="font-size: 12px; color: #666;">Brasão Esquerdo</label>
+              <input type="file" id="brasaoEsqFile" accept="image/*" class="form-input" style="font-size: 12px;" onchange="carregarBrasao('esq')">
+            </div>
+            <div>
+              <label style="font-size: 12px; color: #666;">Brasão Direito</label>
+              <input type="file" id="brasaoDirFile" accept="image/*" class="form-input" style="font-size: 12px;" onchange="carregarBrasao('dir')">
+            </div>
+          </div>
+        </div>
+
+        <!-- Cabeçalho -->
+        <div>
+          <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">📄 Cabeçalho</h3>
+          <input type="text" id="cabLinha1" class="form-input mb-2" placeholder="Linha 1" value="ESTADO DO ESPÍRITO SANTO">
+          <input type="text" id="cabLinha2" class="form-input mb-2" placeholder="Linha 2" value="POLÍCIA MILITAR">
+          <input type="text" id="cabLinha3" class="form-input mb-2" placeholder="Linha 3 (Ex: 9º BATALHÃO)">
+          <input type="text" id="cabLinha4" class="form-input mb-2" placeholder="Linha 4 (opcional)">
+          <input type="text" id="lema" class="form-input mb-2" placeholder="Lema" value='"Policial Militar, herói protetor da sociedade"'>
+          <input type="text" id="tituloEscala" class="form-input mb-2" placeholder="Título" value="ESCALA DIÁRIA">
+          <input type="text" id="subtitulo" class="form-input" placeholder="Subtítulo (opcional)">
+        </div>
+
+        <!-- Rodapé -->
+        <div>
+          <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">📍 Rodapé</h3>
+          <input type="text" id="rodapeLinha1" class="form-input mb-2" placeholder="Linha 1 (Ex: 1ª COMPANHIA DO 9º BATALHÃO...)">
+          <input type="text" id="rodapeLinha2" class="form-input mb-2" placeholder="Linha 2 (Ex: Avenida Beira Rio, nº 287...)">
+          <input type="text" id="rodapeLinha3" class="form-input" placeholder="Linha 3 (Ex: Tel.: (28) 3636-2003 - E-mail:...)">
+        </div>
+      </div>
+
+      <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
+    </div>
+
+    <!-- Tab: Efetivo -->
+    <div id="tab-efetivo" class="tab-content card">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">👮 Empenho do Efetivo Diário</h2>
+
+      <div style="border: 1px solid #ddd; border-radius: 8px; max-height: 400px; overflow-y: auto; margin-bottom: 16px;">
+        <table class="table" id="tabelaEfetivo">
+          <thead>
+            <tr>
+              <th style="width: 120px;">Modalidade</th>
+              <th style="width: 150px;">Setor</th>
+              <th style="width: 100px;">Horário</th>
+              <th style="width: 80px;">Viatura</th>
+              <th>Militares</th>
+              <th style="width: 60px;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyEfetivo"></tbody>
+        </table>
+      </div>
+      <button onclick="adicionarLinhaEfetivo('EFETIVO')" class="btn btn-secondary">➕ Adicionar Linha</button>
+
+      <!-- ISEO -->
+      <div id="secaoIseo" class="hidden mt-6">
+        <h2 style="font-size: 18px; margin-bottom: 16px;">⭐ Escala ISEO / Especial</h2>
+        <div style="border: 1px solid #ddd; border-radius: 8px; max-height: 300px; overflow-y: auto; margin-bottom: 16px;">
+          <table class="table" id="tabelaIseo">
+            <thead>
+              <tr>
+                <th style="width: 120px;">Evento</th>
+                <th style="width: 150px;">Local</th>
+                <th style="width: 100px;">Horário</th>
+                <th style="width: 80px;">Viatura</th>
+                <th>Militares</th>
+                <th style="width: 60px;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyIseo"></tbody>
+          </table>
+        </div>
+        <button onclick="adicionarLinhaEfetivo('ISEO')" class="btn btn-secondary">➕ Adicionar Linha ISEO</button>
+      </div>
+
+      <!-- Audiências -->
+      <div id="secaoAudiencias" class="hidden mt-6">
+        <h2 style="font-size: 18px; margin-bottom: 16px;">⚖️ Audiências Judiciais</h2>
+        <div style="border: 1px solid #ddd; border-radius: 8px; max-height: 300px; overflow-y: auto; margin-bottom: 16px;">
+          <table class="table" id="tabelaAudiencias">
+            <thead>
+              <tr>
+                <th>Militar</th>
+                <th style="width: 100px;">RG</th>
+                <th style="width: 100px;">Horário</th>
+                <th>Local</th>
+                <th style="width: 60px;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyAudiencias"></tbody>
+          </table>
+        </div>
+        <button onclick="adicionarLinhaAudiencia()" class="btn btn-secondary">➕ Adicionar Audiência</button>
+        <p style="font-size: 11px; color: #666; margin-top: 8px; font-style: italic;">Obs.: Este não é o meio oficial de intimação dos militares.</p>
+      </div>
+
+      <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
+    </div>
+
+    <!-- Tab: Observações -->
+    <div id="tab-observacoes" class="tab-content card">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">📝 Observações e Planejamento</h2>
+
+      <div class="mb-4">
+        <label style="font-size: 14px; font-weight: bold;">Trocas / Dispensas / Observações</label>
+        <textarea id="observacoes" class="form-input mt-2" rows="5" placeholder="Digite observações, trocas de serviço, dispensas..."></textarea>
+      </div>
+
+      <div class="mb-4">
+        <label style="font-size: 14px; font-weight: bold;">📋 Planejamento Operacional</label>
+        <textarea id="planejamento" class="form-input mt-2" rows="8" placeholder="Operações, pontos base, orientações..."></textarea>
+      </div>
+
+      <div class="mb-4">
+        <label style="font-size: 14px; font-weight: bold;">📌 Outras Determinações</label>
+        <textarea id="outrasDeterminacoes" class="form-input mt-2" rows="5" placeholder="Outras determinações..."></textarea>
+      </div>
+
+      <!-- Totais -->
+      <div id="secaoTotais" class="hidden">
+        <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">📊 Totais</h3>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+          <div>
+            <label style="font-size: 12px;">RH</label>
+            <input type="number" id="totalRH" class="form-input" value="0">
+          </div>
+          <div>
+            <label style="font-size: 12px;">RM</label>
+            <input type="number" id="totalRM" class="form-input" value="0">
+          </div>
+          <div>
+            <label style="font-size: 12px;">Atestados</label>
+            <input type="number" id="totalAtestados" class="form-input" value="0">
+          </div>
+          <div>
+            <label style="font-size: 12px;">Operações</label>
+            <input type="number" id="totalOperacoes" class="form-input" value="0">
+          </div>
+        </div>
+      </div>
+
+      <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
+    </div>
+
+    <!-- Tab: Assinatura -->
+    <div id="tab-assinatura" class="tab-content card">
+      <h2 style="font-size: 18px; margin-bottom: 16px;">✍️ Assinatura</h2>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <label style="font-size: 12px; color: #666;">Nome Completo</label>
+          <input type="text" id="assinaturaNome" class="form-input" placeholder="Ex: CHARLES SOUZA DA SILVA">
+        </div>
+        <div>
+          <label style="font-size: 12px; color: #666;">Posto/Graduação</label>
+          <input type="text" id="assinaturaPosto" class="form-input" placeholder="Ex: CAP QOCPM">
+        </div>
+        <div>
+          <label style="font-size: 12px; color: #666;">Função</label>
+          <input type="text" id="assinaturaFuncao" class="form-input" placeholder="Ex: Comandante da 1ª Cia do 9º BPM">
+        </div>
+        <div>
+          <label style="font-size: 12px; color: #666;">Cidade/UF</label>
+          <input type="text" id="assinaturaCidade" class="form-input" placeholder="Ex: Cachoeiro de Itapemirim/ES">
+        </div>
+      </div>
+
+      <p class="footer">© 2026 Self-Labs. Todos os direitos reservados.</p>
+    </div>
+
+  </div>
+
+  <!-- MODO VISUALIZAÇÃO -->
+  <div id="modoVisualizacao" class="hidden">
+    <table id="documento" class="print-wrapper" style="background: white; max-width: 210mm; margin: 24px auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+
+      <thead class="print-header">
+        <tr><td class="print-header-content" style="padding: 16px 16px 8px;">
+          <div style="display: flex; justify-content: center; align-items: center; gap: 48px;">
+            <div id="viewBrasaoEsq"></div>
+            <div style="text-align: center; line-height: 1.4;" id="viewHeaderTexto"></div>
+            <div id="viewBrasaoDir"></div>
+          </div>
+          <div style="text-align: center; margin: 8px 0;">
+            <p style="font-weight: bold; font-size: 14px;" id="viewTitulo"></p>
+            <p id="viewSubtitulo"></p>
+          </div>
+        </td></tr>
+      </thead>
+
+      <tfoot class="print-footer">
+        <tr><td class="print-footer-content" style="padding: 12px 16px; text-align: center; font-size: 11px;">
+          <div id="viewRodape"></div>
+        </td></tr>
+      </tfoot>
+
+      <tbody class="print-body">
+        <tr><td style="padding: 8px 16px; font-size: 11px;">
+          <table id="viewTabelaEfetivo" class="print-table print-table-diaria"></table>
+          <div id="viewSecaoIseo"></div>
+          <div id="viewObservacoes"></div>
+          <div id="viewSecaoAudiencias"></div>
+          <div id="viewPlanejamento"></div>
+          <div id="viewOutrasDeterminacoes"></div>
+          <div id="viewSecaoTotais"></div>
+          <div id="viewAssinatura" style="text-align: center; margin: 32px 0 16px;"></div>
+        </td></tr>
+      </tbody>
+
+    </table>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/diaria.js"></script>
+</body>
+</html>

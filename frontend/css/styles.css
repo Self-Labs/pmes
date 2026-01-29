@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Estilos
-  Versão: 1.9
+  Versão: 2.0
 */
 
 /* Variáveis de Cores */
@@ -37,7 +37,7 @@ body {
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 14px;
-  font-family: inherit; /* Força herdar a Carlito do body */
+  font-family: inherit;
 }
 
 .form-input:focus, .form-select:focus {
@@ -56,43 +56,14 @@ body {
   transition: opacity 0.2s;
 }
 
-.btn:hover {
-  opacity: 0.9;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-a.btn {
-  text-decoration: none;
-}
-
-.btn-primary {
-  background: var(--pm-blue);
-  color: white;
-}
-
-.btn-active {
-  background: var(--pm-gold);
-  color: black;
-}
-
-.btn-secondary {
-  background: var(--pm-gray);
-  color: #374151;
-}
-
-.btn-success {
-  background: #16a34a;
-  color: white;
-}
-
-.btn-danger {
-  background: #dc2626;
-  color: white;
-}
+.btn:hover { opacity: 0.9; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+a.btn { text-decoration: none; }
+.btn-primary { background: var(--pm-blue); color: white; }
+.btn-active { background: var(--pm-gold); color: black; }
+.btn-secondary { background: var(--pm-gray); color: #374151; }
+.btn-success { background: #16a34a; color: white; }
+.btn-danger { background: #dc2626; color: white; }
 
 /* Cards */
 .card {
@@ -198,13 +169,8 @@ a.btn {
   color: var(--pm-gold-dark);
 }
 
-.tab-content {
-  display: none;
-}
-
-.tab-content.active {
-  display: block;
-}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
 
 /* Tables */
 .table {
@@ -223,9 +189,7 @@ a.btn {
   font-weight: 600;
 }
 
-.table tr:hover {
-  background: #f9fafb;
-}
+.table tr:hover { background: #f9fafb; }
 
 /* Utils */
 .text-center { text-align: center; }
@@ -263,85 +227,86 @@ a.btn {
 .status-salvo.erro { background: #fee2e2; color: #991b1b; }
 .status-salvo.pendente { background: #e5e7eb; color: #6b7280; }
 
-/* Estilos Específicos Escala Mensal */
+/* Estilos de Impressão - Tabelas */
 .print-table { 
   width: 100% !important; 
   border-collapse: collapse !important; 
-  table-layout: fixed !important; 
-  font-size: 11px !important;
 }
 
 .print-table td, .print-table th { 
   border: 1px solid #000 !important;
-  padding: 0 2px !important; 
   vertical-align: middle !important;
+}
+
+/* Escala Mensal */
+.print-table-mensal { 
+  table-layout: fixed !important; 
+  font-size: 11px !important;
+}
+
+.print-table-mensal td, .print-table-mensal th { 
+  padding: 0 2px !important; 
   line-height: 1.1 !important; 
 }
 
-.print-table tr { height: 20px !important; }
+.print-table-mensal tr { height: 20px !important; }
+
+/* Escala ISEO */
+.print-table-iseo { 
+  font-size: 12px !important;
+}
+
+.print-table-iseo td, .print-table-iseo th { 
+  padding: 4px 8px !important; 
+}
+
+/* Escala Diária */
+.print-table-diaria { 
+  font-size: 11px !important;
+}
+
+.print-table-diaria td, .print-table-diaria th { 
+  padding: 4px 6px !important; 
+}
+
+/* Classes auxiliares impressão */
 .overlap-top { margin-top: -1px !important; }
 .bg-pm-gold { background-color: #FFD966 !important; }
 .bg-pm-red { background-color: #f8d7da !important; }
 .bg-pm-green { background-color: #d4edda !important; }
 
+/* Impressão - Media Query Unificado */
 @media print {
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .no-print { display: none !important; }
   #documento { box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
   .print-header-text p { margin: 2px 0; }
+  .print-header { display: table-header-group; }
+  .print-footer { display: table-footer-group; }
+  .print-body { display: table-row-group; }
+  .print-header-content { padding-bottom: 12px; border-bottom: 1px solid #ccc; }
+  .print-footer-content { padding-top: 12px; border-top: 1px solid #ccc; }
 }
 
-/* Estilos Específicos Escala ISEO */
-.print-table { 
-  width: 100% !important; 
-  border-collapse: collapse !important; 
-  font-size: 12px !important;
-}
-
-.print-table td, .print-table th { 
-  border: 1px solid #000 !important;
-  padding: 4px 8px !important; 
-  vertical-align: middle !important;
-}
-
-@media print {
-  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .no-print { display: none !important; }
-  #documento { box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
-}
+/* Impressão com Cabeçalho/Rodapé Fixo */
+.print-wrapper { display: table; width: 100%; }
+.print-header { display: table-header-group; }
+.print-footer { display: table-footer-group; }
+.print-body { display: table-row-group; }
+.print-header-content, .print-footer-content { padding: 8px 0; }
 
 /* Admin - Hierarquia e Unidades */
-.unit-row-root {
-  background: #f8f9fa;
-  border-bottom: 2px solid #e5e7eb;
-}
-
-.unit-row-child {
-  border-bottom: 1px solid #eee;
-}
-
-.unit-sigla-root {
-  font-weight: 700;
-  color: #1f2937;
-}
-
-.unit-sigla-child {
-  font-weight: 500;
-  color: #4b5563;
-}
-
-.unit-inactive {
-  color: #dc2626;
-  font-size: 10px;
-  margin-left: 5px;
-  font-weight: normal;
-}
+.unit-row-root { background: #f8f9fa; border-bottom: 2px solid #e5e7eb; }
+.unit-row-child { border-bottom: 1px solid #eee; }
+.unit-sigla-root { font-weight: 700; color: #1f2937; }
+.unit-sigla-child { font-weight: 500; color: #4b5563; }
+.unit-inactive { color: #dc2626; font-size: 10px; margin-left: 5px; font-weight: normal; }
 
 /* Badges de Tipo (Admin) */
 .badge {
   display: inline-block;
   padding: 4px 8px;
-  border-radius: 6px; /* Retangular arredondado */
+  border-radius: 6px;
   font-size: 11px;
   font-weight: bold;
   text-align: center;
@@ -384,7 +349,7 @@ a.btn {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 16px; /* Aumentei um pouco para legibilidade */
+  font-size: 16px;
   padding: 4px 6px;
   opacity: 0.7;
   transition: all 0.2s;
@@ -402,40 +367,8 @@ a.btn {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.9); /* Branco com leve transparência para barra azul */
   font-style: italic;
-  display: block; /* Garante que fique em linha nova se necessário, ou use inline-block */
+  display: block;
   margin-top: 4px;
-}
-
-/* Impressão com Cabeçalho/Rodapé Fixo */
-.print-wrapper {
-  display: table;
-  width: 100%;
-}
-
-.print-header {
-  display: table-header-group;
-}
-
-.print-footer {
-  display: table-footer-group;
-}
-
-.print-body {
-  display: table-row-group;
-}
-
-.print-header-content,
-.print-footer-content {
-  padding: 8px 0;
-}
-
-@media print {
-  .print-header { display: table-header-group; }
-  .print-footer { display: table-footer-group; }
-  .print-body { display: table-row-group; }
-  
-  .print-header-content { padding-bottom: 12px; border-bottom: 1px solid #ccc; }
-  .print-footer-content { padding-top: 12px; border-top: 1px solid #ccc; }
 }
 
 /* Layout Centralizado com Fundo Azul */
@@ -445,4 +378,186 @@ body.page-centered {
   justify-content: center;
   min-height: 100vh;
   background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
+}
+
+/* Escala Diária - Edição */
+.config-panel {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.config-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.config-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+}
+
+.section-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-weight: bold;
+  color: var(--pm-blue);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.efetivo-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.efetivo-table th, .efetivo-table td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.efetivo-table th {
+  background: #f1f5f9;
+  font-weight: 600;
+}
+
+.efetivo-table input, .efetivo-table textarea {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.efetivo-table textarea {
+  resize: vertical;
+  min-height: 40px;
+}
+
+.btn-add-row {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px dashed #0369a1;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.btn-add-row:hover { background: #bae6fd; }
+
+.btn-remove-row {
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.brasao-upload {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brasao-preview {
+  width: 80px;
+  height: 80px;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #f9fafb;
+}
+
+.brasao-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Escala Diária - Visualização */
+.doc-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  padding: 12px 16px;
+}
+
+.doc-header-text { text-align: center; }
+.doc-header-text p { margin: 2px 0; }
+.doc-brasao img { max-height: 70px; }
+
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0;
+  font-size: 11px;
+}
+
+.doc-table th, .doc-table td {
+  border: 1px solid #000;
+  padding: 4px 6px;
+}
+
+.doc-table th {
+  background: #f0f0f0;
+  font-weight: bold;
+  text-align: center;
+}
+
+.doc-section-title {
+  background: #e5e5e5;
+  font-weight: bold;
+  text-align: center;
+  padding: 4px;
+}
+
+.doc-textarea {
+  white-space: pre-wrap;
+  padding: 8px 16px;
+  font-size: 11px;
+}
+
+.doc-assinatura {
+  text-align: center;
+  margin: 32px 0 16px;
+}
+
+.doc-assinatura-linha {
+  display: inline-block;
+  border-top: 1px solid #000;
+  padding-top: 4px;
+  min-width: 250px;
+}
+
+.doc-rodape {
+  text-align: center;
+  font-size: 10px;
+  border-top: 1px solid #ccc;
+  padding: 8px 16px;
+  margin-top: 16px;
 }

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala ISEO
-  Versão: 2.10
+  Versão: 2.12
 -->
 <html lang="pt-BR">
 <head>
@@ -25,14 +25,15 @@
     <div class="navbar-content" style="max-width: 1000px;">
       <div class="navbar-brand">
         📋 Escala ISEO
-        <span class="navbar-version">v3.8</span>
+        <span class="navbar-version">v2.12</span>
       </div>
       <div class="navbar-menu">
         <select id="adminUnitSelect" class="form-select hidden" style="width: auto; max-width: 350px; padding: 4px; font-size: 12px; margin-right: 10px;">
           <option value="">Carregando...</option>
         </select>
-        
+
         <a href="/perfil" id="navbarUser" class="navbar-user" style="text-decoration: none; color: inherit; margin-right: 8px;" title="Ir para Perfil"></a>
+        <a href="/diaria" class="btn btn-secondary">📆 Diária</a>
         <a href="/mensal" class="btn btn-secondary">📅 Mensal</a>
         <a href="/iseo" class="btn btn-active">🚓 ISEO</a>
         <a href="/admin" id="adminMenu" class="btn btn-secondary hidden">⚙️ Admin</a>
@@ -291,7 +292,7 @@
           </div>
 
           <!-- Tabela Militares -->
-          <table id="tabelaMilitares" class="print-table" style="margin-bottom: 16px; table-layout: auto; width: 100%; font-size: 14px;"></table>
+          <table id="tabelaMilitares" class="print-table print-table-iseo" style="margin-bottom: 16px; table-layout: auto; width: 100%;"></table>
 
           <!-- Observações -->
           <div id="observacoesView" style="font-size: 14px; margin-bottom: 24px;"></div>
@@ -831,8 +832,7 @@
     observer.observe(document.getElementById('observacoesContainer'), { childList: true, subtree: true });
 
     // === Init ===
-    // Removido o carregarDados() daqui pois é chamado no bloco async
-    console.log('🚀 Escala ISEO v2.10');
+    console.log('🚀 Escala ISEO v2.12');
   </script>
 
 </body>
