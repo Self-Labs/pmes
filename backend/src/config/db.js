@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Database Config
-  Versão: 1.0
+  Versão: 1.2
 */
 
 const { Pool } = require('pg');
@@ -11,5 +11,6 @@ const pool = new Pool({
 
 module.exports = {
   query: (text, params) => pool.query(text, params),
+  connect: () => pool.connect(),
   pool
 };
