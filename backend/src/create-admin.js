@@ -22,14 +22,14 @@ async function criarAdmin() {
 
   try {
     const existe = await db.query('SELECT id FROM usuarios WHERE email = $1', [email]);
-    
+
     if (existe.rows.length > 0) {
       console.log('⚠️ Admin já existe com este email.');
       process.exit(0);
     }
 
     const senhaHash = await bcrypt.hash(senha, 10);
-    
+
     await db.query(
       `INSERT INTO usuarios (email, senha, nome, role, ativo)
        VALUES ($1, $2, $3, 'admin', true)`,
@@ -37,7 +37,7 @@ async function criarAdmin() {
     );
 
     console.log('✅ Admin criado com sucesso!');
-    
+
   } catch (err) {
     console.error('❌ Erro:', err.message);
   }

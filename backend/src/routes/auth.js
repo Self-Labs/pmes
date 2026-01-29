@@ -101,14 +101,14 @@ router.post('/cadastro', async (req, res) => {
     const unidadesResult = await db.query('SELECT id, sigla, parent_id FROM unidades');
     const unidades = unidadesResult.rows;
     const mapa = new Map(unidades.map(u => [u.id, u]));
-    
+
     const getCaminho = (id) => {
       const u = mapa.get(id);
       if (!u) return [];
       if (!u.parent_id) return [u.sigla];
       return [...getCaminho(u.parent_id), u.sigla];
     };
-    
+
     const caminho = getCaminho(unidade_id);
     const unidadeSigla = caminho.length > 0 ? caminho.join(' / ') : null;
 

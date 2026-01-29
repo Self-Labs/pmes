@@ -228,45 +228,45 @@ a.btn { text-decoration: none; }
 .status-salvo.pendente { background: #e5e7eb; color: #6b7280; }
 
 /* Estilos de Impressão - Tabelas */
-.print-table { 
-  width: 100% !important; 
-  border-collapse: collapse !important; 
+.print-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
 }
 
-.print-table td, .print-table th { 
+.print-table td, .print-table th {
   border: 1px solid #000 !important;
   vertical-align: middle !important;
 }
 
 /* Escala Mensal */
-.print-table-mensal { 
-  table-layout: fixed !important; 
+.print-table-mensal {
+  table-layout: fixed !important;
   font-size: 11px !important;
 }
 
-.print-table-mensal td, .print-table-mensal th { 
-  padding: 0 2px !important; 
-  line-height: 1.1 !important; 
+.print-table-mensal td, .print-table-mensal th {
+  padding: 0 2px !important;
+  line-height: 1.1 !important;
 }
 
 .print-table-mensal tr { height: 20px !important; }
 
 /* Escala ISEO */
-.print-table-iseo { 
+.print-table-iseo {
   font-size: 12px !important;
 }
 
-.print-table-iseo td, .print-table-iseo th { 
-  padding: 4px 8px !important; 
+.print-table-iseo td, .print-table-iseo th {
+  padding: 4px 8px !important;
 }
 
 /* Escala Diária */
-.print-table-diaria { 
+.print-table-diaria {
   font-size: 11px !important;
 }
 
-.print-table-diaria td, .print-table-diaria th { 
-  padding: 4px 6px !important; 
+.print-table-diaria td, .print-table-diaria th {
+  padding: 4px 6px !important;
 }
 
 /* Classes auxiliares impressão */

@@ -35,7 +35,7 @@ function redirectIfLogged() {
 function renderUserInfo() {
   const usuario = getUsuario();
   const userEl = document.getElementById('navbarUser');
-  
+
   if (userEl && usuario) {
     userEl.textContent = `${usuario.nome} (${usuario.role})`;
   }
@@ -45,7 +45,7 @@ function renderUserInfo() {
 function renderMenu() {
   const usuario = getUsuario();
   const adminMenu = document.getElementById('adminMenu');
-  
+
   if (adminMenu && usuario && usuario.role === 'admin') {
     adminMenu.classList.remove('hidden');
   }

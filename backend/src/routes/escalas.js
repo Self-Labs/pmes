@@ -59,11 +59,11 @@ router.post('/mensal', authMiddleware, async (req, res) => {
       `INSERT INTO escalas_mensal (unidade_id, config, militares, colunas, equipes, observacoes)
        VALUES ($1, $2, $3, $4, $5, $6)
        ON CONFLICT (unidade_id)
-       DO UPDATE SET 
-         config = $2, 
-         militares = $3, 
-         colunas = $4, 
-         equipes = $5, 
+       DO UPDATE SET
+         config = $2,
+         militares = $3,
+         colunas = $4,
+         equipes = $5,
          observacoes = $6,
          updated_at = CURRENT_TIMESTAMP
        RETURNING *`,
@@ -130,10 +130,10 @@ router.post('/iseo', authMiddleware, async (req, res) => {
       `INSERT INTO escalas_iseo (unidade_id, config, dados, militares, observacoes, setor)
        VALUES ($1, $2, $3, $4, $5, $6)
        ON CONFLICT (unidade_id)
-       DO UPDATE SET 
-         config = $2, 
-         dados = $3, 
-         militares = $4, 
+       DO UPDATE SET
+         config = $2,
+         dados = $3,
+         militares = $4,
          observacoes = $5,
          setor = $6,
          updated_at = CURRENT_TIMESTAMP

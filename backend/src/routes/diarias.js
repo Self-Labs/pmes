@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Escalas Diárias
-  Versão: 1.2
+  Versão: 1.3
 */
 
 const express = require('express');
@@ -14,7 +14,7 @@ router.use(authMiddleware);
 async function verificarAcessoUnidade(userId, userUnidadeId, userRole, unidadeAlvo) {
   if (userRole === 'admin') return true;
   if (userUnidadeId === unidadeAlvo) return true;
-  
+
   // Verificar se unidadeAlvo é filha (recursivo)
   const result = await db.query(`
     WITH RECURSIVE hierarquia AS (
@@ -25,7 +25,7 @@ async function verificarAcessoUnidade(userId, userUnidadeId, userRole, unidadeAl
     )
     SELECT id FROM hierarquia WHERE id = $2
   `, [userUnidadeId, unidadeAlvo]);
-  
+
   return result.rows.length > 0;
 }
 
@@ -33,7 +33,7 @@ async function verificarAcessoUnidade(userId, userUnidadeId, userRole, unidadeAl
 router.get('/', async (req, res) => {
   try {
     const { unidade_id } = req.query;
-    
+
     if (!unidade_id) {
       return res.status(400).json({ error: 'unidade_id é obrigatório' });
     }
@@ -83,10 +83,10 @@ router.get('/', async (req, res) => {
 // POST - Criar ou atualizar escala (uma por unidade)
 router.post('/', async (req, res) => {
   const client = await db.connect();
-  
+
   try {
     await client.query('BEGIN');
-    
+
     const { unidade_id } = req.body;
 
     // Verificar acesso
@@ -124,7 +124,7 @@ router.post('/', async (req, res) => {
     if (existente.rows.length > 0) {
       // Atualizar
       escalaId = existente.rows[0].id;
-      
+
       await client.query(`
         UPDATE escalas_diarias SET
           usuario_id = $1, data_servico = $2,
@@ -167,7 +167,7 @@ router.post('/', async (req, res) => {
           total_rh, total_rm, total_atestados, total_operacoes,
           assinatura_nome, assinatura_posto, assinatura_funcao, assinatura_cidade,
           rodape_linha1, rodape_linha2, rodape_linha3
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29)
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30)
         RETURNING id
       `, [
         usuario_id, unidade_id, data_servico,
@@ -180,7 +180,7 @@ router.post('/', async (req, res) => {
         assinatura_nome, assinatura_posto, assinatura_funcao, assinatura_cidade,
         rodape_linha1, rodape_linha2, rodape_linha3
       ]);
-      
+
       escalaId = nova.rows[0].id;
     }
 
@@ -207,7 +207,7 @@ router.post('/', async (req, res) => {
     }
 
     await client.query('COMMIT');
-    
+
     res.json({ success: true, id: escalaId });
   } catch (error) {
     await client.query('ROLLBACK');

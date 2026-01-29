@@ -21,7 +21,7 @@ const DB = {
   try {
     const user = await buscarMeuPerfil(); // Usa api.js
     document.getElementById('navbarUser').textContent = `${user.nome} (${user.role})`;
-    
+
     currentUnidadeId = user.unidade_id;
 
     // Lógica ADMIN
