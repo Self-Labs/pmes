@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - JavaScript Diária
-  Versão: 1.4
+  Versão: 1.5
 */
 
 let currentUnidadeId = null;
@@ -15,6 +15,14 @@ const DB = {
   efetivo: [],
   audiencias: []
 };
+
+// Máscara RG: 00.000-0
+function mascaraRG(input) {
+  let v = input.value.replace(/\D/g, '').slice(0, 6);
+  if (v.length > 5) v = v.replace(/(\d{2})(\d{3})(\d{1})/, '$1.$2-$3');
+  else if (v.length > 2) v = v.replace(/(\d{2})(\d+)/, '$1.$2');
+  input.value = v;
+}
 
 // === INICIALIZAÇÃO ===
 (async () => {
@@ -353,11 +361,13 @@ function removerEfetivo(id) {
 function coletarEfetivo() {
   DB.efetivo = [];
   document.querySelectorAll('#tbodyEfetivo tr, #tbodyIseo tr').forEach(tr => {
+    const hInicio = tr.querySelector('.ef-horario-inicio')?.value || '';
+    const hFim = tr.querySelector('.ef-horario-fim')?.value || '';
     DB.efetivo.push({
       tipo: tr.dataset.tipo,
       modalidade: tr.querySelector('.ef-modalidade')?.value || '',
       setor: tr.querySelector('.ef-setor')?.value || '',
-      horario: tr.querySelector('.ef-horario')?.value || '',
+      horario: hInicio && hFim ? `${hInicio}-${hFim}` : (hInicio || hFim || ''),
       viatura: tr.querySelector('.ef-viatura')?.value || '',
       militares: tr.querySelector('.ef-militares')?.value || ''
     });
@@ -373,10 +383,11 @@ function renderEfetivo() {
   DB.efetivo.forEach(e => {
     const tr = document.createElement('tr');
     tr.dataset.tipo = e.tipo || 'EFETIVO';
+    const [hInicio, hFim] = (e.horario || '').split('-');
     tr.innerHTML = `
       <td><input type="text" class="form-input ef-modalidade" value="${e.modalidade || ''}" placeholder="RO DIURNA"></td>
       <td><input type="text" class="form-input ef-setor" value="${e.setor || ''}" placeholder="Centro"></td>
-      <td><input type="text" class="form-input ef-horario" value="${e.horario || ''}" placeholder="07h-19h"></td>
+      <td><input type="time" class="form-input ef-horario-inicio" value="${hInicio || ''}" style="width:48%;"> <input type="time" class="form-input ef-horario-fim" value="${hFim || ''}" style="width:48%;"></td>
       <td><input type="text" class="form-input ef-viatura" value="${e.viatura || ''}" placeholder="RP 5187"></td>
       <td><textarea class="form-input ef-militares" rows="2" placeholder="Sd Fulano RG 12.345-6">${e.militares || ''}</textarea></td>
       <td style="text-align:center;"><button onclick="removerEfetivo(${e.id})" class="btn-icon" title="Remover">🗑️</button></td>
@@ -420,8 +431,8 @@ function renderAudiencias() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><input type="text" class="form-input aud-militar" value="${a.militar || ''}" placeholder="Nome"></td>
-      <td><input type="text" class="form-input aud-rg" value="${a.rg || ''}" placeholder="00.000-0"></td>
-      <td><input type="text" class="form-input aud-horario" value="${a.horario || ''}" placeholder="14:00"></td>
+      <td><input type="text" class="form-input aud-rg" value="${a.rg || ''}" placeholder="00.000-0" oninput="mascaraRG(this)"></td>
+      <td><input type="time" class="form-input aud-horario" value="${a.horario || ''}"></td>
       <td><input type="text" class="form-input aud-local" value="${a.local || ''}" placeholder="Fórum de..."></td>
       <td style="text-align:center;"><button onclick="removerAudiencia(${a.id})" class="btn-icon" title="Remover">🗑️</button></td>
     `;
@@ -601,4 +612,4 @@ observer.observe(document.getElementById('tbodyEfetivo'), observerConfig);
 observer.observe(document.getElementById('tbodyIseo'), observerConfig);
 observer.observe(document.getElementById('tbodyAudiencias'), observerConfig);
 
-console.log('🚀 Escala Diária v1.4');
+console.log('🚀 Escala Diária v1.5');

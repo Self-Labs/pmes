@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala Diária
-  Versão: 1.1
+  Versão: 1.2
 -->
 <html lang="pt-BR">
 <head>
@@ -25,7 +25,7 @@
     <div class="navbar-content" style="max-width: 1200px;">
       <div class="navbar-brand">
         📋 Escala Diária
-        <span class="navbar-version">v1.1</span>
+        <span class="navbar-version">v1.2</span>
       </div>
       <div class="navbar-menu">
         <select id="adminUnitSelect" class="form-select hidden" style="width: auto; max-width: 350px; padding: 4px; font-size: 12px; margin-right: 10px;">
@@ -139,7 +139,7 @@
               <th style="width: 120px;">Modalidade</th>
               <th style="width: 150px;">Setor</th>
               <th style="width: 100px;">Horário</th>
-              <th style="width: 80px;">Viatura</th>
+              <th style="width: 100px;">Viatura</th>
               <th>Militares</th>
               <th style="width: 60px;">Ações</th>
             </tr>
@@ -147,7 +147,7 @@
           <tbody id="tbodyEfetivo"></tbody>
         </table>
       </div>
-      <button onclick="adicionarLinhaEfetivo('EFETIVO')" class="btn btn-secondary">➕ Adicionar Linha</button>
+      <button onclick="adicionarLinhaEfetivo('EFETIVO')" class="btn btn-secondary">➕ Adicionar</button>
 
       <!-- ISEO -->
       <div id="secaoIseo" class="hidden mt-6">
@@ -159,7 +159,7 @@
                 <th style="width: 120px;">Evento</th>
                 <th style="width: 150px;">Local</th>
                 <th style="width: 100px;">Horário</th>
-                <th style="width: 80px;">Viatura</th>
+                <th style="width: 100px;">Viatura</th>
                 <th>Militares</th>
                 <th style="width: 60px;">Ações</th>
               </tr>
@@ -167,7 +167,7 @@
             <tbody id="tbodyIseo"></tbody>
           </table>
         </div>
-        <button onclick="adicionarLinhaEfetivo('ISEO')" class="btn btn-secondary">➕ Adicionar Linha ISEO</button>
+        <button onclick="adicionarLinhaEfetivo('ISEO')" class="btn btn-secondary">➕ Adicionar</button>
       </div>
 
       <!-- Audiências -->
@@ -187,7 +187,7 @@
             <tbody id="tbodyAudiencias"></tbody>
           </table>
         </div>
-        <button onclick="adicionarLinhaAudiencia()" class="btn btn-secondary">➕ Adicionar Audiência</button>
+        <button onclick="adicionarLinhaAudiencia()" class="btn btn-secondary">➕ Adicionar</button>
         <p style="font-size: 11px; color: #666; margin-top: 8px; font-style: italic;">Obs.: Este não é o meio oficial de intimação dos militares.</p>
       </div>
 
