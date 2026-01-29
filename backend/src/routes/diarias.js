@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Escalas Diárias
-  Versão: 1.1
+  Versão: 1.2
 */
 
 const express = require('express');

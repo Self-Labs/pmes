@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - API Client
-  Versão: 1.6
+  Versão: 1.7
 */
 
 const API_URL = '/api';
@@ -15,8 +15,10 @@ const getUsuario = () => JSON.parse(localStorage.getItem('pmes_usuario') || 'nul
 const setUsuario = (usuario) => localStorage.setItem('pmes_usuario', JSON.stringify(usuario));
 const removeUsuario = () => localStorage.removeItem('pmes_usuario');
 
-// Fetch wrapper
-async function api(endpoint, options = {}) {
+// =============================================
+// Função de Compatibilidade para diaria.js
+// =============================================
+async function fetchComToken(endpoint, options = {}) {
   const token = getToken();
 
   const config = {
@@ -32,9 +34,17 @@ async function api(endpoint, options = {}) {
     config.body = JSON.stringify(options.body);
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, config);
+  // Retorna o objeto Response cru (como o diaria.js espera)
+  return fetch(`${API_URL}${endpoint}`, config);
+}
 
-  // Ignora redirect se for login (deixa o try/catch do login lidar com erro de senha)
+// =============================================
+// Fetch wrapper
+// =============================================
+async function api(endpoint, options = {}) {
+  const response = await fetchComToken(endpoint, options);
+
+  // Ignora redirect se for login
   if (response.status === 401 && !endpoint.includes('/auth/login')) {
     removeToken();
     removeUsuario();
@@ -192,7 +202,6 @@ async function buscarEscalaMensal(unidadeId = null) {
 
 async function salvarEscalaMensal(dados, unidadeId = null) {
   if (unidadeId) dados.unidade_id = unidadeId;
-  
   return api('/escalas/mensal', {
     method: 'POST',
     body: dados,
@@ -211,7 +220,6 @@ async function buscarEscalaISEO(unidadeId = null) {
 
 async function salvarEscalaISEO(dados, unidadeId = null) {
   if (unidadeId) dados.unidade_id = unidadeId;
-
   return api('/escalas/iseo', {
     method: 'POST',
     body: dados,
