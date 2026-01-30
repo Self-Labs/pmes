@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Estilos
-  Versão: 2.5
+  Versão: 2.6
 */
 
 /* Variáveis de Cores */
@@ -281,23 +281,30 @@ a.btn { text-decoration: none; }
   text-align: center !important;
 }
 
-.print-table-diaria td.cell-left {
-  text-align: left !important;
+.print-table-diaria td.no-border-top {
+  border-top: hidden !important;
 }
 
-.print-table-diaria td.no-border-top {
-  border-top: none !important;
-  border-top-style: none !important;
+.print-table-diaria td.cell-left {
+  text-align: left !important;
 }
 
 .print-table-diaria td.cell-center {
   vertical-align: middle !important;
   text-align: center !important;
 }
+/* Larguras fixas para colunas de impressão (ISEO e Audiências) */
+#viewSecaoIseo .print-table-diaria thead tr:nth-child(2) th:nth-child(1) { width: 25%; } /* Evento */
+#viewSecaoIseo .print-table-diaria thead tr:nth-child(2) th:nth-child(2) { width: 25%; } /* Local */
+#viewSecaoIseo .print-table-diaria thead tr:nth-child(2) th:nth-child(3) { width: 15%; } /* Horário */
+#viewSecaoIseo .print-table-diaria thead tr:nth-child(2) th:nth-child(4) { width: 10%; } /* Viatura */
+#viewSecaoIseo .print-table-diaria thead tr:nth-child(2) th:nth-child(5) { width: 15%; } /* Militares */
+#viewSecaoIseo .print-table-diaria thead tr:nth-child(2) th:nth-child(6) { width: 10%; } /* RG */
 
-.print-table-diaria td.cell-vmiddle {
-  vertical-align: middle !important;
-}
+#viewSecaoAudiencias .print-table-diaria thead tr:nth-child(2) th:nth-child(1) { width: 30%; } /* Militar */
+#viewSecaoAudiencias .print-table-diaria thead tr:nth-child(2) th:nth-child(2) { width: 15%; } /* RG */
+#viewSecaoAudiencias .print-table-diaria thead tr:nth-child(2) th:nth-child(3) { width: 15%; } /* Horário */
+#viewSecaoAudiencias .print-table-diaria thead tr:nth-child(2) th:nth-child(4) { width: 40%; } /* Local */
 
 /* Classes auxiliares impressão */
 .overlap-top { margin-top: -1px !important; }

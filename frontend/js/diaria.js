@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - JavaScript Diária
-  Versão: 2.3
+  Versão: 2.4
 */
 
 let currentUnidadeId = null;
@@ -483,9 +483,9 @@ function renderizarDocumento() {
   const diaSemana = dias[data.getDay()];
 
   // Estilo padrão para headers (garante uniformidade)
-  const headerStyle = 'background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border:1px solid #000;font-size:11px;font-family:inherit;';
+  const headerStyle = 'background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border:1px solid #000;font-size:12px;font-family:inherit;';
   // Estilo padrão para headers de blocos de texto (borda inferior)
-  const textBlockHeaderStyle = 'background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border-bottom:1px solid #000;font-size:11px;font-family:inherit;';
+  const textBlockHeaderStyle = 'background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border-bottom:1px solid #000;font-size:12px;font-family:inherit;';
 
   // Brasões
   const brasaoEsqHTML = c.brasao_esquerdo
@@ -548,12 +548,12 @@ function renderizarDocumento() {
   linhasExpandidas.forEach((linha, i) => {
     const bordaMil = linha.milIndex > 0 ? 'no-border-top' : '';
     html += '<tr>';
-    if (spanModalidade[i] > 0) html += `<td rowspan="${spanModalidade[i]}" class="cell-vmiddle">${linha.modalidade}</td>`;
-    if (spanSetor[i] > 0) html += `<td rowspan="${spanSetor[i]}" class="cell-vmiddle">${linha.setor}</td>`;
-    if (spanHorario[i] > 0) html += `<td rowspan="${spanHorario[i]}" class="cell-vmiddle">${linha.horario}</td>`;
+    if (spanModalidade[i] > 0) html += `<td rowspan="${spanModalidade[i]}" class="cell-center">${linha.modalidade}</td>`;
+    if (spanSetor[i] > 0) html += `<td rowspan="${spanSetor[i]}" class="cell-center">${linha.setor}</td>`;
+    if (spanHorario[i] > 0) html += `<td rowspan="${spanHorario[i]}" class="cell-center">${linha.horario}</td>`;
     if (linha.milIndex === 0) html += `<td rowspan="${linha.milTotal}" class="cell-center">${linha.viatura}</td>`;
     html += `<td class="${bordaMil} cell-left">${linha.militar}</td>`;
-    html += `<td class="${bordaMil} cell-left">${linha.rg}</td>`;
+    html += `<td class="${bordaMil} cell-center">${linha.rg}</td>`;
     html += '</tr>';
   });
 
@@ -601,12 +601,12 @@ function renderizarDocumento() {
     linhasIseo.forEach((linha, i) => {
       const bordaMil = linha.milIndex > 0 ? 'no-border-top' : '';
       iseoHtml += '<tr>';
-      if (spanModalidade[i] > 0) iseoHtml += `<td rowspan="${spanModalidade[i]}" class="cell-vmiddle">${linha.modalidade}</td>`;
-      if (spanSetor[i] > 0) iseoHtml += `<td rowspan="${spanSetor[i]}" class="cell-vmiddle">${linha.setor}</td>`;
-      if (spanHorario[i] > 0) iseoHtml += `<td rowspan="${spanHorario[i]}" class="cell-vmiddle">${linha.horario}</td>`;
+      if (spanModalidade[i] > 0) iseoHtml += `<td rowspan="${spanModalidade[i]}" class="cell-center">${linha.modalidade}</td>`;
+      if (spanSetor[i] > 0) iseoHtml += `<td rowspan="${spanSetor[i]}" class="cell-center">${linha.setor}</td>`;
+      if (spanHorario[i] > 0) iseoHtml += `<td rowspan="${spanHorario[i]}" class="cell-center">${linha.horario}</td>`;
       if (linha.milIndex === 0) iseoHtml += `<td rowspan="${linha.milTotal}" class="cell-center">${linha.viatura}</td>`;
       iseoHtml += `<td class="${bordaMil} cell-left">${linha.militar}</td>`;
-      iseoHtml += `<td class="${bordaMil} cell-left">${linha.rg}</td>`;
+      iseoHtml += `<td class="${bordaMil} cell-center">${linha.rg}</td>`;
       iseoHtml += '</tr>';
     });
 
@@ -743,4 +743,4 @@ observer.observe(document.getElementById('tbodyEfetivo'), observerConfig);
 observer.observe(document.getElementById('tbodyIseo'), observerConfig);
 observer.observe(document.getElementById('tbodyAudiencias'), observerConfig);
 
-console.log('🚀 Escala Diária v2.3');
+console.log('🚀 Escala Diária v2.4');
