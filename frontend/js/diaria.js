@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - JavaScript Diária
-  Versão: 2.0
+  Versão: 2.1
 */
 
 let currentUnidadeId = null;
@@ -289,22 +289,22 @@ function carregarDadosUI() {
 
 // Calcula totais RH e RM automaticamente
 function calcularTotais() {
-  const militaresUnicos = new Set();
-  const viaturasUnicas = new Set();
+  let totalMilitares = 0;
+  let totalViaturas = 0;
 
   DB.efetivo.forEach(e => {
-    // Militares únicos
+    // Conta cada linha de militar
     (e.militares || '').split('\n').forEach(m => {
-      if (m.trim()) militaresUnicos.add(m.trim().toUpperCase());
+      if (m.trim()) totalMilitares++;
     });
-    // Viaturas únicas
+    // Conta cada empenho de viatura
     if (e.viatura && e.viatura.trim()) {
-      viaturasUnicas.add(e.viatura.trim().toUpperCase());
+      totalViaturas++;
     }
   });
 
-  document.getElementById('totalRH').value = militaresUnicos.size;
-  document.getElementById('totalRM').value = viaturasUnicas.size;
+  document.getElementById('totalRH').value = totalMilitares;
+  document.getElementById('totalRM').value = totalViaturas;
 }
 
 // === COLETAR TUDO ===
@@ -377,7 +377,7 @@ function adicionarLinhaEfetivo(tipo) {
 
 function removerEfetivo(id) {
   coletarEfetivo();
-  DB.efetivo = DB.efetivo.filter(e => e.id !== id);
+  DB.efetivo = DB.efetivo.filter(e => String(e.id) !== String(id));
   renderEfetivo();
   marcarAlterado();
 }
@@ -388,7 +388,7 @@ function coletarEfetivo() {
     const hInicio = tr.querySelector('.ef-horario-inicio')?.value || '';
     const hFim = tr.querySelector('.ef-horario-fim')?.value || '';
     DB.efetivo.push({
-      id: parseInt(tr.dataset.id),
+      id: tr.dataset.id,
       tipo: tr.dataset.tipo,
       modalidade: tr.querySelector('.ef-modalidade')?.value || '',
       setor: tr.querySelector('.ef-setor')?.value || '',
@@ -411,14 +411,15 @@ function renderEfetivo() {
     tr.dataset.id = e.id;
     tr.dataset.tipo = e.tipo || 'EFETIVO';
     const [hInicio, hFim] = (e.horario || '').split('-');
+    const placeholderMod = e.tipo === 'ISEO' ? 'Policiamento...' : 'RO/RI/NPC...';
     tr.innerHTML = `
-      <td><input type="text" class="form-input ef-modalidade" value="${e.modalidade || ''}" placeholder="RO DIURNA"></td>
+      <td><input type="text" class="form-input ef-modalidade" value="${e.modalidade || ''}" placeholder="${placeholderMod}"></td>
       <td><input type="text" class="form-input ef-setor" value="${e.setor || ''}" placeholder="Centro"></td>
       <td style="text-align:center;"><input type="time" class="form-input ef-horario-inicio" value="${hInicio || ''}" style="width:90%;"><br><input type="time" class="form-input ef-horario-fim" value="${hFim || ''}" style="width:90%;"></td>
       <td><input type="text" class="form-input ef-viatura" value="${e.viatura || ''}" placeholder="RP 5187"></td>
-      <td><textarea class="form-input ef-militares" rows="2" placeholder="Sd Fulano&#10;Sd Ciclano">${e.militares || ''}</textarea></td>
+      <td><textarea class="form-input ef-militares" rows="2" placeholder="Cb João&#10;Sd Maria">${e.militares || ''}</textarea></td>
       <td><textarea class="form-input ef-rg" rows="2" placeholder="12.345-6&#10;23.456-7">${e.rg || ''}</textarea></td>
-      <td style="text-align:center;"><button onclick="removerEfetivo(${e.id})" class="btn-icon" title="Remover">🗑️</button></td>
+      <td style="text-align:center;"><button onclick="removerEfetivo('${e.id}')" class="btn-icon" title="Remover">🗑️</button></td>
     `;
 
     if (e.tipo === 'ISEO') tbodyIseo.appendChild(tr);
@@ -535,12 +536,8 @@ function renderizarDocumento() {
   const spanHorario = calcularRowspans(linhasExpandidas, 'horario');
 
   let html = `
-    <thead><tr style="background: #e5e7eb;">
-      <th colspan="6" style="text-align:center; font-weight:bold;">EMPENHO DO EFETIVO DIÁRIO</th>
-    </tr>
-    <tr style="background: #f3f4f6;">
-      <th>Modalidade</th><th>Setor</th><th>Horário</th><th>Viatura</th><th>Militares</th><th>RG</th>
-    </tr></thead><tbody>
+    <thead><tr><th colspan="6" style="background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border:1px solid #000;">EMPENHO DO EFETIVO DIÁRIO</th></tr>
+    <tr style="background:#f3f4f6;"><th>Modalidade</th><th>Setor</th><th>Horário</th><th>Viatura</th><th>Militares</th><th>RG</th></tr></thead><tbody>
   `;
 
   linhasExpandidas.forEach((linha, i) => {
@@ -551,7 +548,7 @@ function renderizarDocumento() {
     if (spanHorario[i] > 0) html += `<td rowspan="${spanHorario[i]}" class="cell-vmiddle">${linha.horario}</td>`;
     if (linha.milIndex === 0) html += `<td rowspan="${linha.milTotal}" class="cell-center">${linha.viatura}</td>`;
     html += `<td class="${bordaMil} cell-left">${linha.militar}</td>`;
-    html += `<td class="${bordaMil}">${linha.rg}</td>`;
+    html += `<td class="${bordaMil} cell-left">${linha.rg}</td>`;
     html += '</tr>';
   });
 
@@ -593,7 +590,7 @@ function renderizarDocumento() {
     const spanHorario = calcularRowspans(linhasIseo, 'horario');
 
     let iseoHtml = `<table class="print-table print-table-diaria" style="margin-top:12px;">
-      <thead><tr style="background:#e5e7eb;"><th colspan="6" style="text-align:center;font-weight:bold;">ESCALA ESPECIAL - ISEO - OUTROS</th></tr>
+      <thead><tr><th colspan="6" style="background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border:1px solid #000;">ESCALA ESPECIAL - ISEO - OUTROS</th></tr>
       <tr style="background:#f3f4f6;"><th>Evento</th><th>Local</th><th>Horário</th><th>Viatura</th><th>Militares</th><th>RG</th></tr></thead><tbody>`;
 
     linhasIseo.forEach((linha, i) => {
@@ -604,7 +601,7 @@ function renderizarDocumento() {
       if (spanHorario[i] > 0) iseoHtml += `<td rowspan="${spanHorario[i]}" class="cell-vmiddle">${linha.horario}</td>`;
       if (linha.milIndex === 0) iseoHtml += `<td rowspan="${linha.milTotal}" class="cell-center">${linha.viatura}</td>`;
       iseoHtml += `<td class="${bordaMil} cell-left">${linha.militar}</td>`;
-      iseoHtml += `<td class="${bordaMil}">${linha.rg}</td>`;
+      iseoHtml += `<td class="${bordaMil} cell-left">${linha.rg}</td>`;
       iseoHtml += '</tr>';
     });
 
@@ -630,7 +627,7 @@ function renderizarDocumento() {
   // Audiências
   if (c.mostrar_audiencias && DB.audiencias.length > 0) {
     let audHtml = `<table class="print-table print-table-diaria" style="margin-top:12px;">
-      <thead><tr style="background:#e5e7eb;"><th colspan="4" style="text-align:center;font-weight:bold;">INTIMAÇÕES PARA AUDIÊNCIAS JUDICIAIS</th></tr>
+      <thead><tr><th colspan="4" style="background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border:1px solid #000;">INTIMAÇÕES PARA AUDIÊNCIAS JUDICIAIS</th></tr>
       <tr style="background:#f3f4f6;"><th>Militar</th><th>RG</th><th>Horário</th><th>Local</th></tr></thead><tbody>`;
     DB.audiencias.forEach(a => {
       audHtml += `<tr><td>${a.militar}</td><td>${a.rg}</td><td>${a.horario}</td><td>${a.local}</td></tr>`;
@@ -663,7 +660,7 @@ function renderizarDocumento() {
   if (c.mostrar_totais) {
     document.getElementById('viewSecaoTotais').innerHTML = `
       <table class="print-table print-table-diaria" style="margin-top:12px;">
-        <thead><tr style="background:#e5e7eb;"><th colspan="4" style="text-align:center;font-weight:bold;">TOTAL</th></tr>
+        <thead><tr><th colspan="4" style="background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border:1px solid #000;">TOTAL</th></tr>
         <tr style="background:#f3f4f6;"><th>RECURSOS HUMANOS</th><th>RECURSOS MATERIAIS</th><th>ATESTADOS MÉDICOS</th><th>TOTAL DE OPERAÇÕES</th></tr></thead>
         <tbody><tr style="text-align:center;"><td>${c.total_rh || 0}</td><td>${c.total_rm || 0}</td><td>${c.total_atestados || 0}</td><td>${c.total_operacoes || 0}</td></tr></tbody>
       </table>`;
@@ -741,4 +738,4 @@ observer.observe(document.getElementById('tbodyEfetivo'), observerConfig);
 observer.observe(document.getElementById('tbodyIseo'), observerConfig);
 observer.observe(document.getElementById('tbodyAudiencias'), observerConfig);
 
-console.log('🚀 Escala Diária v2.0');
+console.log('🚀 Escala Diária v2.1');

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala ISEO
-  Versão: 2.12
+  Versão: 3.0
 -->
 <html lang="pt-BR">
 <head>
@@ -25,7 +25,7 @@
     <div class="navbar-content" style="max-width: 1200px;">
       <div class="navbar-brand">
         📋 Escala ISEO
-        <span class="navbar-version">v2.12</span>
+        <span class="navbar-version">v3.0</span>
       </div>
       <div class="navbar-menu">
         <select id="adminUnitSelect" class="form-select hidden" style="width: auto; max-width: 350px; padding: 4px; font-size: 12px; margin-right: 10px;">
@@ -601,7 +601,7 @@
       document.getElementById('observacoesContainer').innerHTML = DB.observacoes.map((obs, i) => `
         <div style="display: flex; gap: 8px; align-items: flex-start;">
           <span style="color: #666; font-weight: bold; margin-top: 8px; min-width: 50px;">Obs ${i + 1}:</span>
-          <textarea class="form-input obs-input" data-index="${i}" rows="2" style="flex: 1;">${obs}</textarea>
+          <textarea class="form-input obs-input" data-index="${i}" rows="3" style="flex: 1; white-space: pre-wrap;">${obs}</textarea>
           <button onclick="removerObservacao(${i})" class="btn-icon" title="Remover">🗑️</button>
         </div>
       `).join('');
@@ -832,7 +832,7 @@
     observer.observe(document.getElementById('observacoesContainer'), { childList: true, subtree: true });
 
     // === Init ===
-    console.log('🚀 Escala ISEO v2.12');
+    console.log('🚀 Escala ISEO v3.0');
   </script>
 
 </body>
