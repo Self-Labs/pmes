@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - JavaScript Diária
-  Versão: 2.1
+  Versão: 2.2
 */
 
 let currentUnidadeId = null;
@@ -618,7 +618,7 @@ function renderizarDocumento() {
   // Observações
   if (c.observacoes) {
     document.getElementById('viewObservacoes').innerHTML = `
-      <div style="margin-top:12px;border:1px solid #000;"><div style="background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;">TROCAS DE SERVIÇO / DISPENSAS / OBSERVAÇÕES</div>
+      <div style="margin-top:12px;border:1px solid #000;"><div style="background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border-bottom:1px solid #000;">TROCAS DE SERVIÇO / DISPENSAS / OBSERVAÇÕES</div>
       <div style="padding:8px;white-space:pre-wrap;">${c.observacoes}</div></div>`;
   } else {
     document.getElementById('viewObservacoes').innerHTML = '';
@@ -641,7 +641,7 @@ function renderizarDocumento() {
   // Planejamento
   if (c.planejamento) {
     document.getElementById('viewPlanejamento').innerHTML = `
-      <div style="margin-top:12px;border:1px solid #000;"><div style="background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;">PLANEJAMENTO OPERACIONAL</div>
+      <div style="margin-top:12px;border:1px solid #000;"><div style="background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border-bottom:1px solid #000;">PLANEJAMENTO OPERACIONAL</div>
       <div style="padding:8px;white-space:pre-wrap;">${c.planejamento}</div></div>`;
   } else {
     document.getElementById('viewPlanejamento').innerHTML = '';
@@ -650,7 +650,7 @@ function renderizarDocumento() {
   // Outras Determinações
   if (c.outras_determinacoes) {
     document.getElementById('viewOutrasDeterminacoes').innerHTML = `
-      <div style="margin-top:12px;border:1px solid #000;"><div style="background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;">OUTRAS DETERMINAÇÕES</div>
+      <div style="margin-top:12px;border:1px solid #000;"><div style="background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border-bottom:1px solid #000;">OUTRAS DETERMINAÇÕES</div>
       <div style="padding:8px;white-space:pre-wrap;">${c.outras_determinacoes}</div></div>`;
   } else {
     document.getElementById('viewOutrasDeterminacoes').innerHTML = '';
@@ -738,4 +738,4 @@ observer.observe(document.getElementById('tbodyEfetivo'), observerConfig);
 observer.observe(document.getElementById('tbodyIseo'), observerConfig);
 observer.observe(document.getElementById('tbodyAudiencias'), observerConfig);
 
-console.log('🚀 Escala Diária v2.1');
+console.log('🚀 Escala Diária v2.2');

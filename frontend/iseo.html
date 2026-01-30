@@ -799,7 +799,7 @@
         obsHtml += `<p style="font-weight: bold; margin-bottom: 8px;">Setor: ${DB.setor}</p>`;
       }
       DB.observacoes.filter(o => o.trim()).forEach((o, i) => {
-        obsHtml += `<p style="margin-bottom: 4px;"><strong>Obs ${i + 1}:</strong> ${o}</p>`;
+        obsHtml += `<p style="margin-bottom: 4px; white-space: pre-wrap;"><strong>Obs ${i + 1}:</strong> ${o}</p>`;
       });
       document.getElementById('observacoesView').innerHTML = obsHtml;
 
