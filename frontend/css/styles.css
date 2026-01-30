@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Estilos
-  Versão: 2.1
+  Versão: 2.2
 */
 
 /* Variáveis de Cores */
@@ -191,6 +191,16 @@ a.btn { text-decoration: none; }
 
 .table tr:hover { background: #f9fafb; }
 
+/* Tabela Compacta (Edição) */
+.table-compact th, .table-compact td {
+  padding: 4px !important;
+  vertical-align: middle;
+}
+
+.table-compact input, .table-compact textarea {
+  font-size: 13px;
+}
+
 /* Utils */
 .text-center { text-align: center; }
 .text-right { text-align: right; }
@@ -262,11 +272,16 @@ a.btn { text-decoration: none; }
 
 /* Escala Diária */
 .print-table-diaria {
-  font-size: 11px !important;
+  font-size: 12px !important;
 }
 
 .print-table-diaria td, .print-table-diaria th {
-  padding: 4px 6px !important;
+  padding: 2px 4px !important;
+  text-align: center !important;
+}
+
+.print-table-diaria td.cell-left {
+  text-align: left !important;
 }
 
 .print-table-diaria td.no-border-top {
@@ -297,7 +312,7 @@ a.btn { text-decoration: none; }
   .print-header { display: table-header-group; }
   .print-footer { display: table-footer-group; }
   .print-body { display: table-row-group; }
-  .print-header-content { padding-bottom: 12px; border-bottom: 1px solid #ccc; }
+  .print-header-content { padding-bottom: 12px; }
   .print-footer-content { padding-top: 12px; border-top: 1px solid #ccc; }
 }
 

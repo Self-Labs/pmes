@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - JavaScript Diária
-  Versão: 1.8
+  Versão: 2.0
 */
 
 let currentUnidadeId = null;
@@ -287,6 +287,26 @@ function carregarDadosUI() {
   renderAudiencias();
 }
 
+// Calcula totais RH e RM automaticamente
+function calcularTotais() {
+  const militaresUnicos = new Set();
+  const viaturasUnicas = new Set();
+
+  DB.efetivo.forEach(e => {
+    // Militares únicos
+    (e.militares || '').split('\n').forEach(m => {
+      if (m.trim()) militaresUnicos.add(m.trim().toUpperCase());
+    });
+    // Viaturas únicas
+    if (e.viatura && e.viatura.trim()) {
+      viaturasUnicas.add(e.viatura.trim().toUpperCase());
+    }
+  });
+
+  document.getElementById('totalRH').value = militaresUnicos.size;
+  document.getElementById('totalRM').value = viaturasUnicas.size;
+}
+
 // === COLETAR TUDO ===
 function coletarTudo() {
   DB.data_servico = document.getElementById('dataServico').value;
@@ -323,6 +343,7 @@ function coletarTudo() {
 
   coletarEfetivo();
   coletarAudiencias();
+  calcularTotais();
 }
 
 // === BRASÕES ===
@@ -529,7 +550,7 @@ function renderizarDocumento() {
     if (spanSetor[i] > 0) html += `<td rowspan="${spanSetor[i]}" class="cell-vmiddle">${linha.setor}</td>`;
     if (spanHorario[i] > 0) html += `<td rowspan="${spanHorario[i]}" class="cell-vmiddle">${linha.horario}</td>`;
     if (linha.milIndex === 0) html += `<td rowspan="${linha.milTotal}" class="cell-center">${linha.viatura}</td>`;
-    html += `<td class="${bordaMil}">${linha.militar}</td>`;
+    html += `<td class="${bordaMil} cell-left">${linha.militar}</td>`;
     html += `<td class="${bordaMil}">${linha.rg}</td>`;
     html += '</tr>';
   });
@@ -582,7 +603,7 @@ function renderizarDocumento() {
       if (spanSetor[i] > 0) iseoHtml += `<td rowspan="${spanSetor[i]}" class="cell-vmiddle">${linha.setor}</td>`;
       if (spanHorario[i] > 0) iseoHtml += `<td rowspan="${spanHorario[i]}" class="cell-vmiddle">${linha.horario}</td>`;
       if (linha.milIndex === 0) iseoHtml += `<td rowspan="${linha.milTotal}" class="cell-center">${linha.viatura}</td>`;
-      iseoHtml += `<td class="${bordaMil}">${linha.militar}</td>`;
+      iseoHtml += `<td class="${bordaMil} cell-left">${linha.militar}</td>`;
       iseoHtml += `<td class="${bordaMil}">${linha.rg}</td>`;
       iseoHtml += '</tr>';
     });
@@ -720,4 +741,4 @@ observer.observe(document.getElementById('tbodyEfetivo'), observerConfig);
 observer.observe(document.getElementById('tbodyIseo'), observerConfig);
 observer.observe(document.getElementById('tbodyAudiencias'), observerConfig);
 
-console.log('🚀 Escala Diária v1.7');
+console.log('🚀 Escala Diária v2.0');
