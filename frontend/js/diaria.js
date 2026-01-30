@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - JavaScript Diária
-  Versão: 1.7
+  Versão: 1.8
 */
 
 let currentUnidadeId = null;
@@ -393,7 +393,7 @@ function renderEfetivo() {
     tr.innerHTML = `
       <td><input type="text" class="form-input ef-modalidade" value="${e.modalidade || ''}" placeholder="RO DIURNA"></td>
       <td><input type="text" class="form-input ef-setor" value="${e.setor || ''}" placeholder="Centro"></td>
-      <td><input type="time" class="form-input ef-horario-inicio" value="${hInicio || ''}" style="width:48%;"> <input type="time" class="form-input ef-horario-fim" value="${hFim || ''}" style="width:48%;"></td>
+      <td style="text-align:center;"><input type="time" class="form-input ef-horario-inicio" value="${hInicio || ''}" style="width:90%;"><br><input type="time" class="form-input ef-horario-fim" value="${hFim || ''}" style="width:90%;"></td>
       <td><input type="text" class="form-input ef-viatura" value="${e.viatura || ''}" placeholder="RP 5187"></td>
       <td><textarea class="form-input ef-militares" rows="2" placeholder="Sd Fulano&#10;Sd Ciclano">${e.militares || ''}</textarea></td>
       <td><textarea class="form-input ef-rg" rows="2" placeholder="12.345-6&#10;23.456-7">${e.rg || ''}</textarea></td>
@@ -415,7 +415,7 @@ function adicionarLinhaAudiencia() {
 
 function removerAudiencia(id) {
   coletarAudiencias();
-  DB.audiencias = DB.audiencias.filter(a => a.id !== id);
+  DB.audiencias = DB.audiencias.filter(a => String(a.id) !== String(id));
   renderAudiencias();
   marcarAlterado();
 }
@@ -424,7 +424,7 @@ function coletarAudiencias() {
   DB.audiencias = [];
   document.querySelectorAll('#tbodyAudiencias tr').forEach(tr => {
     DB.audiencias.push({
-      id: parseInt(tr.dataset.id),
+      id: tr.dataset.id,
       militar: tr.querySelector('.aud-militar')?.value || '',
       rg: tr.querySelector('.aud-rg')?.value || '',
       horario: tr.querySelector('.aud-horario')?.value || '',
@@ -445,7 +445,7 @@ function renderAudiencias() {
       <td><input type="text" class="form-input aud-rg" value="${a.rg || ''}" placeholder="00.000-0" oninput="mascaraRG(this)"></td>
       <td><input type="time" class="form-input aud-horario" value="${a.horario || ''}"></td>
       <td><input type="text" class="form-input aud-local" value="${a.local || ''}" placeholder="Fórum de..."></td>
-      <td style="text-align:center;"><button onclick="removerAudiencia(${a.id})" class="btn-icon" title="Remover">🗑️</button></td>
+      <td style="text-align:center;"><button onclick="removerAudiencia('${a.id}')" class="btn-icon" title="Remover">🗑️</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -482,7 +482,7 @@ function renderizarDocumento() {
 
   // Título
   document.getElementById('viewTitulo').textContent = c.titulo_escala || '';
-  document.getElementById('viewSubtitulo').textContent = `Serviço do dia ${dataFormatada} - ${diaSemana}`;
+  document.getElementById('viewSubtitulo').innerHTML = `Serviço do dia ${dataFormatada} - <b>${diaSemana}</b>`;
 
   // Tabela Efetivo
   const efetivoData = DB.efetivo.filter(e => e.tipo !== 'ISEO');
