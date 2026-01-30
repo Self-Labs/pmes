@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - JavaScript Diária
-  Versão: 2.2
+  Versão: 2.3
 */
 
 let currentUnidadeId = null;
@@ -482,6 +482,11 @@ function renderizarDocumento() {
   const dataFormatada = data.toLocaleDateString('pt-BR');
   const diaSemana = dias[data.getDay()];
 
+  // Estilo padrão para headers (garante uniformidade)
+  const headerStyle = 'background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border:1px solid #000;font-size:11px;font-family:inherit;';
+  // Estilo padrão para headers de blocos de texto (borda inferior)
+  const textBlockHeaderStyle = 'background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border-bottom:1px solid #000;font-size:11px;font-family:inherit;';
+
   // Brasões
   const brasaoEsqHTML = c.brasao_esquerdo
     ? `<img src="${c.brasao_esquerdo}" style="height: 70px;">`
@@ -508,7 +513,7 @@ function renderizarDocumento() {
 
   // Tabela Efetivo
   const efetivoData = DB.efetivo.filter(e => e.tipo !== 'ISEO');
-  
+
   // Expandir para linhas individuais
   const linhasExpandidas = [];
   efetivoData.forEach((e, idx) => {
@@ -536,7 +541,7 @@ function renderizarDocumento() {
   const spanHorario = calcularRowspans(linhasExpandidas, 'horario');
 
   let html = `
-    <thead><tr><th colspan="6" style="background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border:1px solid #000;">EMPENHO DO EFETIVO DIÁRIO</th></tr>
+    <thead><tr><th colspan="6" style="${headerStyle}">EMPENHO DO EFETIVO DIÁRIO</th></tr>
     <tr style="background:#f3f4f6;"><th>Modalidade</th><th>Setor</th><th>Horário</th><th>Viatura</th><th>Militares</th><th>RG</th></tr></thead><tbody>
   `;
 
@@ -590,7 +595,7 @@ function renderizarDocumento() {
     const spanHorario = calcularRowspans(linhasIseo, 'horario');
 
     let iseoHtml = `<table class="print-table print-table-diaria" style="margin-top:12px;">
-      <thead><tr><th colspan="6" style="background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border:1px solid #000;">ESCALA ESPECIAL - ISEO - OUTROS</th></tr>
+      <thead><tr><th colspan="6" style="${headerStyle}">ESCALA ESPECIAL - ISEO - OUTROS</th></tr>
       <tr style="background:#f3f4f6;"><th>Evento</th><th>Local</th><th>Horário</th><th>Viatura</th><th>Militares</th><th>RG</th></tr></thead><tbody>`;
 
     linhasIseo.forEach((linha, i) => {
@@ -615,19 +620,10 @@ function renderizarDocumento() {
     document.getElementById('viewSecaoIseo').innerHTML = '';
   }
 
-  // Observações
-  if (c.observacoes) {
-    document.getElementById('viewObservacoes').innerHTML = `
-      <div style="margin-top:12px;border:1px solid #000;"><div style="background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border-bottom:1px solid #000;">TROCAS DE SERVIÇO / DISPENSAS / OBSERVAÇÕES</div>
-      <div style="padding:8px;white-space:pre-wrap;">${c.observacoes}</div></div>`;
-  } else {
-    document.getElementById('viewObservacoes').innerHTML = '';
-  }
-
   // Audiências
   if (c.mostrar_audiencias && DB.audiencias.length > 0) {
     let audHtml = `<table class="print-table print-table-diaria" style="margin-top:12px;">
-      <thead><tr><th colspan="4" style="background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border:1px solid #000;">INTIMAÇÕES PARA AUDIÊNCIAS JUDICIAIS</th></tr>
+      <thead><tr><th colspan="4" style="${headerStyle}">INTIMAÇÕES PARA AUDIÊNCIAS JUDICIAIS</th></tr>
       <tr style="background:#f3f4f6;"><th>Militar</th><th>RG</th><th>Horário</th><th>Local</th></tr></thead><tbody>`;
     DB.audiencias.forEach(a => {
       audHtml += `<tr><td>${a.militar}</td><td>${a.rg}</td><td>${a.horario}</td><td>${a.local}</td></tr>`;
@@ -638,10 +634,19 @@ function renderizarDocumento() {
     document.getElementById('viewSecaoAudiencias').innerHTML = '';
   }
 
+  // Observações (TROCAS) - Movido para depois de Audiências
+  if (c.observacoes) {
+    document.getElementById('viewObservacoes').innerHTML = `
+      <div style="margin-top:12px;border:1px solid #000;"><div style="${textBlockHeaderStyle}">TROCAS DE SERVIÇO / DISPENSAS / OBSERVAÇÕES</div>
+      <div style="padding:8px;white-space:pre-wrap;">${c.observacoes}</div></div>`;
+  } else {
+    document.getElementById('viewObservacoes').innerHTML = '';
+  }
+
   // Planejamento
   if (c.planejamento) {
     document.getElementById('viewPlanejamento').innerHTML = `
-      <div style="margin-top:12px;border:1px solid #000;"><div style="background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border-bottom:1px solid #000;">PLANEJAMENTO OPERACIONAL</div>
+      <div style="margin-top:12px;border:1px solid #000;"><div style="${textBlockHeaderStyle}">PLANEJAMENTO OPERACIONAL</div>
       <div style="padding:8px;white-space:pre-wrap;">${c.planejamento}</div></div>`;
   } else {
     document.getElementById('viewPlanejamento').innerHTML = '';
@@ -650,7 +655,7 @@ function renderizarDocumento() {
   // Outras Determinações
   if (c.outras_determinacoes) {
     document.getElementById('viewOutrasDeterminacoes').innerHTML = `
-      <div style="margin-top:12px;border:1px solid #000;"><div style="background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border-bottom:1px solid #000;">OUTRAS DETERMINAÇÕES</div>
+      <div style="margin-top:12px;border:1px solid #000;"><div style="${textBlockHeaderStyle}">OUTRAS DETERMINAÇÕES</div>
       <div style="padding:8px;white-space:pre-wrap;">${c.outras_determinacoes}</div></div>`;
   } else {
     document.getElementById('viewOutrasDeterminacoes').innerHTML = '';
@@ -660,7 +665,7 @@ function renderizarDocumento() {
   if (c.mostrar_totais) {
     document.getElementById('viewSecaoTotais').innerHTML = `
       <table class="print-table print-table-diaria" style="margin-top:12px;">
-        <thead><tr><th colspan="4" style="background:#e5e7eb;text-align:center;font-weight:bold;padding:4px;border:1px solid #000;">TOTAL</th></tr>
+        <thead><tr><th colspan="4" style="${headerStyle}">TOTAL</th></tr>
         <tr style="background:#f3f4f6;"><th>RECURSOS HUMANOS</th><th>RECURSOS MATERIAIS</th><th>ATESTADOS MÉDICOS</th><th>TOTAL DE OPERAÇÕES</th></tr></thead>
         <tbody><tr style="text-align:center;"><td>${c.total_rh || 0}</td><td>${c.total_rm || 0}</td><td>${c.total_atestados || 0}</td><td>${c.total_operacoes || 0}</td></tr></tbody>
       </table>`;
@@ -738,4 +743,4 @@ observer.observe(document.getElementById('tbodyEfetivo'), observerConfig);
 observer.observe(document.getElementById('tbodyIseo'), observerConfig);
 observer.observe(document.getElementById('tbodyAudiencias'), observerConfig);
 
-console.log('🚀 Escala Diária v2.2');
+console.log('🚀 Escala Diária v2.3');
