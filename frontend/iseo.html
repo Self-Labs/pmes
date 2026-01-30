@@ -150,7 +150,7 @@
           <label style="font-size: 12px; color: #666;">Horário de Apresentação</label>
           <div style="display: flex; gap: 8px; align-items: center;">
             <input type="time" id="horarioApresentacao" class="form-input" style="flex: 1;">
-            <span>no</span>
+            <span>-</span>
             <input type="text" id="localApresentacao" class="form-input" placeholder="Ex: 9º BPM" style="flex: 2;">
           </div>
         </div>
@@ -755,7 +755,7 @@
       // Formatar horários
       const formatarHora = (h) => h ? h.replace(':', 'h') + 'min' : '';
       const horarioEscala = d.horarioInicio && d.horarioFim ? `${formatarHora(d.horarioInicio)} às ${formatarHora(d.horarioFim)}` : '';
-      const horarioApres = d.horarioApresentacao ? `${formatarHora(d.horarioApresentacao)}${d.localApresentacao ? ' no ' + d.localApresentacao : ''}` : '';
+      const horarioApres = d.horarioApresentacao ? `${formatarHora(d.horarioApresentacao)}${d.localApresentacao ? ' - ' + d.localApresentacao : ''}` : '';
 
       document.getElementById('viewHorario').textContent = horarioEscala;
       document.getElementById('viewApresentacao').textContent = horarioApres;
