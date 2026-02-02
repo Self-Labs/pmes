@@ -18,3 +18,8 @@ Thumbs.db
 # Docker volumes locais
 data/
 postgres/
+
+# Testes
+coverage/
+.nocoverage
+.jest/

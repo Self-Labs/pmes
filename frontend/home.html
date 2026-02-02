@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <!--
   Sistema de Escalas - Home
-  Versão: 1.4
+  Versão: 1.5
 -->
 <html lang="pt-BR">
 <head>
@@ -37,16 +37,6 @@
 
   <script src="/js/api.js"></script>
   <script src="/js/auth.js"></script>
-  <script>
-    if (!initProtectedPage()) throw new Error('Não autenticado');
-
-    const usuario = getUsuario();
-    document.getElementById('nomeUsuario').textContent = usuario.nome;
-
-    if (usuario.role === 'admin') {
-      document.getElementById('btnAdmin').classList.remove('hidden');
-    }
-  </script>
-
+  <script src="/js/home.js"></script>
 </body>
 </html>

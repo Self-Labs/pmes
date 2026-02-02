@@ -1,6 +1,6 @@
-/*
+﻿/*
   Sistema de Escalas - JavaScript Diária
-  Versão: 2.4
+  Versão: 2.6
 */
 
 let currentUnidadeId = null;
