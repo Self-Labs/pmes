@@ -1,27 +1,24 @@
 /*
   Sistema de Escalas - Auth Middleware
-  Versão: 1.0
+  Versão: 1.1 - Security Update
 */
 
 const jwt = require('jsonwebtoken');
 
 const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  // Tenta obter token do cookie HttpOnly (método mais seguro)
+  let token = req.cookies?.pmes_token;
 
-  if (!authHeader) {
+  // Fallback para header Authorization (compatibilidade com apps/testes)
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && /^Bearer\s/i.test(authHeader)) {
+      token = authHeader.split(' ')[1];
+    }
+  }
+
+  if (!token) {
     return res.status(401).json({ error: 'Token não fornecido' });
-  }
-
-  const parts = authHeader.split(' ');
-
-  if (parts.length !== 2) {
-    return res.status(401).json({ error: 'Token mal formatado' });
-  }
-
-  const [scheme, token] = parts;
-
-  if (!/^Bearer$/i.test(scheme)) {
-    return res.status(401).json({ error: 'Token mal formatado' });
   }
 
   try {

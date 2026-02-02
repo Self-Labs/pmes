@@ -1,30 +1,26 @@
 /*
   Sistema de Escalas - API Client
-  Versão: 1.8
+  Versão: 2.0 - Security Update (HttpOnly Cookie Auth)
 */
 
 const API_URL = '/api';
 
-// Token storage
-const getToken = () => localStorage.getItem('pmes_token');
-const setToken = (token) => localStorage.setItem('pmes_token', token);
-const removeToken = () => localStorage.removeItem('pmes_token');
-
-// Usuário storage
+// =============================================
+// Usuário storage (apenas para cache da UI, não para auth)
+// O token agora é gerenciado via HttpOnly Cookie pelo backend
+// =============================================
 const getUsuario = () => JSON.parse(localStorage.getItem('pmes_usuario') || 'null');
 const setUsuario = (usuario) => localStorage.setItem('pmes_usuario', JSON.stringify(usuario));
 const removeUsuario = () => localStorage.removeItem('pmes_usuario');
 
 // =============================================
-// Fetch wrapper
+// Fetch wrapper com credentials para enviar cookies automaticamente
 // =============================================
 async function api(endpoint, options = {}) {
-  const token = getToken();
-
   const config = {
+    credentials: 'include', // Envia cookies HttpOnly automaticamente
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
       ...options.headers,
     },
     ...options,
@@ -36,9 +32,8 @@ async function api(endpoint, options = {}) {
 
   const response = await fetch(`${API_URL}${endpoint}`, config);
 
-  // Ignora redirect se for login
+  // Se token expirou ou inválido, redireciona para login
   if (response.status === 401 && !endpoint.includes('/auth/login')) {
-    removeToken();
     removeUsuario();
     window.location.href = '/';
     return;
@@ -62,7 +57,8 @@ async function login(email, senha) {
     method: 'POST',
     body: { email, senha },
   });
-  setToken(data.token);
+  // Token agora é setado como HttpOnly cookie pelo backend
+  // Apenas salvamos o usuário para cache da UI
   setUsuario(data.usuario);
   return data;
 }
@@ -74,14 +70,20 @@ async function cadastro(nome, email, senha, unidade_id) {
   });
 }
 
-function logout() {
-  removeToken();
+async function logout() {
+  try {
+    // Chama endpoint para limpar cookie no servidor
+    await api('/auth/logout', { method: 'POST' });
+  } catch (e) {
+    // Ignora erro se já deslogado
+  }
   removeUsuario();
   window.location.href = '/';
 }
 
 function isLoggedIn() {
-  return !!getToken();
+  // Verifica se há usuário em cache. A validação real é feita pelo backend via cookie.
+  return !!getUsuario();
 }
 
 // =============================================

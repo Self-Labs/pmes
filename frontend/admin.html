@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Admin
-  Versão: 2.6
+  Versão: 2.7
 -->
 <html lang="pt-BR">
 <head>
@@ -19,7 +19,7 @@
     <div class="navbar-content" style="max-width: 1200px;">
       <div class="navbar-brand">
         ⚙️ Administração
-        <span class="navbar-version">v2.6</span>
+        <span class="navbar-version">v2.7</span>
       </div>
       <div class="navbar-menu">
         <a href="/perfil" id="navbarUser" class="navbar-user" style="text-decoration: none; color: inherit; margin-right: 8px;" title="Ir para Perfil"></a>
@@ -301,6 +301,7 @@
 
   <script src="/js/api.js"></script>
   <script src="/js/auth.js"></script>
+  <script src="/js/sanitize.js"></script>
   <script>
     // Verifica autenticação admin
     if (!initAdminPage()) throw new Error('Não autorizado');
@@ -334,8 +335,8 @@
         container.innerHTML = pendentes.map(u => `
           <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 8px; background: #fffbeb;">
             <div>
-              <p style="font-weight: bold;">${u.nome}</p>
-              <p style="font-size: 13px; color: #666;">${u.email} • ${u.unidade_sigla || 'Sem unidade'}</p>
+              <p style="font-weight: bold;">${escapeHTML(u.nome)}</p>
+              <p style="font-size: 13px; color: #666;">${escapeHTML(u.email)} • ${escapeHTML(u.unidade_sigla || 'Sem unidade')}</p>
             </div>
             <div style="display: flex; gap: 8px;">
               <button onclick="aprovar('${u.id}')" class="btn btn-success" style="padding: 6px 12px;">✅ Aprovar</button>
@@ -392,8 +393,8 @@
 
         return `
         <tr>
-          <td style="font-weight: 600;">${u.nome}</td>
-          <td>${u.email}</td>
+          <td style="font-weight: 600;">${escapeHTML(u.nome)}</td>
+          <td>${escapeHTML(u.email)}</td>
           <td style="font-size: 13px; color: #4b5563;">${nomeUnidade}</td>
           <td>
             <select onchange="mudarRole('${u.id}', this.value)" class="form-select" style="width: auto; padding: 4px 8px; font-size: 12px;">
@@ -506,9 +507,9 @@
         let row = `
           <tr class="${rowClass}">
             <td class="${siglaClass}" style="padding-left: ${padding + 12}px;">
-              ${icone} ${u.sigla} ${inativoTag}
+              ${icone} ${escapeHTML(u.sigla)} ${inativoTag}
             </td>
-            <td><span class="badge ${badgeClass}">${u.tipo.replace('_', ' ')}</span></td>
+            <td><span class="badge ${badgeClass}">${escapeHTML(u.tipo.replace('_', ' '))}</span></td>
             <td class="text-right">
               <button onclick="abrirEditarUnidade('${u.id}')" class="btn-icon" title="Editar">✏️</button>
               <button onclick="excluirUnidade('${u.id}', '${u.sigla}')" class="btn-icon" title="Excluir">🗑️</button>
@@ -842,7 +843,7 @@
     }
 
     inicializar();
-    console.log('🚀 Admin v2.6');
+    console.log('🚀 Admin v2.7');
   </script>
 
 </body>

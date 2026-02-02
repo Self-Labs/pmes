@@ -1,11 +1,12 @@
 /*
   Sistema de Escalas - Escalas Routes
-  Versão: 1.2
+  Versão: 1.3 - Security Update
 */
 
 const express = require('express');
 const db = require('../config/db');
 const { authMiddleware } = require('../middleware/auth');
+const { verificarAcessoUnidade } = require('../middleware/access');
 
 const router = express.Router();
 
@@ -22,8 +23,16 @@ router.get('/mensal', authMiddleware, async (req, res) => {
       targetUnidadeId = req.query.unidade_id;
     }
 
-    // Se admin sem unidade tentar acessar sem especificar, retorna null (ou erro)
+    // Se admin sem unidade tentar acessar sem especificar, retorna null
     if (!targetUnidadeId) return res.json(null);
+
+    // Validação de acesso hierárquico (IDOR Protection)
+    const temAcesso = await verificarAcessoUnidade(
+      req.user.id, req.user.unidade_id, req.user.role, targetUnidadeId
+    );
+    if (!temAcesso) {
+      return res.status(403).json({ error: 'Sem permissão para acessar esta unidade' });
+    }
 
     const result = await db.query(
       'SELECT * FROM escalas_mensal WHERE unidade_id = $1',
@@ -54,6 +63,14 @@ router.post('/mensal', authMiddleware, async (req, res) => {
     }
 
     const { config, militares, colunas, equipes, observacoes } = req.body;
+
+    // Validação de acesso hierárquico (IDOR Protection)
+    const temAcesso = await verificarAcessoUnidade(
+      req.user.id, req.user.unidade_id, req.user.role, targetUnidadeId
+    );
+    if (!temAcesso) {
+      return res.status(403).json({ error: 'Sem permissão para modificar esta unidade' });
+    }
 
     const result = await db.query(
       `INSERT INTO escalas_mensal (unidade_id, config, militares, colunas, equipes, observacoes)
@@ -96,6 +113,14 @@ router.get('/iseo', authMiddleware, async (req, res) => {
 
     if (!targetUnidadeId) return res.json(null);
 
+    // Validação de acesso hierárquico (IDOR Protection)
+    const temAcesso = await verificarAcessoUnidade(
+      req.user.id, req.user.unidade_id, req.user.role, targetUnidadeId
+    );
+    if (!temAcesso) {
+      return res.status(403).json({ error: 'Sem permissão para acessar esta unidade' });
+    }
+
     const result = await db.query(
       'SELECT * FROM escalas_iseo WHERE unidade_id = $1',
       [targetUnidadeId]
@@ -125,6 +150,14 @@ router.post('/iseo', authMiddleware, async (req, res) => {
     }
 
     const { config, dados, militares, observacoes, setor } = req.body;
+
+    // Validação de acesso hierárquico (IDOR Protection)
+    const temAcesso = await verificarAcessoUnidade(
+      req.user.id, req.user.unidade_id, req.user.role, targetUnidadeId
+    );
+    if (!temAcesso) {
+      return res.status(403).json({ error: 'Sem permissão para modificar esta unidade' });
+    }
 
     const result = await db.query(
       `INSERT INTO escalas_iseo (unidade_id, config, dados, militares, observacoes, setor)

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Sistema de Escalas - Escala ISEO
-  Versão: 3.0
+  Versão: 3.1
 -->
 <html lang="pt-BR">
 <head>
@@ -25,7 +25,7 @@
     <div class="navbar-content" style="max-width: 1200px;">
       <div class="navbar-brand">
         📋 Escala ISEO
-        <span class="navbar-version">v3.0</span>
+        <span class="navbar-version">v3.1</span>
       </div>
       <div class="navbar-menu">
         <select id="adminUnitSelect" class="form-select hidden" style="width: auto; max-width: 350px; padding: 4px; font-size: 12px; margin-right: 10px;">
@@ -312,6 +312,7 @@
 
   <script src="/js/api.js"></script>
   <script src="/js/auth.js"></script>
+  <script src="/js/sanitize.js"></script>
   <script>
     // Verifica autenticação
     if (!isLoggedIn()) window.location.href = '/';
@@ -575,18 +576,18 @@
 
     function renderMilitares() {
       document.getElementById('listaMilitares').innerHTML = DB.militares.map((m, i) => {
-        let nomeExibir = m.nome;
+        let nomeExibir = escapeHTML(m.nome);
         if (m.nomeGuerra) {
-          nomeExibir = m.nome.replace(new RegExp(`(${m.nomeGuerra})`, 'i'), '<strong>$1</strong>');
+          nomeExibir = escapeHTML(m.nome).replace(new RegExp(`(${escapeHTML(m.nomeGuerra)})`, 'i'), '<strong>$1</strong>');
         }
         return `
         <tr>
           <td style="text-align: center; color: #999;">${i + 1}</td>
-          <td>${m.posto}</td>
-          <td>${m.quadro || '-'}</td>
+          <td>${escapeHTML(m.posto)}</td>
+          <td>${escapeHTML(m.quadro) || '-'}</td>
           <td>${nomeExibir}</td>
-          <td>${m.rg}</td>
-          <td>${m.nf || '-'}</td>
+          <td>${escapeHTML(m.rg)}</td>
+          <td>${escapeHTML(m.nf) || '-'}</td>
           <td style="text-align: center;">
             <button onclick="moverMilitar(${m.id}, -1)" class="btn-icon" title="Mover para cima">⬆️</button>
             <button onclick="moverMilitar(${m.id}, 1)" class="btn-icon" title="Mover para baixo">⬇️</button>
@@ -601,7 +602,7 @@
       document.getElementById('observacoesContainer').innerHTML = DB.observacoes.map((obs, i) => `
         <div style="display: flex; gap: 8px; align-items: flex-start;">
           <span style="color: #666; font-weight: bold; margin-top: 8px; min-width: 50px;">Obs ${i + 1}:</span>
-          <textarea class="form-input obs-input" data-index="${i}" rows="3" style="flex: 1; white-space: pre-wrap;">${obs}</textarea>
+          <textarea class="form-input obs-input" data-index="${i}" rows="3" style="flex: 1; white-space: pre-wrap;">${escapeHTML(obs)}</textarea>
           <button onclick="removerObservacao(${i})" class="btn-icon" title="Remover">🗑️</button>
         </div>
       `).join('');
@@ -737,10 +738,10 @@
 
       // Cabeçalho
       document.getElementById('headerTexto').innerHTML = `
-        <p style="font-size: 13px; font-weight: bold; text-transform: uppercase;">${c.headerLinha1 || ''}</p>
-        <p style="font-size: 18px; font-weight: bold; text-transform: uppercase;">${c.headerLinha2 || ''}</p>
-        <p style="font-size: 13px; font-weight: bold; text-transform: uppercase;">${c.headerLinha3 || ''}</p>
-        <p style="font-size: 12px; font-style: italic;">${c.headerLema || ''}</p>
+        <p style="font-size: 13px; font-weight: bold; text-transform: uppercase;">${escapeHTML(c.headerLinha1 || '')}</p>
+        <p style="font-size: 18px; font-weight: bold; text-transform: uppercase;">${escapeHTML(c.headerLinha2 || '')}</p>
+        <p style="font-size: 13px; font-weight: bold; text-transform: uppercase;">${escapeHTML(c.headerLinha3 || '')}</p>
+        <p style="font-size: 12px; font-style: italic;">${escapeHTML(c.headerLema || '')}</p>
       `;
 
       // Título
@@ -774,18 +775,18 @@
       `;
 
       DB.militares.forEach((m, i) => {
-        const postoQuadro = m.quadro ? `${m.posto} ${m.quadro}` : m.posto;
+        const postoQuadro = m.quadro ? `${escapeHTML(m.posto)} ${escapeHTML(m.quadro)}` : escapeHTML(m.posto);
         // Destaca nome de guerra em negrito, ou nome completo se não tiver
-        let nomeExibir = m.nome;
+        let nomeExibir = escapeHTML(m.nome);
         if (m.nomeGuerra) {
-          nomeExibir = m.nome.replace(new RegExp(`(${m.nomeGuerra})`, 'i'), '<strong>$1</strong>');
+          nomeExibir = escapeHTML(m.nome).replace(new RegExp(`(${escapeHTML(m.nomeGuerra)})`, 'i'), '<strong>$1</strong>');
         }
         html += `
           <tr>
             <td style="text-align: center;">${String(i + 1).padStart(2, '0')}</td>
             <td>${postoQuadro} ${nomeExibir}</td>
-            <td style="text-align: center; white-space: nowrap;">${m.rg}</td>
-            <td style="text-align: center; white-space: nowrap;">${m.nf || '-'}</td>
+            <td style="text-align: center; white-space: nowrap;">${escapeHTML(m.rg)}</td>
+            <td style="text-align: center; white-space: nowrap;">${escapeHTML(m.nf) || '-'}</td>
           </tr>
         `;
       });
@@ -796,10 +797,10 @@
       // Observações
       let obsHtml = '';
       if (DB.setor) {
-        obsHtml += `<p style="font-weight: bold; margin-bottom: 8px;">Setor: ${DB.setor}</p>`;
+        obsHtml += `<p style="font-weight: bold; margin-bottom: 8px;">Setor: ${escapeHTML(DB.setor)}</p>`;
       }
       DB.observacoes.filter(o => o.trim()).forEach((o, i) => {
-        obsHtml += `<p style="margin-bottom: 4px; white-space: pre-wrap;"><strong>Obs ${i + 1}:</strong> ${o}</p>`;
+        obsHtml += `<p style="margin-bottom: 4px; white-space: pre-wrap;"><strong>Obs ${i + 1}:</strong> ${escapeHTML(o)}</p>`;
       });
       document.getElementById('observacoesView').innerHTML = obsHtml;
 
@@ -832,7 +833,7 @@
     observer.observe(document.getElementById('observacoesContainer'), { childList: true, subtree: true });
 
     // === Init ===
-    console.log('🚀 Escala ISEO v3.0');
+    console.log('🚀 Escala ISEO v3.1');
   </script>
 
 </body>

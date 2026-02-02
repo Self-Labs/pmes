@@ -500,11 +500,11 @@ function renderizarDocumento() {
 
   // Header
   document.getElementById('viewHeaderTexto').innerHTML = `
-    <p style="font-size: 13px; font-weight: bold;">${c.cabecalho_linha1 || ''}</p>
-    <p style="font-size: 18px; font-weight: bold;">${c.cabecalho_linha2 || ''}</p>
-    <p style="font-size: 13px; font-weight: bold;">${c.cabecalho_linha3 || ''}</p>
-    ${c.cabecalho_linha4 ? `<p style="font-size: 12px;">${c.cabecalho_linha4}</p>` : ''}
-    <p style="font-size: 12px; font-style: italic;">${c.lema || ''}</p>
+    <p style="font-size: 13px; font-weight: bold;">${escapeHTML(c.cabecalho_linha1 || '')}</p>
+    <p style="font-size: 18px; font-weight: bold;">${escapeHTML(c.cabecalho_linha2 || '')}</p>
+    <p style="font-size: 13px; font-weight: bold;">${escapeHTML(c.cabecalho_linha3 || '')}</p>
+    ${c.cabecalho_linha4 ? `<p style="font-size: 12px;">${escapeHTML(c.cabecalho_linha4)}</p>` : ''}
+    <p style="font-size: 12px; font-style: italic;">${escapeHTML(c.lema || '')}</p>
   `;
 
   // Título
@@ -548,12 +548,12 @@ function renderizarDocumento() {
   linhasExpandidas.forEach((linha, i) => {
     const bordaMil = linha.milIndex > 0 ? 'no-border-top' : '';
     html += '<tr>';
-    if (spanModalidade[i] > 0) html += `<td rowspan="${spanModalidade[i]}" class="cell-center">${linha.modalidade}</td>`;
-    if (spanSetor[i] > 0) html += `<td rowspan="${spanSetor[i]}" class="cell-center">${linha.setor}</td>`;
-    if (spanHorario[i] > 0) html += `<td rowspan="${spanHorario[i]}" class="cell-center">${linha.horario}</td>`;
-    if (linha.milIndex === 0) html += `<td rowspan="${linha.milTotal}" class="cell-center">${linha.viatura}</td>`;
-    html += `<td class="${bordaMil} cell-left">${linha.militar}</td>`;
-    html += `<td class="${bordaMil} cell-center">${linha.rg}</td>`;
+    if (spanModalidade[i] > 0) html += `<td rowspan="${spanModalidade[i]}" class="cell-center">${escapeHTML(linha.modalidade)}</td>`;
+    if (spanSetor[i] > 0) html += `<td rowspan="${spanSetor[i]}" class="cell-center">${escapeHTML(linha.setor)}</td>`;
+    if (spanHorario[i] > 0) html += `<td rowspan="${spanHorario[i]}" class="cell-center">${escapeHTML(linha.horario)}</td>`;
+    if (linha.milIndex === 0) html += `<td rowspan="${linha.milTotal}" class="cell-center">${escapeHTML(linha.viatura)}</td>`;
+    html += `<td class="${bordaMil} cell-left">${escapeHTML(linha.militar)}</td>`;
+    html += `<td class="${bordaMil} cell-center">${escapeHTML(linha.rg)}</td>`;
     html += '</tr>';
   });
 
@@ -601,12 +601,12 @@ function renderizarDocumento() {
     linhasIseo.forEach((linha, i) => {
       const bordaMil = linha.milIndex > 0 ? 'no-border-top' : '';
       iseoHtml += '<tr>';
-      if (spanModalidade[i] > 0) iseoHtml += `<td rowspan="${spanModalidade[i]}" class="cell-center">${linha.modalidade}</td>`;
-      if (spanSetor[i] > 0) iseoHtml += `<td rowspan="${spanSetor[i]}" class="cell-center">${linha.setor}</td>`;
-      if (spanHorario[i] > 0) iseoHtml += `<td rowspan="${spanHorario[i]}" class="cell-center">${linha.horario}</td>`;
-      if (linha.milIndex === 0) iseoHtml += `<td rowspan="${linha.milTotal}" class="cell-center">${linha.viatura}</td>`;
-      iseoHtml += `<td class="${bordaMil} cell-left">${linha.militar}</td>`;
-      iseoHtml += `<td class="${bordaMil} cell-center">${linha.rg}</td>`;
+      if (spanModalidade[i] > 0) iseoHtml += `<td rowspan="${spanModalidade[i]}" class="cell-center">${escapeHTML(linha.modalidade)}</td>`;
+      if (spanSetor[i] > 0) iseoHtml += `<td rowspan="${spanSetor[i]}" class="cell-center">${escapeHTML(linha.setor)}</td>`;
+      if (spanHorario[i] > 0) iseoHtml += `<td rowspan="${spanHorario[i]}" class="cell-center">${escapeHTML(linha.horario)}</td>`;
+      if (linha.milIndex === 0) iseoHtml += `<td rowspan="${linha.milTotal}" class="cell-center">${escapeHTML(linha.viatura)}</td>`;
+      iseoHtml += `<td class="${bordaMil} cell-left">${escapeHTML(linha.militar)}</td>`;
+      iseoHtml += `<td class="${bordaMil} cell-center">${escapeHTML(linha.rg)}</td>`;
       iseoHtml += '</tr>';
     });
 
@@ -626,7 +626,7 @@ function renderizarDocumento() {
       <thead><tr><th colspan="4" style="${headerStyle}">INTIMAÇÕES PARA AUDIÊNCIAS JUDICIAIS</th></tr>
       <tr style="background:#f3f4f6;"><th>Militar</th><th>RG</th><th>Horário</th><th>Local</th></tr></thead><tbody>`;
     DB.audiencias.forEach(a => {
-      audHtml += `<tr><td>${a.militar}</td><td>${a.rg}</td><td>${a.horario}</td><td>${a.local}</td></tr>`;
+      audHtml += `<tr><td>${escapeHTML(a.militar)}</td><td>${escapeHTML(a.rg)}</td><td>${escapeHTML(a.horario)}</td><td>${escapeHTML(a.local)}</td></tr>`;
     });
     audHtml += '</tbody></table><p style="font-size:10px;font-style:italic;padding:4px;">Obs.: Este não é o meio oficial de intimação.</p>';
     document.getElementById('viewSecaoAudiencias').innerHTML = audHtml;
@@ -638,7 +638,7 @@ function renderizarDocumento() {
   if (c.observacoes) {
     document.getElementById('viewObservacoes').innerHTML = `
       <div style="margin-top:12px;border:1px solid #000;"><div style="${textBlockHeaderStyle}">TROCAS DE SERVIÇO / DISPENSAS / OBSERVAÇÕES</div>
-      <div style="padding:8px;white-space:pre-wrap;">${c.observacoes}</div></div>`;
+      <div style="padding:8px;white-space:pre-wrap;">${escapeHTML(c.observacoes)}</div></div>`;
   } else {
     document.getElementById('viewObservacoes').innerHTML = '';
   }
@@ -647,7 +647,7 @@ function renderizarDocumento() {
   if (c.planejamento) {
     document.getElementById('viewPlanejamento').innerHTML = `
       <div style="margin-top:12px;border:1px solid #000;"><div style="${textBlockHeaderStyle}">PLANEJAMENTO OPERACIONAL</div>
-      <div style="padding:8px;white-space:pre-wrap;">${c.planejamento}</div></div>`;
+      <div style="padding:8px;white-space:pre-wrap;">${escapeHTML(c.planejamento)}</div></div>`;
   } else {
     document.getElementById('viewPlanejamento').innerHTML = '';
   }
@@ -656,7 +656,7 @@ function renderizarDocumento() {
   if (c.outras_determinacoes) {
     document.getElementById('viewOutrasDeterminacoes').innerHTML = `
       <div style="margin-top:12px;border:1px solid #000;"><div style="${textBlockHeaderStyle}">OUTRAS DETERMINAÇÕES</div>
-      <div style="padding:8px;white-space:pre-wrap;">${c.outras_determinacoes}</div></div>`;
+      <div style="padding:8px;white-space:pre-wrap;">${escapeHTML(c.outras_determinacoes)}</div></div>`;
   } else {
     document.getElementById('viewOutrasDeterminacoes').innerHTML = '';
   }
@@ -674,19 +674,19 @@ function renderizarDocumento() {
   }
 
   // Assinatura
-  let assHtml = `<p style="margin-bottom:4px;">${c.assinatura_cidade || ''}, na data da assinatura.</p>
+  let assHtml = `<p style="margin-bottom:4px;">${escapeHTML(c.assinatura_cidade || '')}, na data da assinatura.</p>
     <div style="display:inline-block;border-top:1px solid #000;padding-top:8px;min-width:250px;">
-      <p style="font-weight:bold;">${c.assinatura_nome || ''}</p>
-      <p>${c.assinatura_posto || ''}${c.assinatura_posto && c.assinatura_funcao ? ' – ' : ''}${c.assinatura_funcao || ''}</p>
+      <p style="font-weight:bold;">${escapeHTML(c.assinatura_nome || '')}</p>
+      <p>${escapeHTML(c.assinatura_posto || '')}${c.assinatura_posto && c.assinatura_funcao ? ' – ' : ''}${escapeHTML(c.assinatura_funcao || '')}</p>
     </div>`;
   document.getElementById('viewAssinatura').innerHTML = assHtml;
 
   // Rodapé
   if (c.mostrar_rodape) {
     document.getElementById('viewRodape').innerHTML = `
-      <p style="font-weight:bold;">${c.rodape_linha1 || ''}</p>
-      <p>${c.rodape_linha2 || ''}</p>
-      <p>${c.rodape_linha3 || ''}</p>`;
+      <p style="font-weight:bold;">${escapeHTML(c.rodape_linha1 || '')}</p>
+      <p>${escapeHTML(c.rodape_linha2 || '')}</p>
+      <p>${escapeHTML(c.rodape_linha3 || '')}</p>`;
   } else {
     document.getElementById('viewRodape').innerHTML = '';
   }
@@ -743,4 +743,4 @@ observer.observe(document.getElementById('tbodyEfetivo'), observerConfig);
 observer.observe(document.getElementById('tbodyIseo'), observerConfig);
 observer.observe(document.getElementById('tbodyAudiencias'), observerConfig);
 
-console.log('🚀 Escala Diária v2.4');
+// Escala Diária v2.4 - Production Ready

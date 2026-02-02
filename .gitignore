@@ -1,5 +1,6 @@
 # Ambiente
 .env
+.gitclone
 node_modules/
 
 # Logs

@@ -1,6 +1,6 @@
 /*
   Sistema de Escalas - Auth Routes
-  Versão: 1.1
+  Versão: 1.2 - Security Update
 */
 
 const express = require('express');
@@ -10,6 +10,16 @@ const db = require('../config/db');
 const { enviarEmailNovoUsuario } = require('../config/email');
 
 const router = express.Router();
+
+// Validação de senha forte
+function validarSenhaForte(senha) {
+  if (!senha || senha.length < 8) return 'Senha deve ter no mínimo 8 caracteres';
+  if (!/[A-Z]/.test(senha)) return 'Senha deve ter pelo menos uma letra maiúscula';
+  if (!/[a-z]/.test(senha)) return 'Senha deve ter pelo menos uma letra minúscula';
+  if (!/[0-9]/.test(senha)) return 'Senha deve ter pelo menos um número';
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(senha)) return 'Senha deve ter pelo menos um caractere especial';
+  return null;
+}
 
 // POST /auth/login
 router.post('/login', async (req, res) => {
@@ -52,8 +62,15 @@ router.post('/login', async (req, res) => {
       { expiresIn: '24h' }
     );
 
+    // Define token em cookie HttpOnly (mais seguro que localStorage)
+    res.cookie('pmes_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000 // 24 horas
+    });
+
     res.json({
-      token,
       usuario: {
         id: usuario.id,
         nome: usuario.nome,
@@ -75,6 +92,12 @@ router.post('/cadastro', async (req, res) => {
 
     if (!nome || !email || !senha || !unidade_id) {
       return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+    }
+
+    // Validação de senha forte
+    const erroSenha = validarSenhaForte(senha);
+    if (erroSenha) {
+      return res.status(400).json({ error: erroSenha });
     }
 
     const existe = await db.query(
@@ -177,13 +200,18 @@ router.post('/resetar-senha', async (req, res) => {
       return res.status(400).json({ error: 'Token e nova senha são obrigatórios' });
     }
 
-    if (senha.length < 6) {
-      return res.status(400).json({ error: 'Senha deve ter no mínimo 6 caracteres' });
+    // Validação de senha forte
+    const erroSenha = validarSenhaForte(senha);
+    if (erroSenha) {
+      return res.status(400).json({ error: erroSenha });
     }
 
-    // Busca usuário pelo token válido
+    // Busca usuário e INVALIDA token atomicamente (previne uso concorrente)
     const result = await db.query(
-      'SELECT id FROM usuarios WHERE reset_token = $1 AND reset_token_expires > NOW()',
+      `UPDATE usuarios 
+       SET reset_token = NULL, reset_token_expires = NULL 
+       WHERE reset_token = $1 AND reset_token_expires > NOW()
+       RETURNING id`,
       [token]
     );
 
@@ -194,9 +222,9 @@ router.post('/resetar-senha', async (req, res) => {
     const usuario = result.rows[0];
     const senhaHash = await bcrypt.hash(senha, 10);
 
-    // Atualiza senha e limpa token
+    // Atualiza senha (token já foi limpo acima)
     await db.query(
-      'UPDATE usuarios SET senha = $1, reset_token = NULL, reset_token_expires = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+      'UPDATE usuarios SET senha = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
       [senhaHash, usuario.id]
     );
 
@@ -205,6 +233,16 @@ router.post('/resetar-senha', async (req, res) => {
     console.error('Erro ao resetar senha:', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
+});
+
+// POST /auth/logout - Limpa cookie de autenticação
+router.post('/logout', (req, res) => {
+  res.clearCookie('pmes_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict'
+  });
+  res.json({ message: 'Logout realizado com sucesso' });
 });
 
 module.exports = router;
