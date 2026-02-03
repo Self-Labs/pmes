@@ -457,7 +457,7 @@ function renderEquipes() {
   const container = document.getElementById('equipesContainer');
   container.innerHTML = `
     <div style="margin-bottom: 16px; padding: 12px; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px;">
-      <button onclick="adicionarEquipe()" class="btn btn-primary">⮕ Adicionar Equipe</button>
+      <button onclick="adicionarEquipe()" class="btn btn-primary">Adicionar Equipe</button>
       <span style="font-size: 12px; color: #666; margin-left: 12px;">Total: ${DB.equipes.length} equipe(s)</span>
     </div>
   ` + DB.equipes.map(eq => `
@@ -472,7 +472,7 @@ function renderEquipes() {
           <span id="legOffset${eq.id}" style="font-size: 11px; color: #999; min-width: 25px;">${eq.offset === 0 ? '(D)' : eq.offset === 1 ? '(N)' : '(F)'}</span>
         </div>
         
-        <button onclick="removerEquipe('${eq.id}')" class="btn-icon" title="Remover Equipe" style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px;">🗑️</button>
+        <button onclick="removerEquipe('${eq.id}')" class="btn-icon" title="Remover Equipe">🗑️</button>
       </div>
       <div style="display: grid; grid-template-columns: repeat(${DB.colunas.length}, 1fr); gap: 8px;">
         ${DB.colunas.map((_, i) => {
