@@ -1,4 +1,4 @@
-﻿/*
+/*
   Sistema de Escalas - Mensal
   Versão: 2.8
 */
@@ -138,15 +138,40 @@ const DB = {
   config: {},
   militares: [],
   colunas: ['CHEFE DE OPERAÇÕES', 'RELATORISTA', 'DRO 9º BPM', 'DRO 9º BPM', 'DRO 3º BPM', 'DRO 9ª CIA IND', 'DRO 10ª/15ª CIA IND'],
-  equipes: {
-    A: [null, null, null, null, null, null, null],
-    B: [null, null, null, null, null, null, null],
-    C: [null, null, null, null, null, null, null],
-    D: [null, null, null, null, null, null, null],
-    E: [null, null, null, null, null, null, null]
-  },
+  equipes: [
+    { id: 'A', nome: 'Equipe A', offset: 1, militares: [null, null, null, null, null, null, null] },
+    { id: 'B', nome: 'Equipe B', offset: 0, militares: [null, null, null, null, null, null, null] },
+    { id: 'C', nome: 'Equipe C', offset: 4, militares: [null, null, null, null, null, null, null] },
+    { id: 'D', nome: 'Equipe D', offset: 3, militares: [null, null, null, null, null, null, null] },
+    { id: 'E', nome: 'Equipe E', offset: 2, militares: [null, null, null, null, null, null, null] }
+  ],
   observacoes: []
 };
+
+// === Migração de Dados Antigos ===
+function migrarEquipes(equipesData) {
+  // Se já é array, retorna
+  if (Array.isArray(equipesData)) return equipesData;
+  
+  // Se é objeto antigo, converte para array
+  if (typeof equipesData === 'object' && equipesData !== null) {
+    return Object.keys(equipesData).map(id => ({
+      id,
+      nome: `Equipe ${id}`,
+      offset: DB.config[`offset${id}`] ?? 0,
+      militares: equipesData[id] || []
+    }));
+  }
+  
+  // Fallback para estrutura padrão
+  return [
+    { id: 'A', nome: 'Equipe A', offset: 1, militares: [] },
+    { id: 'B', nome: 'Equipe B', offset: 0, militares: [] },
+    { id: 'C', nome: 'Equipe C', offset: 4, militares: [] },
+    { id: 'D', nome: 'Equipe D', offset: 3, militares: [] },
+    { id: 'E', nome: 'Equipe E', offset: 2, militares: [] }
+  ];
+}
 
 // === Tabs ===
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -355,7 +380,7 @@ function renderColunas() {
 function adicionarColuna() {
   coletarColunas();
   DB.colunas.push('NOVA COLUNA');
-  ['A','B','C','D','E'].forEach(eq => DB.equipes[eq].push(null));
+  DB.equipes.forEach(eq => eq.militares.push(null));
   renderColunas();
   renderEquipes();
   marcarAlterado();
@@ -365,7 +390,7 @@ function removerColuna() {
   if (DB.colunas.length <= 1) { alert('Mínimo 1 coluna!'); return; }
   coletarColunas();
   DB.colunas.pop();
-  ['A','B','C','D','E'].forEach(eq => DB.equipes[eq].pop());
+  DB.equipes.forEach(eq => eq.militares.pop());
   renderColunas();
   renderEquipes();
   marcarAlterado();
@@ -378,24 +403,80 @@ function coletarColunas() {
 }
 
 // === Equipes ===
+// Funções CRUD para Equipes
+function adicionarEquipe() {
+  if (DB.equipes.length >= 10) {
+    alert('⚠️ Máximo de 10 equipes atingido!');
+    return;
+  }
+  
+  // Gera próximo ID (A-Z)
+  const usedIds = new Set(DB.equipes.map(eq => eq.id));
+  let novoId = null;
+  for (let i = 65; i <= 90; i++) {
+    const letra = String.fromCharCode(i);
+    if (!usedIds.has(letra)) {
+      novoId = letra;
+      break;
+    }
+  }
+  if (!novoId) {
+    let num = 1;
+    while (usedIds.has(`E${num}`)) num++;
+    novoId = `E${num}`;
+  }
+  
+  const militares = Array(DB.colunas.length).fill(null);
+  DB.equipes.push({ id: novoId, nome: `Equipe ${novoId}`, offset: 0, militares });
+  renderEquipes();
+  marcarAlterado();
+}
+
+function removerEquipe(id) {
+  if (DB.equipes.length <= 1) { alert('⚠️ Mínimo de 1 equipe!'); return; }
+  if (confirm(`Remover Equipe ${id}?`)) {
+    DB.equipes = DB.equipes.filter(eq => eq.id !== id);
+    renderEquipes();
+    marcarAlterado();
+  }
+}
+
+function atualizarNomeEquipe(id, nome) {
+  const eq = DB.equipes.find(e => e.id === id);
+  if (eq) { eq.nome = nome.trim() || `Equipe ${id}`; marcarAlterado(); }
+}
+
+function atualizarOffsetEquipe(id, offset) {
+  const eq = DB.equipes.find(e => e.id === id);
+  if (eq) { eq.offset = parseInt(offset) || 0; marcarAlterado(); }
+}
+
 function renderEquipes() {
   const usados = new Set();
-  ['A','B','C','D','E'].forEach(eq => {
-    DB.equipes[eq].forEach(id => { if (id) usados.add(id); });
+  DB.equipes.forEach(eq => {
+    eq.militares.forEach(id => { if (id) usados.add(id); });
   });
 
   const container = document.getElementById('equipesContainer');
-  container.innerHTML = ['A', 'B', 'C', 'D', 'E'].map(eq => `
-    <div style="padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f9fafb;">
+  container.innerHTML = `\n    <div style=`margin-bottom: 16px; padding: 12px; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px;`>\n      <button onclick=`adicionarEquipe()` class=`btn btn-primary`>⮕ Adicionar Equipe</button>\n      <span style=`font-size: 12px; color: #666; margin-left: 12px;`>Total:  equipe(s)</span>\n    </div>\n  ` + DB.equipes.map(eq => `
+    <div style="padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f9fafb; margin-bottom: 12px;">
       <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-        <span style="width: 32px; height: 32px; background: var(--pm-gold); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold;">${eq}</span>
-        <span style="font-weight: 600;">Equipe ${eq}</span>
+        <span style="width: 32px; height: 32px; background: var(--pm-gold); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">${escapeHTML(eq.id)}</span>
+        <input type="text" value="${escapeHTML(eq.nome)}" onchange="atualizarNomeEquipe('${eq.id}', this.value)" class="form-input" style="flex: 1; font-weight: 600;" placeholder="Nome da Equipe">
+        
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <label style="font-size: 11px; color: #666;">Offset:</label>
+          <input type="number" value="${eq.offset}" onchange="atualizarOffsetEquipe('${eq.id}', this.value)" class="form-input" style="width: 60px; text-align: center; padding: 4px;" min="0" max="4">
+          <span id="legOffset${eq.id}" style="font-size: 11px; color: #999; min-width: 25px;">${eq.offset === 0 ? '(D)' : eq.offset === 1 ? '(N)' : '(F)'}</span>
+        </div>
+        
+        <button onclick="removerEquipe('${eq.id}')" class="btn-icon" title="Remover Equipe" style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px;">🗑️</button>
       </div>
       <div style="display: grid; grid-template-columns: repeat(${DB.colunas.length}, 1fr); gap: 8px;">
         ${DB.colunas.map((_, i) => {
-          const selId = DB.equipes[eq][i];
+          const selId = eq.militares[i];
           return `
-          <select class="form-select equipe-select" data-equipe="${eq}" data-col="${i}" style="font-size: 12px;">
+          <select class="form-select equipe-select" data-equipe="${eq.id}" data-col="${i}" style="font-size: 12px;">
             <option value="">XXX</option>
             ${DB.militares.map(m => {
               const jaUsado = usados.has(m.id) && m.id !== selId;
@@ -409,10 +490,14 @@ function renderEquipes() {
 
   document.querySelectorAll('.equipe-select').forEach(sel => {
     sel.addEventListener('change', e => {
-      const eq = e.target.dataset.equipe;
+      const equipeId = e.target.dataset.equipe;
       const col = parseInt(e.target.dataset.col);
-      DB.equipes[eq][col] = e.target.value ? parseInt(e.target.value) : null;
-      renderEquipes();
+      const equipe = DB.equipes.find(eq => eq.id === equipeId);
+      if (equipe) {
+        equipe.militares[col] = e.target.value ? parseInt(e.target.value) : null;
+        renderEquipes();
+        marcarAlterado();
+      }
     });
   });
 }
@@ -460,11 +545,11 @@ function coletarConfig() {
     anoEscala: parseInt(document.getElementById('anoEscala').value),
     diaInicio: parseInt(document.getElementById('diaInicio').value),
     diaFim: parseInt(document.getElementById('diaFim').value),
-    offsetA: getOffset('offsetA', 1),
-    offsetB: getOffset('offsetB', 0),
-    offsetC: getOffset('offsetC', 4),
-    offsetD: getOffset('offsetD', 3),
-    offsetE: getOffset('offsetE', 2),
+    diaFim: parseInt(document.getElementById('diaFim').value),
+    horarios: {
+      D: document.getElementById('horarioD').value,
+      N: document.getElementById('horarioN').value
+    },
     brasaoEsq: DB.config.brasaoEsq || '',
     brasaoDir: DB.config.brasaoDir || '',
     headerLinha1: document.getElementById('headerLinha1').value,
@@ -490,11 +575,11 @@ function carregarConfig() {
   document.getElementById('anoEscala').value = DB.config.anoEscala || 2026;
   document.getElementById('diaInicio').value = DB.config.diaInicio || 15;
   document.getElementById('diaFim').value = DB.config.diaFim || 15;
-  document.getElementById('offsetA').value = DB.config.offsetA ?? 1;
-  document.getElementById('offsetB').value = DB.config.offsetB ?? 0;
-  document.getElementById('offsetC').value = DB.config.offsetC ?? 4;
-  document.getElementById('offsetD').value = DB.config.offsetD ?? 3;
-  document.getElementById('offsetE').value = DB.config.offsetE ?? 2;
+  document.getElementById('diaFim').value = DB.config.diaFim || 15;
+  if (DB.config.horarios) {
+    document.getElementById('horarioD').value = DB.config.horarios.D || '06:00 às 18:00';
+    document.getElementById('horarioN').value = DB.config.horarios.N || '18:00 às 06:00';
+  }
   document.getElementById('headerLinha1').value = DB.config.headerLinha1;
   document.getElementById('headerLinha2').value = DB.config.headerLinha2;
   document.getElementById('headerLinha3').value = DB.config.headerLinha3;
@@ -506,10 +591,6 @@ function carregarConfig() {
   document.getElementById('footerLema').value = DB.config.footerLema || '';
   document.getElementById('footerEndereco1').value = DB.config.footerEndereco1 || '';
   document.getElementById('footerEndereco2').value = DB.config.footerEndereco2 || '';
-  ['A','B','C','D','E'].forEach(eq => {
-    const input = document.getElementById('offset' + eq);
-    if(input) atualizarLegenda(input, 'leg' + eq);
-  });
 }
 
 // === Carregar Dados do Servidor ===
@@ -522,7 +603,10 @@ async function carregarDados() {
       DB.config = dados.config || {};
       DB.militares = dados.militares || [];
       DB.colunas = dados.colunas || DB.colunas;
-      DB.equipes = dados.equipes || DB.equipes;
+      DB.config = dados.config || {};
+      DB.militares = dados.militares || [];
+      DB.colunas = dados.colunas || DB.colunas;
+      DB.equipes = migrarEquipes(dados.equipes);
       DB.observacoes = dados.observacoes || [];
     } else {
       // Se não existir escala, mantém o estado padrão (limpo)
@@ -577,15 +661,30 @@ function renderizarDocumento() {
     <colgroup><col style="width:6%;">${DB.colunas.map(() => '<col>').join('')}</colgroup>
     <thead><tr class="bg-pm-gold">
       <th style="height: 32px;"></th>
-      ${DB.colunas.map(col => `<th style="height: 32px; font-weight: bold; text-align: center; vertical-align: middle; text-transform: uppercase;">${escapeHTML(col)}</th>`).join('')}
+      ${(() => {
+        const headers = [];
+        let lastCol = null;
+        let span = 0;
+        DB.colunas.forEach(col => {
+          if (col === lastCol) {
+            span++;
+          } else {
+            if (lastCol) headers.push({ text: lastCol, span });
+            lastCol = col;
+            span = 1;
+          }
+        });
+        if (lastCol) headers.push({ text: lastCol, span });
+        return headers.map(h => `<th colspan="${h.span}" style="height: 32px; font-weight: bold; text-align: center; vertical-align: middle; text-transform: uppercase; border: 1px solid black;">${escapeHTML(h.text)}</th>`).join('');
+      })()}
     </tr></thead>
     <tbody style="text-align: center; vertical-align: middle;">
   `;
 
-  ['A','B','C','D','E'].forEach(eq => {
+  DB.equipes.forEach(eq => {
     html += `<tr style="height: 45px;">
-      <td style="font-weight: bold; background: #FFD966; vertical-align: middle;">${eq}</td>
-      ${DB.colunas.map((_, i) => `<td style="vertical-align: middle; background: white;">${formatMilitar(DB.equipes[eq][i])}</td>`).join('')}
+      <td style="font-weight: bold; background: #FFD966; vertical-align: middle;">${escapeHTML(eq.id)}</td>
+      ${DB.colunas.map((_, i) => `<td style="vertical-align: middle; background: white;">${formatMilitar(eq.militares[i])}</td>`).join('')}
     </tr>`;
   });
   html += '</tbody>';
@@ -630,16 +729,13 @@ function renderizarCalendario() {
     dias.push({ dia: d, mes: mesFim, diaSemana: new Date(anoFim, mesFim, d).getDay() });
   }
 
-  const offsets = {
-    A: DB.config.offsetA ?? 1,
-    B: DB.config.offsetB ?? 0,
-    C: DB.config.offsetC ?? 4,
-    D: DB.config.offsetD ?? 3,
-    E: DB.config.offsetE ?? 2
-  };
+  /* 
+    Lógica de Calendário: 
+    Itera dias do diaInicio até fim do mês 1, depois dia 1 até diaFim do mês 2.
+  */
 
   function getTurno(equipe, diaIndex) {
-    const pos = (diaIndex + offsets[equipe]) % 5;
+    const pos = (diaIndex + (equipe.offset || 0)) % 5;
     if (pos === 0) return 'D';
     if (pos === 1) return 'N';
     return '';
@@ -647,8 +743,10 @@ function renderizarCalendario() {
 
   const getBg = d => (d.diaSemana === 0 || d.diaSemana === 6) ? 'background-color:#e5e7eb !important;' : '';
 
-  const diasMes1 = dias.filter(d => d.mes === mesInicio).length;
-  const diasMes2 = dias.filter(d => d.mes === mesFim).length;
+// Export for Testing
+if (typeof module !== 'undefined') {
+  module.exports = { migrarEquipes, getTurno, DB };
+}
 
   let html = `<colgroup><col style="width:6%;">${dias.map(() => `<col style="width:${94/dias.length}%;">`).join('')}</colgroup>`;
 
@@ -667,9 +765,9 @@ function renderizarCalendario() {
     ${dias.map(d => `<td style="border: 1px solid black; padding: 4px; text-align: center;">${String(d.dia).padStart(2,'0')}</td>`).join('')}
   </tr>`;
 
-  ['A','B','C','D','E'].forEach(eq => {
+  DB.equipes.forEach(eq => {
     html += `<tr style="height: 24px;">
-      <td style="border: 1px solid black; padding: 4px; font-weight: bold; background: #FFD966; text-align: center;">${eq}</td>
+      <td style="border: 1px solid black; padding: 4px; font-weight: bold; background: #FFD966; text-align: center;">${escapeHTML(eq.id)}</td>
       ${dias.map((d, i) => `<td style="border: 1px solid black; padding: 4px; text-align: center; font-weight: bold; ${getBg(d)}">${getTurno(eq, i)}</td>`).join('')}
     </tr>`;
   });

@@ -5,12 +5,14 @@ Sistema desenvolvido para gerenciamento de escalas mensais e ISEO. Foco em perfo
 ## 🏗️ Arquitetura
 
 O sistema roda atrás de um Cloudflare Tunnel, eliminando necessidade de abrir portas no roteador.
+A interface é composta por arquivos estáticos (`.html`, `.js`, `.css`) localizados na pasta `frontend`.
+Para desenvolvimento, você pode servir esta pasta usando qualquer servidor estático (ex: Live Server do VSCode) ou configurar o backend para servir os arquivos estáticos.
 
 ```mermaid
 graph TD
     User((Usuário)) -->|HTTPS| CF[Cloudflare Edge]
     CF -->|Tunnel| OPI[Orange Pi 5]
-    
+
     subgraph OPI [Docker Host]
         Tun[cloudflared] -->|http| Nginx[Nginx :80]
         Nginx -->|Static| Front[Frontend Files]
@@ -20,7 +22,7 @@ graph TD
 
 ```
 
-*Versão ASCII "raw"*
+_Versão ASCII "raw"_
 
 ```text
 ┌─────────────────────────────────────────────────────┐
@@ -59,14 +61,30 @@ graph TD
 
 ## 🛠️ Tech Stack
 
-* **Frontend:** HTML5, CSS3, Vanilla JS (Sem frameworks pesados).
-* **Backend:** Node.js + Express.
-* **Auth:** JWT + bcrypt.
-* **Database:** PostgreSQL 16.
-* **Infra:** Docker Compose + Cloudflare Tunnel.
-* **Hardware:** Orange Pi 5 (ARM64).
+- **Frontend:** HTML5, CSS3, Vanilla JS (Sem frameworks pesados).
+- **Backend:** Node.js + Express.
+- **Auth:** JWT + bcrypt.
+- **Database:** PostgreSQL 16.
+- **Infra:** Docker Compose + Cloudflare Tunnel.
+- **Hardware:** Orange Pi 5 (ARM64).
+
+## 🛠️ Funcionalidades Principais
+
+### Escala Mensal
+
+- **Equipes Dinâmicas:** Adicione/remova equipes conforme necessidade.
+- **Offsets Configuráveis:** Defina o ciclo de D/N diretamente na equipe.
+- **Horários Flexíveis:** Configure os horários de início/fim dos turnos.
+- **RowSpan Inteligente:** Agrupamento automático de setores no cabeçalho.
+
+### Escala Diária
+
+- **Importação Automática:** Puxe dados da escala mensal escolhendo o dia.
+- **Ordenação:** Efetivo ordenado automaticamente por Turno (Dia -> Noite) e Setor.
+- **Visualização Otimizada:** Agrupamento de informações repetidas (RowSpan) na impressão.
 
 ## 🚀 Deploy
+
 ```bash
 # Clone
 git clone https://github.com/Self-Labs/pmes.git
@@ -89,6 +107,7 @@ docker-compose up -d
   - Database: 5434
 
 ## 📂 Estrutura
+
 ```text
 pmes/
 ├── .gitignore

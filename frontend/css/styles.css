@@ -406,7 +406,24 @@ a.btn { text-decoration: none; }
   color: rgba(255, 255, 255, 0.9); /* Branco com leve transparência para barra azul */
   font-style: italic;
   display: block;
-  margin-top: 4px;
+  margin-top: 16px;
+}
+
+/* UI Refinements */
+.import-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f0f9ff;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #bae6fd;
+}
+
+.input-time {
+  text-align: center;
+  font-family: monospace;
+  font-weight: bold;
 }
 
 /* Layout Centralizado com Fundo Azul */

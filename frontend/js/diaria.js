@@ -744,3 +744,166 @@ observer.observe(document.getElementById('tbodyIseo'), observerConfig);
 observer.observe(document.getElementById('tbodyAudiencias'), observerConfig);
 
 // Escala Diária v2.4 - Production Ready
+
+// === IMPORTAÇÃO DA MENSAL ===
+async function importarDaMensal() {
+  const diaInput = document.getElementById('importarDia');
+  const dia = parseInt(diaInput.value);
+  if (!dia) return alert('Por favor, informe o dia para importar (ex: 12).');
+
+  if (!confirm(`Deseja importar o efetivo da Escala Mensal para o dia ${dia}?\nIsso adicionará novos registros ao efetivo atual.`)) return;
+
+  isLoading = true;
+  try {
+    const token = localStorage.getItem('pmes_token');
+    const resp = await fetch(`/api/escalas/mensal?unidade_id=${currentUnidadeId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!resp.ok) throw new Error('Erro ao buscar escala mensal');
+    const mensal = await resp.json();
+
+    if (!mensal || !mensal.equipes) {
+      alert('Escala mensal não encontrada ou vazia.');
+      return;
+    }
+
+    processarImportacaoMensal(mensal, dia);
+
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao importar da mensal: ' + err.message);
+  } finally {
+    isLoading = false;
+  }
+}
+
+function processarImportacaoMensal(mensal, dia) {
+  const conf = mensal.config || {};
+  const mesInicio = conf.mesInicio ?? 0;
+  const ano = conf.anoEscala || 2026;
+  const diaInicio = conf.diaInicio || 15;
+  const diaFimConfig = conf.diaFim || 15;
+  const horarios = conf.horarios || { D: '06:00-18:00', N: '18:00-06:00' };
+
+  // Localizar index do dia
+  let diaIndex = -1;
+  let counter = 0;
+  
+  // Loop 1
+  const ultimoDiaMes1 = new Date(ano, mesInicio + 1, 0).getDate();
+  for (let d = diaInicio; d <= ultimoDiaMes1; d++) {
+    if (d === dia) { diaIndex = counter; break; }
+    counter++;
+  }
+  
+  // Loop 2 (se não achou e considerando mes seguinte)
+  if (diaIndex === -1) {
+    for (let d = 1; d <= diaFimConfig; d++) {
+      if (d === dia) { diaIndex = counter; break; }
+      counter++;
+    }
+  }
+
+  if (diaIndex === -1) {
+    alert(`O dia ${dia} não foi encontrado no período configurado da escala mensal.`);
+    return;
+  }
+
+  // Normalizar Equipes (Array ou Objeto)
+  let equipes = [];
+  if (Array.isArray(mensal.equipes)) {
+    equipes = mensal.equipes;
+  } else {
+    equipes = Object.keys(mensal.equipes).map(k => ({
+      id: k,
+      offset: mensal.config[`offset${k}`] ?? 0,
+      militares: mensal.equipes[k]
+    }));
+  }
+
+  // Processar Equipes
+  let adicionados = 0;
+  equipes.forEach(eq => {
+    const offset = eq.offset ?? 0;
+    const pos = (diaIndex + offset) % 5;
+    let turno = '';
+    if (pos === 0) turno = 'D';
+    else if (pos === 1) turno = 'N';
+
+    if (turno) {
+      const horario = horarios[turno] || (turno === 'D' ? '06:00-18:00' : '18:00-06:00');
+      
+      // Iterar colunas para pegar militares
+      eq.militares.forEach((milId, colIndex) => {
+        if (!milId) return;
+        
+        // Buscar dados do militar
+        const militar = (mensal.militares || []).find(m => m.id === milId);
+        if (militar) {
+          const setor = (mensal.colunas || [])[colIndex] || 'Indefinido';
+          
+          DB.efetivo.push({
+            id: Date.now() + Math.random(),
+            tipo: 'EFETIVO',
+            modalidade: '', // Não importa modalidade
+            setor: setor,
+            horario: horario,
+            viatura: '', 
+            militares: `${militar.posto} ${militar.nome}`,
+            rg: militar.rg
+          });
+          adicionados++;
+        }
+      });
+    }
+  });
+
+  if (adicionados > 0) {
+    ordenarEfetivo();
+    renderEfetivo();
+    marcarAlterado();
+    alert(`Importação concluída! ${adicionados} militares adicionados.`);
+  } else {
+    alert('Nenhum militar encontrado escalado para este dia.');
+  }
+}
+
+function ordenarEfetivo() {
+  DB.efetivo.sort((a, b) => {
+    // 1. ISEO por último
+    if (a.tipo !== b.tipo) return (a.tipo === 'ISEO' ? 1 : -1) - (b.tipo === 'ISEO' ? 1 : -1);
+
+    // 2. Ordem Turno: D (manhã) < N (noite)
+    const getInicio = h => parseInt((h || '').split(':')[0]) || 0;
+    const inicioA = getInicio(a.horario);
+    const inicioB = getInicio(b.horario);
+    if (inicioA !== inicioB) return inicioA - inicioB;
+
+    // 3. Setor
+    return (a.setor || '').localeCompare(b.setor || '');
+  });
+}
+
+// Helper para rowspan (se não existir)
+function calcularRowspans(lista, campo) {
+  const spans = new Array(lista.length).fill(0);
+  if (lista.length === 0) return spans;
+  
+  let currentVal = lista[0][campo];
+  let currentStart = 0;
+  
+  for (let i = 1; i < lista.length; i++) {
+    if (lista[i][campo] !== currentVal) {
+      spans[currentStart] = i - currentStart;
+      currentVal = lista[i][campo];
+      currentStart = i;
+    }
+  }
+  spans[currentStart] = lista.length - currentStart;
+  return spans;
+}
+
+// Export for Testing
+if (typeof module !== 'undefined') {
+  module.exports = { processarImportacaoMensal, ordenarEfetivo, calcularRowspans, DB };
+}

@@ -107,14 +107,16 @@
               <input type="number" id="diaFim" class="form-input" value="15" min="1" max="31">
             </div>
           </div>
-          <h4 style="font-size: 13px; font-weight: bold; margin-top: 12px; margin-bottom: 4px;">🔄 Offset D/N por Equipe</h4>
-          <p style="font-size: 11px; color: #666; margin-bottom: 4px;">0=D, 1=N, 2=1ª folga, 3=2ª folga, 4=3ª folga</p>
-          <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; font-size: 12px;">
-            <div><label>A <span id="legA" style="font-weight: bold; color: var(--pm-blue);"></span></label><input type="number" id="offsetA" class="form-input" value="1" min="0" max="4" oninput="atualizarLegenda(this, 'legA')"></div>
-            <div><label>B <span id="legB" style="font-weight: bold; color: var(--pm-blue);"></span></label><input type="number" id="offsetB" class="form-input" value="0" min="0" max="4" oninput="atualizarLegenda(this, 'legB')"></div>
-            <div><label>C <span id="legC" style="font-weight: bold; color: var(--pm-blue);"></span></label><input type="number" id="offsetC" class="form-input" value="4" min="0" max="4" oninput="atualizarLegenda(this, 'legC')"></div>
-            <div><label>D <span id="legD" style="font-weight: bold; color: var(--pm-blue);"></span></label><input type="number" id="offsetD" class="form-input" value="3" min="0" max="4" oninput="atualizarLegenda(this, 'legD')"></div>
-            <div><label>E <span id="legE" style="font-weight: bold; color: var(--pm-blue);"></span></label><input type="number" id="offsetE" class="form-input" value="2" min="0" max="4" oninput="atualizarLegenda(this, 'legE')"></div>
+          <h4 style="font-size: 13px; font-weight: bold; margin-top: 12px; margin-bottom: 4px;">⏰ Horários dos Turnos</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div>
+              <label style="font-size: 11px; color: #666;">Turno Dia (D)</label>
+              <input type="text" id="horarioD" class="form-input input-time" value="06:00 às 18:00" placeholder="Ex: 06:00 às 18:00">
+            </div>
+            <div>
+              <label style="font-size: 11px; color: #666;">Turno Noite (N)</label>
+              <input type="text" id="horarioN" class="form-input input-time" value="18:00 às 06:00" placeholder="Ex: 18:00 às 06:00">
+            </div>
           </div>
         </div>
 
