@@ -159,15 +159,12 @@ function migrarEquipes(equipesData) {
       id,
       nome: `Equipe ${id}`,
       offset: DB.config[`offset${id}`] ?? 0,
-      militares: equipesData[id] || []
+      militares: equipesData[id]
     }));
   }
   
-  // Fallback para estrutura padrão
+  // Se não tem dados válidos, retorna array padrão (A-E)
   return [
-    { id: 'A', nome: 'Equipe A', offset: 1, militares: [] },
-    { id: 'B', nome: 'Equipe B', offset: 0, militares: [] },
-    { id: 'C', nome: 'Equipe C', offset: 4, militares: [] },
     { id: 'D', nome: 'Equipe D', offset: 3, militares: [] },
     { id: 'E', nome: 'Equipe E', offset: 2, militares: [] }
   ];
@@ -458,7 +455,12 @@ function renderEquipes() {
   });
 
   const container = document.getElementById('equipesContainer');
-  container.innerHTML = `\n    <div style=`margin-bottom: 16px; padding: 12px; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px;`>\n      <button onclick=`adicionarEquipe()` class=`btn btn-primary`>⮕ Adicionar Equipe</button>\n      <span style=`font-size: 12px; color: #666; margin-left: 12px;`>Total:  equipe(s)</span>\n    </div>\n  ` + DB.equipes.map(eq => `
+  container.innerHTML = `
+    <div style="margin-bottom: 16px; padding: 12px; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px;">
+      <button onclick="adicionarEquipe()" class="btn btn-primary">⮕ Adicionar Equipe</button>
+      <span style="font-size: 12px; color: #666; margin-left: 12px;">Total: ${DB.equipes.length} equipe(s)</span>
+    </div>
+  ` + DB.equipes.map(eq => `
     <div style="padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f9fafb; margin-bottom: 12px;">
       <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
         <span style="width: 32px; height: 32px; background: var(--pm-gold); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">${escapeHTML(eq.id)}</span>

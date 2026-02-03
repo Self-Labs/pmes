@@ -79,11 +79,11 @@
         </div>
 
         <!-- Importação -->
-        <div style="border-top: 1px solid #eee; padding-top: 12px; margin-top: 4px;">
+        <div style="padding-top: 12px; margin-top: 4px;">
            <label style="font-size: 12px; color: #666; display: block; margin-bottom: 4px;">📥 Importar da Mensal</label>
-           <div style="display: flex; gap: 6px;">
-             <input type="number" id="importarDia" class="form-input" style="width: 60px;" min="1" max="31" placeholder="Dia">
-             <button onclick="importarDaMensal()" class="btn btn-secondary" style="font-size: 12px; flex: 1;">Importar</button>
+           <div class="import-box">
+             <input type="date" id="importarData" class="form-input" style="font-size: 12px;">
+             <button onclick="importarDaMensal()" class="btn btn-primary" style="font-size: 12px;">Importar</button>
            </div>
         </div>
 

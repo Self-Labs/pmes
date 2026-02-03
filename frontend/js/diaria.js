@@ -747,9 +747,15 @@ observer.observe(document.getElementById('tbodyAudiencias'), observerConfig);
 
 // === IMPORTAÇÃO DA MENSAL ===
 async function importarDaMensal() {
-  const diaInput = document.getElementById('importarDia');
-  const dia = parseInt(diaInput.value);
-  if (!dia) return alert('Por favor, informe o dia para importar (ex: 12).');
+  const diaInput = document.getElementById('importarData');
+  if (!diaInput.value) return alert('Por favor, selecione uma data para importar.');
+  
+  // Extrair dia da data (YYYY-MM-DD)
+  // Nota: split('-') garante que pegamos o dia literal, sem problemas de timezone
+  const parts = diaInput.value.split('-');
+  const dia = parseInt(parts[2]);
+  
+  if (!dia) return alert('Data inválida.');
 
   if (!confirm(`Deseja importar o efetivo da Escala Mensal para o dia ${dia}?\nIsso adicionará novos registros ao efetivo atual.`)) return;
 
