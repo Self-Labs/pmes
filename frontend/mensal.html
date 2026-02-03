@@ -111,11 +111,19 @@
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <div>
               <label style="font-size: 11px; color: #666;">Turno Dia (D)</label>
-              <input type="text" id="horarioD" class="form-input input-time" value="06:00 às 18:00" placeholder="Ex: 06:00 às 18:00">
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <input type="time" id="horarioD_ini" class="form-input input-time" value="07:00">
+                <span style="font-size: 11px;">às</span>
+                <input type="time" id="horarioD_fim" class="form-input input-time" value="19:00">
+              </div>
             </div>
             <div>
               <label style="font-size: 11px; color: #666;">Turno Noite (N)</label>
-              <input type="text" id="horarioN" class="form-input input-time" value="18:00 às 06:00" placeholder="Ex: 18:00 às 06:00">
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <input type="time" id="horarioN_ini" class="form-input input-time" value="19:00">
+                <span style="font-size: 11px;">às</span>
+                <input type="time" id="horarioN_fim" class="form-input input-time" value="07:00">
+              </div>
             </div>
           </div>
         </div>

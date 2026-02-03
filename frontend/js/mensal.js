@@ -549,8 +549,8 @@ function coletarConfig() {
     diaFim: parseInt(document.getElementById('diaFim').value),
     diaFim: parseInt(document.getElementById('diaFim').value),
     horarios: {
-      D: document.getElementById('horarioD').value,
-      N: document.getElementById('horarioN').value
+      D: `${document.getElementById('horarioD_ini').value} às ${document.getElementById('horarioD_fim').value}`,
+      N: `${document.getElementById('horarioN_ini').value} às ${document.getElementById('horarioN_fim').value}`
     },
     brasaoEsq: DB.config.brasaoEsq || '',
     brasaoDir: DB.config.brasaoDir || '',
@@ -579,8 +579,15 @@ function carregarConfig() {
   document.getElementById('diaFim').value = DB.config.diaFim || 15;
   document.getElementById('diaFim').value = DB.config.diaFim || 15;
   if (DB.config.horarios) {
-    document.getElementById('horarioD').value = DB.config.horarios.D || '06:00 às 18:00';
-    document.getElementById('horarioN').value = DB.config.horarios.N || '18:00 às 06:00';
+    const splitTime = (str) => (str || '').includes(' às ') ? str.split(' às ') : [str, ''];
+    
+    const [dIni, dFim] = splitTime(DB.config.horarios.D || '06:00 às 18:00');
+    document.getElementById('horarioD_ini').value = dIni || '06:00';
+    document.getElementById('horarioD_fim').value = dFim || '18:00';
+    
+    const [nIni, nFim] = splitTime(DB.config.horarios.N || '18:00 às 06:00');
+    document.getElementById('horarioN_ini').value = nIni || '18:00';
+    document.getElementById('horarioN_fim').value = nFim || '06:00';
   }
   document.getElementById('headerLinha1').value = DB.config.headerLinha1;
   document.getElementById('headerLinha2').value = DB.config.headerLinha2;
