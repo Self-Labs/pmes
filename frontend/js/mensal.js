@@ -622,12 +622,13 @@ function renderOffsetsConfig() {
   container.innerHTML = DB.equipes.map(eq => `
     <div style="display: flex; flex-direction: column; gap: 2px;">
       <label style="font-size: 11px; font-weight: bold; color: #555;">${escapeHTML(eq.nome)}</label>
-      <div style="display: flex; align-items: center; gap: 4px;">
-        <input type="number" class="form-input" value="${eq.offset}" 
-               onchange="atualizarOffsetEquipe('${eq.id}', this.value)" 
-               min="0" max="4" style="text-align: center; font-size: 12px;">
-        <span style="font-size: 10px; color: #777; width: 15px;">${eq.offset === 0 ? 'D' : eq.offset === 1 ? 'N' : 'F'}</span>
-      </div>
+      <select class="form-input" style="font-size: 11px; padding: 4px;" onchange="atualizarOffsetEquipe('${eq.id}', this.value)">
+        <option value="0" ${eq.offset === 0 ? 'selected' : ''}>Começa no Plantão DIA (D)</option>
+        <option value="1" ${eq.offset === 1 ? 'selected' : ''}>Começa no Plantão NOITE (N)</option>
+        <option value="2" ${eq.offset === 2 ? 'selected' : ''}>Começa na Folga 1 (Pós-Noite)</option>
+        <option value="3" ${eq.offset === 3 ? 'selected' : ''}>Começa na Folga 2</option>
+        <option value="4" ${eq.offset === 4 ? 'selected' : ''}>Começa na Folga 3 (Pré-Dia)</option>
+      </select>
     </div>
   `).join('');
 }
