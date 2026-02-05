@@ -165,6 +165,9 @@ function migrarEquipes(equipesData) {
   
   // Se não tem dados válidos, retorna array padrão (A-E)
   return [
+    { id: 'A', nome: 'Equipe A', offset: 1, militares: [] },
+    { id: 'B', nome: 'Equipe B', offset: 0, militares: [] },
+    { id: 'C', nome: 'Equipe C', offset: 4, militares: [] },
     { id: 'D', nome: 'Equipe D', offset: 3, militares: [] },
     { id: 'E', nome: 'Equipe E', offset: 2, militares: [] }
   ];
@@ -445,7 +448,11 @@ function atualizarNomeEquipe(id, nome) {
 
 function atualizarOffsetEquipe(id, offset) {
   const eq = DB.equipes.find(e => e.id === id);
-  if (eq) { eq.offset = parseInt(offset) || 0; marcarAlterado(); }
+  if (eq) { 
+    eq.offset = parseInt(offset) || 0; 
+    marcarAlterado(); 
+    renderOffsetsConfig(); // Atualiza labels D/N/F
+  }
 }
 
 function renderEquipes() {
@@ -465,12 +472,6 @@ function renderEquipes() {
       <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
         <span style="width: 32px; height: 32px; background: var(--pm-gold); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">${escapeHTML(eq.id)}</span>
         <input type="text" value="${escapeHTML(eq.nome)}" onchange="atualizarNomeEquipe('${eq.id}', this.value)" class="form-input" style="flex: 1; font-weight: 600;" placeholder="Nome da Equipe">
-        
-        <div style="display: flex; align-items: center; gap: 4px;">
-          <label style="font-size: 11px; color: #666;">Offset:</label>
-          <input type="number" value="${eq.offset}" onchange="atualizarOffsetEquipe('${eq.id}', this.value)" class="form-input" style="width: 60px; text-align: center; padding: 4px;" min="0" max="4">
-          <span id="legOffset${eq.id}" style="font-size: 11px; color: #999; min-width: 25px;">${eq.offset === 0 ? '(D)' : eq.offset === 1 ? '(N)' : '(F)'}</span>
-        </div>
         
         <button onclick="removerEquipe('${eq.id}')" class="btn-icon" title="Remover Equipe">🗑️</button>
       </div>
@@ -502,6 +503,9 @@ function renderEquipes() {
       }
     });
   });
+  
+  // Atualiza painel de offsets na Configuração também
+  renderOffsetsConfig();
 }
 
 // === Observações ===
@@ -589,6 +593,9 @@ function carregarConfig() {
     document.getElementById('horarioN_ini').value = nIni || '18:00';
     document.getElementById('horarioN_fim').value = nFim || '06:00';
   }
+  
+  renderOffsetsConfig(); // Atualiza painel de offsets
+
   document.getElementById('headerLinha1').value = DB.config.headerLinha1;
   document.getElementById('headerLinha2').value = DB.config.headerLinha2;
   document.getElementById('headerLinha3').value = DB.config.headerLinha3;
@@ -601,6 +608,37 @@ function carregarConfig() {
   document.getElementById('footerEndereco1').value = DB.config.footerEndereco1 || '';
   document.getElementById('footerEndereco2').value = DB.config.footerEndereco2 || '';
 }
+
+// === Render Offsets na Config ===
+function renderOffsetsConfig() {
+  const container = document.getElementById('offsetsConfigContainer');
+  if (!container) return;
+  
+  if (DB.equipes.length === 0) {
+    container.innerHTML = '<span style="font-size:12px; color:#999;">Nenhuma equipe cadastrada.</span>';
+    return;
+  }
+
+  container.innerHTML = DB.equipes.map(eq => `
+    <div style="display: flex; flex-direction: column; gap: 2px;">
+      <label style="font-size: 11px; font-weight: bold; color: #555;">${escapeHTML(eq.nome)}</label>
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <input type="number" class="form-input" value="${eq.offset}" 
+               onchange="atualizarOffsetEquipe('${eq.id}', this.value)" 
+               min="0" max="4" style="text-align: center; font-size: 12px;">
+        <span style="font-size: 10px; color: #777; width: 15px;">${eq.offset === 0 ? 'D' : eq.offset === 1 ? 'N' : 'F'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Intercepta atualizações de equipe para re-renderizar offsets se necessário
+const _originalAdicionar = window.adicionarEquipe;
+// Se existir globalmente? Não, está no escopo
+// Melhor injetar a chamada dentro das funções adicionar/remover existentes
+// ... Mas como não posso editar tudo de uma vez, vou adicionar à função renderEquipes que é chamada nesses casos?
+// Sim, renderEquipes é chamada após adicionar/remover. Então vou chamar renderOffsetsConfig DENTRO de renderEquipes também.
+
 
 // === Carregar Dados do Servidor ===
 async function carregarDados() {
