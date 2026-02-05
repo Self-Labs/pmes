@@ -795,6 +795,9 @@ if (typeof module !== 'undefined') {
   module.exports = { migrarEquipes, getTurno, DB };
 }
 
+  const diasMes1 = dias.filter(d => d.mes === mesInicio).length;
+  const diasMes2 = dias.filter(d => d.mes === mesFim).length;
+
   let html = `<colgroup><col style="width:6%;">${dias.map(() => `<col style="width:${94/dias.length}%;">`).join('')}</colgroup>`;
 
   html += `<tr class="bg-pm-gold" style="font-weight: bold; text-align: center; height: 24px;">
