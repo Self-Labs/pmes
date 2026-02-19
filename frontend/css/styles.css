@@ -534,7 +534,7 @@ a.btn {
 
   .print-body > tr > td {
     vertical-align: top;
-    page-break-inside: auto;
+    padding-bottom: 100px !important; /* garante espaço para o rodapé fixo não sobrepor o conteúdo */
   }
 
   .print-wrapper tr {
