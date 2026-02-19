@@ -458,7 +458,8 @@ a.btn {
 
 /* ============================================================
    IMPRESSÃO — @media print
-   Objetivo: rodapé fixo no fundo de cada página (como Word)
+   Usa table-header-group / table-footer-group nativos do browser
+   para repetir cabeçalho e rodapé em cada página impressa.
    ============================================================ */
 @media print {
   html, body {
@@ -491,34 +492,17 @@ a.btn {
     width: 100% !important;
   }
 
-  /* Cabeçalho repete em cada página */
+  /* Cabeçalho repete em cada página (nativo do browser) */
   .print-header {
     display: table-header-group !important;
   }
 
-  /* RODAPÉ FIXO: cola na base de TODA página impressa */
+  /* Rodapé repete em cada página (nativo do browser) */
   .print-footer {
-    display: block !important;
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    background: white;
-    text-align: center !important;
+    display: table-footer-group !important;
   }
 
-  /* Quando tfoot vira display:block, os filhos tr/td perdem
-     o contexto de tabela. Forçamos display:block + largura total
-     para que text-align:center funcione corretamente. */
-  .print-footer tr,
-  .print-footer td {
-    display: block !important;
-    width: 100% !important;
-    text-align: center !important;
-  }
-
-  /* Centraliza TODOS os filhos dentro do rodapé impresso */
+  /* Centraliza o conteúdo do rodapé na impressão */
   .print-footer-content,
   .print-footer-content p,
   .print-footer-content div {
@@ -529,9 +513,7 @@ a.btn {
     display: table-row-group !important;
   }
 
-  /* Padding garante que o conteúdo não fique sob o rodapé fixo */
   .print-body > tr > td {
-    padding-bottom: 70px !important;
     vertical-align: top;
   }
 
