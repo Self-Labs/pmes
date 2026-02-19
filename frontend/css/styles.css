@@ -492,15 +492,23 @@ a.btn {
     width: 100% !important;
   }
 
-  /* Cabeçalho repete em cada página (nativo do browser) */
-  .print-header {
-    display: table-header-group !important;
+  /* ESTRATÉGIA DOUBLE-FOOTER:
+     1. .print-footer (tfoot): display:table-footer-group
+        - Reserva espaço físico na página (previne sobreposição)
+        - visibility: hidden (não mostra nada, só ocupa espaço)
+     2. .print-footer-fixed (div fora da tabela): position:fixed
+        - Mostra o rodapé visualmente no fundo da página
+     3. Resultado: Paginação correta + Rodapé fixo visual */
+
+  /* 1. O Espaçador (tfoot) */
+  .print-footer {
+    display: table-footer-group !important;
+    visibility: hidden !important;
+    border: none !important;
   }
 
-  /* Rodapé fixo no fundo de CADA página — position:fixed.
-     O print-utils.js injeta espaçadores para que nenhum conteúdo
-     fique escondido atrás do rodapé. */
-  .print-footer {
+  /* 2. O Visual (div fixo) */
+  .print-footer-fixed {
     display: block !important;
     position: fixed !important;
     bottom: 0 !important;
@@ -508,16 +516,19 @@ a.btn {
     right: 0 !important;
     width: 100% !important;
     background: white !important;
+    z-index: 1000 !important;
+    /* Copia estilos do conteúdo para garantir match visual */
   }
 
-  /* tr/td do tfoot perdem display:table qdo fixed — forçar bloco */
-  .print-footer tr,
-  .print-footer td {
-    display: block !important;
-    width: 100% !important;
+  .print-footer-fixed .print-footer-content {
+    border-top: 1px solid #ccc; /* Borda visível no elemento fixo */
   }
 
-  /* Centraliza o conteúdo do rodapé */
+  .print-footer .print-footer-content {
+    border: none !important; /* Sem borda no espaçador */
+  }
+
+  /* Centraliza conteúdo em ambos */
   .print-footer-content,
   .print-footer-content p,
   .print-footer-content div {
