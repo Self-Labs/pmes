@@ -446,6 +446,7 @@ a.btn {
 .print-header-content,
 .print-footer-content {
   padding: 8px 0;
+  text-align: center;
 }
 
 /* ============================================================
