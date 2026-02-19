@@ -455,6 +455,11 @@ a.btn {
   text-align: center;
 }
 
+/* Oculta elementos exclusivos de impressão na tela */
+.no-screen {
+  display: none !important;
+}
+
 /* ============================================================
    IMPRESSÃO — @media print
    Usa table-header-group / table-footer-group nativos.
@@ -503,6 +508,12 @@ a.btn {
   /* 1. O Espaçador (tfoot) */
   .print-footer {
     display: table-footer-group !important;
+    visibility: hidden !important;
+    border: none !important;
+  }
+
+  /* Garante que NENHUM filho do spacer tenha borda ou visibilidade */
+  .print-footer * {
     visibility: hidden !important;
     border: none !important;
   }
