@@ -449,6 +449,13 @@ a.btn {
   text-align: center;
 }
 
+/* Garante centralização mesmo em filhos block <p> e <div> gerados por JS
+   (text-align nem sempre herda de table-footer-group para filhos block) */
+.print-footer-content p,
+.print-footer-content div {
+  text-align: center;
+}
+
 /* ============================================================
    IMPRESSÃO — @media print
    Objetivo: rodapé fixo no fundo de cada página (como Word)
