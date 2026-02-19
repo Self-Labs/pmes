@@ -441,7 +441,8 @@ a.btn {
     margin: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
-    min-height: 100%; /* ForÃ§a altura da pagina */
+    height: 100%; /* Força altura total na impressão */
+    min-height: 100%;
   }
   .print-header-text p {
     margin: 2px 0;
@@ -787,7 +788,7 @@ body.page-centered {
 
 .doc-assinatura {
   text-align: center;
-  margin: 32px 0 16px;
+  margin: 64px 0 16px; /* Aumentado de 32px para 64px para evitar proximidade com o conteúdo */
 }
 
 .doc-assinatura-linha {
