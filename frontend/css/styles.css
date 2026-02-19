@@ -469,7 +469,7 @@ a.btn {
   body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    display: block !important; /* Remove flexbox na impressão */
+    display: block !important;
   }
 
   .no-print {
@@ -483,7 +483,7 @@ a.btn {
     max-width: 100% !important;
   }
 
-  /* CRÍTICO: Remove o min-height que causava página em branco */
+  /* Remove o min-height que causava página em branco */
   .print-wrapper {
     display: table !important;
     min-height: unset !important;
@@ -496,7 +496,7 @@ a.btn {
     display: table-header-group !important;
   }
 
-  /* RODAPÉ FIXO: cola na base de TODA página impressa, como Word */
+  /* RODAPÉ FIXO: cola na base de TODA página impressa */
   .print-footer {
     display: block !important;
     position: fixed !important;
@@ -505,6 +505,24 @@ a.btn {
     right: 0 !important;
     width: 100% !important;
     background: white;
+    text-align: center !important;
+  }
+
+  /* Quando tfoot vira display:block, os filhos tr/td perdem
+     o contexto de tabela. Forçamos display:block + largura total
+     para que text-align:center funcione corretamente. */
+  .print-footer tr,
+  .print-footer td {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  /* Centraliza TODOS os filhos dentro do rodapé impresso */
+  .print-footer-content,
+  .print-footer-content p,
+  .print-footer-content div {
+    text-align: center !important;
   }
 
   .print-body {
