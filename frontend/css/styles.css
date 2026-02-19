@@ -456,15 +456,10 @@ a.btn {
 }
 
 /* ============================================================
-   IMPRESSÃO — @page + @media print
-   Estratégia: @page reserva margem física no fundo de cada página;
-   position:fixed coloca o rodapé nessa margem reservada.
-   Isso garante rodapé no fundo SEM causar páginas em branco.
+   IMPRESSÃO — @media print
+   Usa table-header-group / table-footer-group nativos.
+   O browser reserva espaço automaticamente para o tfoot ao paginar.
    ============================================================ */
-@page {
-  margin-bottom: 80px; /* Reserva espaço físico para o rodapé em cada página */
-}
-
 @media print {
   html, body {
     height: auto !important;
@@ -502,23 +497,10 @@ a.btn {
     display: table-header-group !important;
   }
 
-  /* Rodapé colado no fundo de CADA página — como Word */
+  /* O browser reserva espaço do tfoot ao calcular quebras de página —
+     conteúdo nunca sobrepõe o rodapé com este método. */
   .print-footer {
-    display: block !important;
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    background: white !important;
-    /* A margem @page já reserva espaço => sem double-rendering */
-  }
-
-  /* Garante que tr/td dentro do footer fixo sejam blocos centralizados */
-  .print-footer tr,
-  .print-footer td {
-    display: block !important;
-    width: 100% !important;
+    display: table-footer-group !important;
   }
 
   /* Centraliza o conteúdo do rodapé */
@@ -534,12 +516,6 @@ a.btn {
 
   .print-body > tr > td {
     vertical-align: top;
-    padding-bottom: 100px !important; /* garante espaço para o rodapé fixo não sobrepor o conteúdo */
-  }
-
-  .print-wrapper tr {
-    page-break-inside: auto;
-    page-break-after: auto;
   }
 
   .print-header-text p {
