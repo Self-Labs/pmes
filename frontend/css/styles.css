@@ -497,10 +497,24 @@ a.btn {
     display: table-header-group !important;
   }
 
-  /* O browser reserva espaço do tfoot ao calcular quebras de página —
-     conteúdo nunca sobrepõe o rodapé com este método. */
+  /* Rodapé fixo no fundo de CADA página — position:fixed.
+     O print-utils.js injeta espaçadores para que nenhum conteúdo
+     fique escondido atrás do rodapé. */
   .print-footer {
-    display: table-footer-group !important;
+    display: block !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    background: white !important;
+  }
+
+  /* tr/td do tfoot perdem display:table qdo fixed — forçar bloco */
+  .print-footer tr,
+  .print-footer td {
+    display: block !important;
+    width: 100% !important;
   }
 
   /* Centraliza o conteúdo do rodapé */
