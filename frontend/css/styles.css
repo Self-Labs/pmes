@@ -421,17 +421,17 @@ a.btn {
   background-color: #d4edda !important;
 }
 
-/* ImpressÃ£o - Media Query Unificado */
+/* Impressão - Media Query Unificado */
 @media print {
   html, body {
     height: 100%;
     margin: 0;
   }
-  
+
   body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    display: block; /* Remove flexbox do body na impressÃ£o */
+    display: block; /* Remove flexbox do body na impressão */
   }
   .no-print {
     display: none !important;
@@ -441,33 +441,44 @@ a.btn {
     margin: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
-    height: 100%; /* Força altura total na impressão */
-    min-height: 100%;
+    /* Sem min-height aqui: deixamos o position:fixed do footer trabalhar */
   }
   .print-header-text p {
     margin: 2px 0;
   }
+
+  /* Cabeçalho repete em cada página via table-header-group */
   .print-header {
     display: table-header-group;
   }
+
+  /* RODAPÉ: position:fixed cola no fundo de TODA página impressa */
   .print-footer {
-    display: table-footer-group;
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
   }
+
   .print-body {
     display: table-row-group;
   }
-  /* Faz a célula de conteúdo expandir para empurrar o footer */
+
+  /* Empurra o conteúdo para não ficar sob o rodapé fixo */
   .print-body > tr > td {
-    height: 100%;
+    padding-bottom: 80px !important; /* Espaço reservado para o rodapé */
     vertical-align: top;
   }
-  
+
   .print-header-content {
     padding-bottom: 12px;
   }
   .print-footer-content {
     padding-top: 12px;
     border-top: 1px solid #ccc;
+    background: white; /* Garante fundo branco para cobrir o conteúdo */
   }
 }
 
