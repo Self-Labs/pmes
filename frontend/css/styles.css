@@ -421,7 +421,37 @@ a.btn {
   background-color: #d4edda !important;
 }
 
-/* Impressão - Media Query Unificado */
+/* ============================================================
+   VISUALIZAÇÃO EM TELA (Modo Visualizar)
+   ============================================================ */
+.print-wrapper {
+  display: table;
+  width: 100%;
+  min-height: 100vh; /* Simula folha A4 na tela */
+}
+.print-header {
+  display: table-header-group;
+}
+.print-footer {
+  display: table-footer-group; /* Aparece após o conteúdo na tela */
+}
+.print-body {
+  display: table-row-group;
+}
+/* Célula de conteúdo expande para preencher a folha simulada */
+.print-body > tr > td {
+  height: 100%;
+  vertical-align: top;
+}
+.print-header-content,
+.print-footer-content {
+  padding: 8px 0;
+}
+
+/* ============================================================
+   IMPRESSÃO — @media print
+   Objetivo: rodapé fixo no fundo de cada página (como Word)
+   ============================================================ */
 @media print {
   html, body {
     height: 100%;
@@ -431,80 +461,67 @@ a.btn {
   body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    display: block; /* Remove flexbox do body na impressão */
+    display: block !important; /* Remove flexbox na impressão */
   }
+
   .no-print {
     display: none !important;
   }
+
   #documento {
     box-shadow: none !important;
     margin: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
-    /* Sem min-height aqui: deixamos o position:fixed do footer trabalhar */
-  }
-  .print-header-text p {
-    margin: 2px 0;
   }
 
-  /* Cabeçalho repete em cada página via table-header-group */
+  /* CRÍTICO: Remove o min-height que causava página em branco */
+  .print-wrapper {
+    display: table !important;
+    min-height: unset !important;
+    height: auto !important;
+    width: 100% !important;
+  }
+
+  /* Cabeçalho repete em cada página */
   .print-header {
-    display: table-header-group;
+    display: table-header-group !important;
   }
 
-  /* RODAPÉ: position:fixed cola no fundo de TODA página impressa */
+  /* RODAPÉ FIXO: cola na base de TODA página impressa, como Word */
   .print-footer {
-    display: block;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
+    display: block !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    background: white;
   }
 
   .print-body {
-    display: table-row-group;
+    display: table-row-group !important;
   }
 
-  /* Empurra o conteúdo para não ficar sob o rodapé fixo */
+  /* Padding garante que o conteúdo não fique sob o rodapé fixo */
   .print-body > tr > td {
-    padding-bottom: 80px !important; /* Espaço reservado para o rodapé */
+    padding-bottom: 70px !important;
     vertical-align: top;
+  }
+
+  .print-header-text p {
+    margin: 2px 0;
   }
 
   .print-header-content {
     padding-bottom: 12px;
   }
+
   .print-footer-content {
     padding-top: 12px;
     border-top: 1px solid #ccc;
-    background: white; /* Garante fundo branco para cobrir o conteúdo */
+    background: white;
   }
-}
-
-/* Impressão com Cabeçalho/Rodapé Fixo */
-.print-wrapper {
-  display: table;
-  width: 100%;
-  min-height: 100vh; /* Para visualização em tela */
-}
-.print-header {
-  display: table-header-group;
-}
-.print-footer {
-  display: table-footer-group;
-}
-.print-body {
-  display: table-row-group;
-}
-/* Faz a célula de conteúdo expandir na visualização tambem */
-.print-body > tr > td {
-  height: 100%;
-  vertical-align: top;
-}
-.print-header-content,
-.print-footer-content {
-  padding: 8px 0;
 }
 
 /* Admin - Hierarquia e Unidades */
