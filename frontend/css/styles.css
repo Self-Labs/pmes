@@ -427,7 +427,7 @@ a.btn {
 .print-wrapper {
   display: table;
   width: 100%;
-  min-height: 100vh; /* Simula folha A4 na tela */
+  /* min-height: 100vh; Removido para não forçar espaço extra vazio ao final na tela */
 }
 .print-header {
   display: table-header-group;
